@@ -1,0 +1,12 @@
+- platform: iphonedetect
+  hosts:
+    host_1: 192.168.1.x
+    host_2: 192.168.1.x
+    host_3: 192.168.1.x
+
+
+- platform: ping
+  interval_seconds: 60
+  consider_home: 300
+  hosts:
+    epson: 192.168.1.x
