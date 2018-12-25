@@ -1,0 +1,57 @@
+homeassistant:
+  name: Дом
+  latitude: !secret latitude
+  longitude: !secret longitude
+  elevation: 50
+  unit_system: metric
+  time_zone: !secret time_zone
+  customize: !include customize.yaml
+  whitelist_external_dirs: /home/homeassistant/.homeassistant/
+
+frontend:
+  themes: !include_dir_merge_named themes
+  javascript_version: latest
+
+lovelace:
+  mode: yaml
+
+config:
+
+http:
+  api_password: !secret http_password
+  ip_ban_enabled: True
+  login_attempts_threshold: 3
+
+conversation:
+
+sun:
+
+xiaomi_aqara:
+  discovery_retry: 5
+  gateways:
+    - key: !secret xiaomi_key
+
+alarm_control_panel:
+  - platform: manual
+    pending_time: 60
+    trigger_time: 120
+
+logger: !include logger.yaml
+history: !include history.yaml
+logbook: !include logbook.yaml
+recorder: !include recorder.yaml
+light: !include lights.yaml
+sensor: !include sensors.yaml
+group: !include groups.yaml
+automation: !include_dir_merge_list automation
+script: !include_dir_merge_named scripts
+media_player: !include media_players.yaml
+input_boolean: !include bolean.yaml
+switch: !include switches.yaml
+timer: !include timers.yaml
+notify: !include notify.yaml
+shell_command: !include shell_commands.yaml
+homekit: !include homekit_config.yaml
+device_tracker: !include device_tracker.yaml
+scene: !include scenes.yaml
+input_datetime: !include input_datetime.yaml
