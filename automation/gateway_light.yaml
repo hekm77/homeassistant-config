@@ -1,0 +1,105 @@
+# ------------------------------------------------------------------------------
+# - Включение подсветки шлюза по движению
+# ------------------------------------------------------------------------------
+- alias: gateway light on motion on
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0000f4470d
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: and
+          conditions:
+            - condition: time
+              after: '00:00:00'
+            - condition: sun
+              before: sunrise
+        - condition: state
+          entity_id: light.gateway_light_f0b429aa26cd
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.gateway_light_f0b429aa26cd
+      data_template:
+        brightness_pct: 2
+        rgb_color: [255, 130, 0]
+
+# ------------------------------------------------------------------------------
+# - Выключение подсветки шлюза без движения
+# ------------------------------------------------------------------------------
+- alias: gateway light off motion off
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0000f4470d
+      to: 'off'
+      for:
+        minutes: 2
+  condition:
+    - condition: and
+      conditions:
+        - condition: and
+          conditions:
+            - condition: time
+              after: '00:00:00'
+            - condition: sun
+              before: sunrise
+        - condition: state
+          entity_id: light.gateway_light_f0b429aa26cd
+          state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: light.gateway_light_f0b429aa26cd
+
+# ------------------------------------------------------------------------------
+# - Включение подсветки шлюза с рандомным цветом в заданное время
+# ------------------------------------------------------------------------------
+- alias: gateway light on time
+  initial_state: true
+  trigger:
+    - platform: time
+      minutes: '/5'
+      seconds: 00
+  condition:
+    - condition: and
+      conditions:
+        - condition: and
+          conditions:
+            - condition: sun
+              after: sunset
+              after_offset: "-01:00:00"
+            - condition: time
+              before: '22:50:00'
+        - condition: state
+          entity_id: light.gateway_light_f0b429aa26cd
+          state: 'off'
+        - condition: state
+          entity_id: alarm_control_panel.ha_alarm
+          state: disarmed
+  action:
+    - service: light.turn_on
+      entity_id: light.gateway_light_f0b429aa26cd
+      data_template:
+        brightness_pct: 15
+        rgb_color: ['{{ (range(0, 255)|random) }}','{{ (range(0, 255)|random) }}','{{ (range(0, 255)|random) }}']
+
+# ------------------------------------------------------------------------------
+# - Выключение подсветки шлюза в заданное время
+# ------------------------------------------------------------------------------
+- alias: gateway light off time
+  initial_state: true
+  trigger:
+    - platform: time
+      at: '23:00:00'
+    - platform: sun
+      event: sunrise
+  condition:
+    - condition: state
+      entity_id: light.gateway_light_f0b429aa26cd
+      state: 'on'
+  action:
+    - delay: 00:00:10
+    - service: light.turn_off
+      entity_id: light.gateway_light_f0b429aa26cd
