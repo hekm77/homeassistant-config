@@ -1,0 +1,283 @@
+# Dark Sky
+sensor.dark_sky_temperature:
+  friendly_name: Температура
+sensor.dark_sky_humidity:
+  friendly_name: Влажность
+sensor.dark_sky_pressure_custom:
+  friendly_name: Давление
+sensor.dark_sky_wind_speed:
+  friendly_name: Скорость ветра
+sensor.dark_sky_cloud_coverage:
+  friendly_name: Облачность
+sensor.wind_custom:
+  friendly_name: Ветер
+
+# Солнце
+sun.sun:
+  friendly_name: Солнце
+  hidden: true
+sensor.sunrise_time:
+  friendly_name: Восход
+sensor.sunset_time:
+  friendly_name: Закат
+
+# Луна
+sensor.moon_custom:
+  friendly_name: Фаза Луны
+
+# Info
+sensor.date:
+  friendly_name: Дата
+sensor.time:
+  friendly_name: Время
+sensor.online_custom:
+  friendly_name: Online
+sensor.mysql_db_size:
+  friendly_name: MySQL DB
+  icon: mdi:database
+sensor.lets_encrypt:
+  friendly_name: Сертификат Lets Encrypt
+  unit_of_measurement: д.
+script.ha_restart:
+  friendly_name: Перезагрузка
+  icon: mdi:restart
+
+# Охрана
+alarm_control_panel.ha_alarm:
+  friendly_name: Сигнализация
+  hidden: true
+
+# Raspberry Pi
+sensor.command_sensor:
+  friendly_name: Температура
+sensor.processor_use:
+  friendly_name: Процессор
+sensor.memory_use_percent:
+  friendly_name: Память
+sensor.disk_use_percent_home:
+  friendly_name: SD Card
+  icon: mdi:micro-sd
+sensor.disk_free_home:
+  friendly_name: Свободно /home
+  icon: mdi:micro-sd
+script.reboot_pi:
+  friendly_name: Перезагрузка
+  icon: mdi:restart
+script.shutdown_pi:
+  friendly_name: Выключение
+  icon: mdi:power-off
+
+# Media
+media_player.dunehd:
+  friendly_name: Dune 301
+media_player.sony_htnt5:
+  friendly_name: Sony NT5
+media_player.sony_htnt5_2:
+  friendly_name: Sony NT5 Cast
+
+# Xiaomi
+binary_sensor.switch_158d0000f7e0a1:
+  friendly_name: Кнопка Охрана
+binary_sensor.switch_158d000104efc8:
+  friendly_name: Спальня Кнопка
+binary_sensor.switch_158d00010a98fa:
+  friendly_name: Холл Кнопка
+binary_sensor.switch_158d00010f2389:
+  friendly_name: Зал Кнопка
+binary_sensor.switch_158d0001256804:
+  friendly_name: Кухня Кнопка
+binary_sensor.door_window_sensor_158d000112f5ad:
+  device_class: door
+  friendly_name: Входная дверь
+sensor.temperature_158d0001140c6a:
+  friendly_name: Зал Температура
+sensor.humidity_158d0001140c6a:
+  friendly_name: Зал Влажность
+binary_sensor.motion_sensor_158d0000f4470d:
+  friendly_name: Холл
+binary_sensor.motion_sensor_158d0001108772:
+  friendly_name: Зал
+binary_sensor.motion_sensor_158d00012928ac:
+  friendly_name: Кухня
+binary_sensor.motion_sensor_158d00011c018c:
+  friendly_name: Ванная
+binary_sensor.motion_sensor_158d0001173873:
+  friendly_name: Спальня
+switch.plug_158d00011016d0:
+  friendly_name: Камера
+  icon: mdi:cctv
+  hidden: true
+switch.plug_158d0001003f15:
+  friendly_name: Розетка
+  hidden: true
+sensor.illumination_f0b429aa26cd:
+  friendly_name: Холл Освещенность
+
+# Состояние батареи
+sensor.text_battery_head:
+  friendly_name: Состояние батареи датчиков
+sensor.battery_door_window_sensor_158d000112f5ad:
+  friendly_name: Входная дверь
+sensor.battery_motion_sensor_158d0000f4470d:
+  friendly_name: Холл
+sensor.battery_motion_sensor_158d0001108772:
+  friendly_name: Зал
+sensor.battery_motion_sensor_158d00012928ac:
+  friendly_name: Кухня
+sensor.battery_motion_sensor_158d00011c018c:
+  friendly_name: Ванная
+sensor.battery_motion_sensor_158d0001173873:
+  friendly_name: Спальня
+sensor.battery_switch_158d0000f7e0a1:
+  friendly_name: Охрана
+sensor.battery_switch_158d00010a98fa:
+  friendly_name: Холл
+sensor.battery_switch_158d00010f2389:
+  friendly_name: Зал
+sensor.battery_switch_158d0001256804:
+  friendly_name: Кухня
+sensor.battery_switch_158d000104efc8:
+  friendly_name: Спальня
+sensor.battery_temperature_158d0001140c6a:
+  friendly_name: Зал Климат
+
+# Освещение
+light.gateway_light_f0b429aa26cd:
+  friendly_name: Подсветка Шлюза
+light.bedroom:
+  friendly_name: Спальня Люстра
+  icon: mdi:ceiling-light
+light.hall_1:
+  friendly_name: Холл-1
+light.hall_2:
+  friendly_name: Холл-2
+light.kitchen:
+  friendly_name: Кухня Люстра
+  icon: mdi:ceiling-light
+light.livingroom_1:
+  friendly_name: Зал Люстра
+  icon: mdi:ceiling-light
+light.livingroom_2:
+  friendly_name: Зал Ночник
+
+# Потребление
+sensor.load_switch_plug_158d0001003f15:
+  friendly_name: Розетка
+sensor.load_switch_plug_158d00011016d0:
+  friendly_name: Камера
+sensor.load_light_hall_1:
+  friendly_name: Холл-1
+sensor.load_light_hall_2:
+  friendly_name: Холл-2
+sensor.load_light_livingroom_1:
+  friendly_name: Зал Люстра
+sensor.load_light_livingroom_2:
+  friendly_name: Зал Ночник
+sensor.load_light_kitchen:
+  friendly_name: Кухня Люстра
+sensor.load_light_bedroom:
+  friendly_name: Спальня Люстра
+sensor.power_load_total:
+  friendly_name: Потребляемая мощность
+  icon: mdi:power-plug
+
+# Потребление MQTT устройства
+sensor.power_mqtt_month_plug1:
+  icon: mdi:counter
+  friendly_name: Розетка
+sensor.power_mqtt_month_plug_camera:
+  icon: mdi:counter
+  friendly_name: Камера
+sensor.power_mqtt_month_light_hall_1:
+  icon: mdi:counter
+  friendly_name: Холл-1
+sensor.power_mqtt_month_light_hall_2:
+  icon: mdi:counter
+  friendly_name: Холл-2
+sensor.power_mqtt_month_light_livingroom_1:
+  icon: mdi:counter
+  friendly_name: Зал Люстра
+sensor.power_mqtt_month_light_livingroom_2:
+  icon: mdi:counter
+  friendly_name: Зал Ночник
+sensor.power_mqtt_month_light_kitchen:
+  icon: mdi:counter
+  friendly_name: Кухня Люстра
+sensor.power_mqtt_month_light_bedroom:
+  icon: mdi:counter
+  friendly_name: Спальня Люстра
+
+# Потребление MQTT месяц
+sensor.power_mqtt_total_m1:
+  friendly_name: Январь
+  icon: mdi:counter
+sensor.power_mqtt_total_m2:
+  friendly_name: Февраль
+  icon: mdi:counter
+sensor.power_mqtt_total_m3:
+  friendly_name: Март
+  icon: mdi:counter
+sensor.power_mqtt_total_m4:
+  friendly_name: Апрель
+  icon: mdi:counter
+sensor.power_mqtt_total_m5:
+  friendly_name: Май
+  icon: mdi:counter
+sensor.power_mqtt_total_m6:
+  friendly_name: Июнь
+  icon: mdi:counter
+sensor.power_mqtt_total_m7:
+  friendly_name: Июль
+  icon: mdi:counter
+sensor.power_mqtt_total_m8:
+  friendly_name: Август
+  icon: mdi:counter
+sensor.power_mqtt_total_m9:
+  friendly_name: Сентябрь
+  icon: mdi:counter
+sensor.power_mqtt_total_m10:
+  friendly_name: Октябрь
+  icon: mdi:counter
+sensor.power_mqtt_total_m11:
+  friendly_name: Ноябрь
+  icon: mdi:counter
+sensor.power_mqtt_total_m12:
+  friendly_name: Декабрь
+  icon: mdi:counter
+sensor.power_mqtt_total_month:
+  friendly_name: Энергопотребление за месяц
+  icon: mdi:counter
+
+# Сцены
+scene.bright_livingroom:
+  friendly_name: Сцена Ярко
+scene.movie_livingroom:
+  friendly_name: Сцена Кино
+scene.night_light_livingroom:
+  friendly_name: Сцена Ночник
+scene.light_off_livingroom:
+  friendly_name: Сцена Выкл.
+
+# Epson Ink
+sensor.epson_ink_level_cyan:
+  friendly_name: Cyan
+  icon: mdi:cup-water
+sensor.epson_ink_level_yellow:
+  friendly_name: Yellow
+  icon: mdi:cup-water
+sensor.epson_ink_level_light_cyan:
+  friendly_name: Light Cyan
+  icon: mdi:cup-water
+sensor.epson_ink_level_black:
+  friendly_name: Black
+  icon: mdi:cup-water
+sensor.epson_ink_level_magenta:
+  friendly_name: Magenta
+  icon: mdi:cup-water
+sensor.epson_ink_level_light_magenta:
+  friendly_name: Light Magenta
+  icon: mdi:cup-water
+
+# Zone
+zone.home:
+  hidden: true
