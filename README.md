@@ -25,6 +25,7 @@
 * Обнаружение присутствия
   * [Кастомный компонент](https://community.home-assistant.io/t/composite-device-tracker-platform/67345/97?u=hekm77) для iOS девайсов
 ## Home Assistant Lovelace UI
+На скриншотах измененная тема [midnight](https://community.home-assistant.io/t/midnight-theme/28598)
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_1.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_2.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_3.png" alt="Home Assistant Lovelace UI" />
@@ -33,3 +34,14 @@
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_6.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_7.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_8.png" alt="Home Assistant Lovelace UI" />
+
+### Кастомные карты Lovelace
+* [Mini Graph Card](https://github.com/kalkih/mini-graph-card)
+* [Mini Media Player](https://github.com/kalkih/mini-media-player)
+* [Button card](https://github.com/kuuji/button-card)
+* [Card-modder](https://github.com/thomasloven/lovelace-card-modder)
+* [Card-tools](https://github.com/thomasloven/lovelace-card-tools)
+* [Fold-entity-row](https://github.com/thomasloven/lovelace-fold-entity-row)
+* [Layout-card](https://github.com/thomasloven/lovelace-layout-card)
+* [Big number card](https://github.com/ciotlosm/custom-lovelace/tree/master/bignumber-card)
+* [Alarm control panel card](https://github.com/ciotlosm/custom-lovelace/tree/master/alarm_control_panel-card)
