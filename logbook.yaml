@@ -1,0 +1,36 @@
+# ------------------------------------------------------------------------------
+# - Журнал GUI
+# ------------------------------------------------------------------------------
+  include:
+    domains:
+      - light
+    entities:
+      - light.gateway_light_f0b429aa26cd
+      - light.hall_1
+      - light.hall_2
+      - light.livingroom_1
+      - light.livingroom_2
+      - light.kitchen
+      - light.bedroom
+  exclude:
+    domains:
+      - alert
+      - camera
+      - media_player
+      - sun
+      - sensor
+      - group
+      - switch
+      - script
+      - device_tracker
+      - automation
+    entities:
+      - binary_sensor.switch_158d0001256804
+      - binary_sensor.switch_158d00010f2389
+      - binary_sensor.switch_158d00010a98fa
+      - binary_sensor.switch_158d000104efc8
+      - binary_sensor.switch_158d0000f7e0a1
+      - binary_sensor.motion_sensor_158d0001108772
+      - binary_sensor.motion_sensor_158d0001173873
+      - binary_sensor.motion_sensor_158d00011c018c
+      - binary_sensor.motion_sensor_158d00012928ac
