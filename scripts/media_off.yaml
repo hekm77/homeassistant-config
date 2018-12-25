@@ -1,0 +1,87 @@
+# ------------------------------------------------------------------------------
+# - Выключение Dune HD
+# ------------------------------------------------------------------------------
+dunehd_off:
+  sequence:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: media_player.dunehd
+          state: 'on'
+        - condition: state
+          entity_id: media_player.dunehd
+          state: 'playing'
+    - service: shell_command.dunehd_key_top_menu
+    - delay: 00:00:02
+    - service: shell_command.dunehd_key_stop
+    - delay: 00:00:03
+    - service: media_player.turn_off
+      entity_id: media_player.dunehd
+
+# ------------------------------------------------------------------------------
+# - Выключение Sony TV
+# ------------------------------------------------------------------------------
+sonytv_off:
+  sequence:
+    - condition: state
+      entity_id: media_player.sony_bravia_tv
+      state: 'on'
+    - delay: 00:00:10
+    - service: media_player.turn_off
+      entity_id: media_player.sony_bravia_tv
+
+# ------------------------------------------------------------------------------
+# - Переключение источника Sony NT5 на HDMI2
+# - Установка громкости 15 на Sony NT5
+# - Выключение Sony TV
+# ------------------------------------------------------------------------------
+sonytv_off_sony_htnt5_off:
+  sequence:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: media_player.sony_bravia_tv
+          state: 'on'
+        - condition: state
+          entity_id: media_player.sony_htnt5
+          state: 'on'
+    - service: media_player.select_source
+      data:
+        entity_id: media_player.sony_htnt5
+        source: 'HDMI2'
+    - delay: 00:00:02
+    - service: media_player.volume_set
+      data_template:
+        entity_id: media_player.sony_htnt5
+        volume_level: 0.15
+    - delay: 00:00:15
+    - service: media_player.turn_off
+      entity_id: media_player.sony_bravia_tv
+
+# ------------------------------------------------------------------------------
+# - Переключение источника Sony NT5 на HDMI2
+# - Установка громкости 15 на Sony NT5
+# - Выключение Sony NT5
+# ------------------------------------------------------------------------------
+sony_htnt5_off:
+  sequence:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: media_player.sony_bravia_tv
+          state: 'off'
+        - condition: state
+          entity_id: media_player.sony_htnt5
+          state: 'on'
+    - service: media_player.select_source
+      data:
+        entity_id: media_player.sony_htnt5
+        source: 'HDMI2'
+    - delay: 00:00:02
+    - service: media_player.volume_set
+      data_template:
+        entity_id: media_player.sony_htnt5
+        volume_level: 0.15
+    - delay: 00:00:15
+    - service: media_player.turn_off
+      entity_id: media_player.sony_htnt5
