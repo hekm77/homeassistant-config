@@ -1,0 +1,81 @@
+- platform: template
+  switches:
+    # Device Tracker 1
+    device_tracker_1:
+      friendly_name: User 1
+      value_template: "{{ is_state('device_tracker.host_1', 'home') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.device_tracker
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.device_tracker
+    # Device Tracker 2
+    device_tracker_2:
+      friendly_name: User 2
+      value_template: "{{ is_state('device_tracker.host_2', 'home') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.device_tracker
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.device_tracker
+    # Device Tracker 3
+    device_tracker_3:
+      friendly_name: User 3
+      value_template: "{{ is_state('device_tracker.host_3', 'home') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.device_tracker
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.device_tracker
+
+    # Кинозал
+    dfi:
+      friendly_name: Кинозал
+      value_template: "{{ is_state('input_boolean.dfi', 'on') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.dfi
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.dfi
+    # ОТТ Клуб
+    ott_club:
+      friendly_name: ОТТ Клуб
+      value_template: "{{ is_state('input_boolean.ott_club', 'on') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.ott_club
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.ott_club
+    # Кинопаб
+    kinopub:
+      friendly_name: Кинопаб
+      value_template: "{{ is_state('input_boolean.kinopub', 'on') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.kinopub
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.kinopub
+
+    # Паника
+    panic_light:
+      friendly_name: Паника
+      value_template: "{{ is_state('input_boolean.light_panic_status', 'on') }}"
+      turn_on:
+        service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.light_panic_status
+      turn_off:
+        service: input_boolean.turn_off
+        entity_id: input_boolean.light_panic_status
