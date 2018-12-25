@@ -1,0 +1,303 @@
+# ------------------------------------------------------------------------------
+# - Включение света по движению
+# ------------------------------------------------------------------------------
+- alias: Hall Motion 1
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0000f4470d
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: time
+          after: '06:00:00'
+          before: '08:00:00'
+        - condition: state
+          entity_id: group.light_hall
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: 10
+
+- alias: Hall Motion 2
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0000f4470d
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: time
+          after: '08:00:00'
+          before: '21:00:00'
+        - condition: state
+          entity_id: group.light_hall
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: 100
+
+- alias: Hall Motion 3
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0000f4470d
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: time
+          after: '21:00:00'
+          before: '22:30:00'
+        - condition: state
+          entity_id: group.light_hall
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: 1
+
+# ------------------------------------------------------------------------------
+# - Выключение света без движения
+# ------------------------------------------------------------------------------
+- alias: Hall No Motion
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0000f4470d
+      to: 'off'
+      for:
+        minutes: 2
+  condition:
+    - condition: state
+      entity_id: group.light_hall
+      state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: group.light_hall
+
+# ------------------------------------------------------------------------------
+# - Включение света по одинарному клику
+# ------------------------------------------------------------------------------
+- alias: Hall Switch Click Light On
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d00010a98fa
+        click_type: single
+  condition:
+    - condition: state
+      entity_id: group.light_hall
+      state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: >
+          {% set h = now().strftime('%H') | int %}
+            {% if h >= 0 and h < 6 %}
+              1
+            {% elif h >= 6 and h < 8 %}
+              10
+            {% elif h >= 8 and h < 21 %}
+              100
+            {% elif h >= 21 and h < 22 %}
+              10
+            {% elif h >= 22 and h < 24 %}
+              1
+          {% endif %}
+
+# ------------------------------------------------------------------------------
+# - Выключение света по одинарному клику
+# ------------------------------------------------------------------------------
+- alias: Hall Switch Click Light Off
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d00010a98fa
+        click_type: single
+  condition:
+    - condition: state
+      entity_id: group.light_hall
+      state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: group.light_hall
+
+# ------------------------------------------------------------------------------
+# - Включение 25% яркости по двойному клику
+# ------------------------------------------------------------------------------
+- alias: Hall Switch Doble Click Light 25
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d00010a98fa
+        click_type: double
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: 25
+
+# ------------------------------------------------------------------------------
+# - Включение 100% яркости по длинному нажатию
+# ------------------------------------------------------------------------------
+- alias: Hall Switch Long Click Light Max
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d00010a98fa
+        click_type: long_click_press
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: 100
+
+# ------------------------------------------------------------------------------
+# - Запуск таймера. Выключение автоматизации по движению при любом нажатии
+# ------------------------------------------------------------------------------
+- alias: Hall Motion Off
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d00010a98fa
+  condition:
+    - condition: state
+      entity_id: input_boolean.hall_motion_status
+      state: 'on'
+  action:
+    - service: timer.start
+      entity_id: timer.hall
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.hall_motion_status
+
+# ------------------------------------------------------------------------------
+# - Сброс, и запуск нового таймера по любому нажатию
+# ------------------------------------------------------------------------------
+- alias: Hall Reset Timer
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d00010a98fa
+  condition:
+    - condition: state
+      entity_id: input_boolean.hall_motion_status
+      state: 'off'
+  action:
+    - service: timer.cancel
+      entity_id: timer.hall
+    - service: timer.start
+      entity_id: timer.hall
+
+# ------------------------------------------------------------------------------
+# - Включение автоматизации по движению после остановки таймера
+# ------------------------------------------------------------------------------
+- alias: Hall Motion On
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.hall
+  action:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.hall_motion_status
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.motion_sensor_158d0000f4470d
+          state: 'off'
+          for:
+            minutes: 1
+        - condition: state
+          entity_id: group.light_hall
+          state: 'on'
+    - service: light.turn_off
+      entity_id: group.light_hall
+
+# ------------------------------------------------------------------------------
+# - Включение / Выключение автоматизации по движению
+# ------------------------------------------------------------------------------
+- alias: Hall Automation ON_OFF
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.hall_motion_status
+  action:
+    - service_template: >
+        {% if is_state('input_boolean.hall_motion_status', 'on') %}
+          automation.turn_on
+        {% else %}
+          automation.turn_off
+        {% endif %}
+      entity_id:
+        - automation.hall_motion_1
+        - automation.hall_motion_2
+        - automation.hall_motion_3
+        - automation.hall_no_motion
+
+# ------------------------------------------------------------------------------
+# - Включение / Выключение автоматизации переключателем в GUI
+# ------------------------------------------------------------------------------
+- alias: Hall Automation ON_OFF Manual
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.hall_auto_status
+  action:
+    - service: timer.cancel
+      entity_id: timer.hall
+    - service_template: >
+        {% if is_state('input_boolean.hall_auto_status', 'on') %}
+          automation.turn_on
+        {% else %}
+          automation.turn_off
+        {% endif %}
+      entity_id:
+        - automation.hall_motion_1
+        - automation.hall_motion_2
+        - automation.hall_motion_3
+        - automation.hall_no_motion
+        - automation.hall_light_dimming
+        - automation.hall_motion_off
+        - automation.hall_reset_timer
+        - automation.hall_motion_on
+        - automation.hall_automation_on_off
+
+# ------------------------------------------------------------------------------
+# - Изменение яркости в заданное время
+# ------------------------------------------------------------------------------
+- alias: Hall Light Dimming
+  initial_state: true
+  trigger:
+    - platform: time
+      at: '21:00:00'
+  condition:
+    - condition: state
+      entity_id: group.light_hall
+      state: 'on'
+  action:
+    - service: light.turn_on
+      entity_id: group.light_hall
+      data_template:
+        brightness_pct: 1
