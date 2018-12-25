@@ -1,0 +1,762 @@
+resources:
+  - url: /local/lovelace/alarm_control_panel-card.js
+    type: js
+  - url: /local/lovelace/counter-card.js
+    type: js
+  - url: /local/lovelace/button-card.js
+    type: module
+  - url: /local/lovelace/mini-media-player-bundle.js?v=0.9.8
+    type: module
+  - url: /local/lovelace/mini-graph-card-bundle.js?v=0.1.0
+    type: module
+  - url: /local/lovelace/card-modder.js
+    type: module
+  - url: /local/lovelace/card-tools.js
+    type: js
+  - url: /local/lovelace/fold-entity-row.js
+    type: js
+  - url: /local/lovelace/layout-card.js
+    type: js
+
+
+title: Дом
+views:
+  # Дом
+  - title: Дом
+    icon: mdi:home
+    cards:
+      - type: vertical-stack
+        cards:
+          # Сцены освещения
+          - type: horizontal-stack
+            cards:
+              # Ярко
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: '#EBEE6C'
+                  font-weight: bold
+                  font-size: 12px
+                card:
+                  type: entity-button
+                  entity: scene.bright_livingroom
+                  name: Ярко
+                  icon: mdi:brightness-7
+                  hold_action: call-service
+                  service: scene.turn_on
+
+              # Кино
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: '#847EEB'
+                  font-weight: bold
+                  font-size: 12px
+                card:
+                  type: entity-button
+                  entity: scene.movie_livingroom
+                  name: Кино
+                  icon: mdi:movie-roll
+                  hold_action: call-service
+                  service: scene.turn_on
+
+              # Ночник
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: '#D85420'
+                  font-weight: bold
+                  font-size: 12px
+                card:
+                  type: entity-button
+                  entity: scene.night_light_livingroom
+                  name: Ночник
+                  icon: mdi:weather-night
+                  hold_action: call-service
+                  service: scene.turn_on
+
+              # Выключение света в зале
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-weight: bold
+                  font-size: 12px
+                card:
+                  type: entity-button
+                  entity: scene.light_off_livingroom
+                  name: Выкл.
+                  icon: mdi:lightbulb-outline
+                  hold_action: call-service
+                  service: scene.turn_on
+
+          # Освещение
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+              background: center / cover url(/local/icons/light.png) no-repeat
+              background-color: var(--paper-card-background-color)
+              background-size: 215px 275px
+            card:
+              type: entities
+              entities:
+                - entity: light.gateway_light_f0b429aa26cd
+                - entity: group.light_hall
+                - entity: light.livingroom_1
+                - entity: light.livingroom_2
+                - entity: light.kitchen
+                - entity: light.bedroom
+
+      - type: vertical-stack
+        cards:
+          # Автоматизация
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - type: custom:fold-entity-row
+                  head: group.light_auto_status
+
+          # Розетка
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - entity: switch.plug_158d0001003f15
+
+          # Тест
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - entity: input_boolean.test
+
+          # Пустая карта
+          - type: custom:button-card
+            color_type: blank-card
+
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              # Device Tracker 1
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.device_tracker_1
+                  name: User 1
+                  icon: mdi:home
+                  show_state: false
+
+              # Device Tracker 2
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.device_tracker_2
+                  name: User 2
+                  icon: mdi:home
+                  show_state: true
+
+              # Device Tracker 3
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.device_tracker_3
+                  name: User 3
+                  icon: mdi:home
+                  show_state: true
+
+  # Медиа
+  - title: Медиа
+    icon: mdi:play
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              # Кинозал
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.dfi
+                  icon: mdi:movie
+                  hold_action: toggle
+
+              # ОТТ Клуб
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.ott_club
+                  icon: mdi:television-box
+                  hold_action: toggle
+
+              # Кинопаб
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.kinopub
+                  icon: mdi:youtube-tv
+                  hold_action: toggle
+
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                # Sony TV
+                - entity: media_player.sony_bravia_tv
+                  type: custom:mini-media-player
+                  group: true
+                  name: Sony TV
+                  icon: mdi:television
+                  hide_controls: true
+                  hide_volume: true
+                  power_color: true
+                - type: divider
+                  style:
+                    height: 10px
+
+                # Dune
+                - entity: media_player.dunehd
+                  type: custom:mini-media-player
+                  group: true
+                  name: Dune 301
+                  icon: mdi:audio-video
+                  hide_controls: true
+                  hide_volume: true
+                  power_color: true
+                  short_info: true
+                - type: divider
+                  style:
+                    height: 10px
+
+                # Sony NT 5
+                - entity: media_player.sony_htnt5
+                  type: custom:mini-media-player
+                  group: true
+                  name: Sony NT5
+                  icon: mdi:speaker
+                  hide_controls: true
+                  power_color: true
+                  show_source: small
+                - type: divider
+                  style:
+                    height: 10px
+
+                # Sony NT 5 Cast
+                - entity: media_player.sony_htnt5_2
+                  type: custom:mini-media-player
+                  group: true
+                  name: Sony NT5 Cast
+                  icon: mdi:cast
+                  hide_volume: true
+                  power_color: true
+                  scroll_info: true
+                  show_progress: true
+                  artwork: cover
+
+      - type: vertical-stack
+        cards:
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+              background: center / cover url(/local/icons/spotify.png) no-repeat
+              background-color: var(--paper-card-background-color)
+              background-size: 235px 300px
+            card:
+              type: entities
+              entities:
+                # Spotify Player
+                - entity: media_player.spotify
+                  type: custom:mini-media-player
+                  name: ' '
+                  group: true
+                  icon: mdi:spotify
+                  hide_power: true
+                  scroll_info: true
+                  artwork_border: true
+                  show_source: full
+                - type: divider
+                  style:
+                    height: 20px
+
+                # Spotify Player
+                - entity: media_player.spotify_2
+                  type: custom:mini-media-player
+                  name: ' '
+                  group: true
+                  icon: mdi:spotify
+                  hide_power: true
+                  scroll_info: true
+                  artwork_border: true
+                  show_source: full
+                - type: divider
+                  style:
+                    height: 20px
+
+                # Spotify Player
+                - entity: media_player.spotify_3
+                  type: custom:mini-media-player
+                  name: ' '
+                  group: true
+                  icon: mdi:spotify
+                  hide_power: true
+                  scroll_info: true
+                  artwork_border: true
+                  show_source: full
+                - type: divider
+                  style:
+                    height: 20px
+
+
+  # Охрана
+  - title: Охрана
+    icon: mdi:security-home
+    cards:
+      - type: vertical-stack
+        cards:
+          # Сигнализация
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: custom:alarm_control_panel-card
+              entity: alarm_control_panel.ha_alarm
+              hide_keypad: true
+              title: Сигнализация
+              states:
+                - arm_away
+
+          - type: horizontal-stack
+            cards:
+              # Камера
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.plug_158d00011016d0
+                  icon: mdi:cctv
+                  tap_action: toggle
+
+              # Входная дверь
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: binary_sensor.door_window_sensor_158d000112f5ad
+                  icon: mdi:door
+                  name: Вх. дверь
+
+              # Паника
+              - type: custom:card-modder
+                style:
+                  border-radius: 10px
+                  --paper-item-icon-color: var(--disabled-text-color)
+                  font-size: 12px
+                  font-weight: bold
+                card:
+                  type: entity-button
+                  entity: switch.panic_light
+                  icon: mdi:alarm-light
+                  hold_action: toggle
+
+          # Датчики
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - entity: binary_sensor.motion_sensor_158d0000f4470d
+                  secondary_info: last-changed
+                - entity: binary_sensor.motion_sensor_158d0001108772
+                  secondary_info: last-changed
+                - entity: binary_sensor.motion_sensor_158d00012928ac
+                  secondary_info: last-changed
+                - entity: binary_sensor.motion_sensor_158d0001173873
+                  secondary_info: last-changed
+                - entity: binary_sensor.motion_sensor_158d00011c018c
+                  secondary_info: last-changed
+
+
+  # Климат
+  - title: Климат
+    icon: mdi:thermometer-lines
+    cards:
+      - type: vertical-stack
+        cards:
+          # Зал Температура
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: custom:mini-graph-card
+              entity: sensor.temperature_158d0001140c6a
+              detail: 1
+              labels: true
+              hours_to_show: 48
+              height: 120
+              line_color: '#EA811D'
+              line_width: 6
+              font_size: 120
+              hide:
+                - icon
+
+          # Зал Влажность
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: custom:mini-graph-card
+              entity: sensor.humidity_158d0001140c6a
+              detail: 1
+              labels: true
+              hours_to_show: 48
+              height: 120
+              line_color: var(--primary-color)
+              line_width: 6
+              font_size: 120
+              hide:
+                - icon
+
+
+  # Информация
+  - title: Информация
+    icon: mdi:information-outline
+    cards:
+      - type: vertical-stack
+        cards:
+          # Home Assistant
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+              background: center / cover url(/local/icons/ha.png) no-repeat
+              background-color: var(--paper-card-background-color)
+              background-size: 266px 340px
+            card:
+              type: entities
+              entities:
+                - entity: sensor.time
+                - entity: sensor.date
+                - entity: sensor.mysql_db_size
+                - entity: sensor.online_custom
+                - entity: sensor.lets_encrypt
+                - entity: script.ha_restart
+
+      - type: vertical-stack
+        cards:
+          # Raspberry Pi
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+              background: center / cover url(/local/icons/rpi.png) no-repeat
+              background-color: var(--paper-card-background-color)
+              background-size: 200px 255px
+            card:
+              type: entities
+              entities:
+                - entity: sensor.command_sensor
+                - entity: sensor.processor_use
+                - entity: sensor.memory_use_percent
+                - entity: sensor.disk_use_percent_home
+                - entity: sensor.disk_free_home
+                - entity: script.reboot_pi
+
+      - type: vertical-stack
+        cards:
+          # Состояние батареи датчиков
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - type: custom:fold-entity-row
+                  head:
+                    entity: sensor.text_battery_head
+                    icon: mdi:car-battery
+                  items:
+                    - sensor.battery_door_window_sensor_158d000112f5ad
+                    - sensor.battery_motion_sensor_158d0000f4470d
+                    - sensor.battery_motion_sensor_158d0001108772
+                    - sensor.battery_motion_sensor_158d00012928ac
+                    - sensor.battery_motion_sensor_158d0001173873
+                    - sensor.battery_motion_sensor_158d00011c018c
+                    - sensor.battery_switch_158d0000f7e0a1
+                    - sensor.battery_switch_158d00010a98fa
+                    - sensor.battery_switch_158d00010f2389
+                    - sensor.battery_switch_158d0001256804
+                    - sensor.battery_switch_158d000104efc8
+                    - sensor.battery_temperature_158d0001140c6a
+
+          # Epson PX720WD
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - type: custom:fold-entity-row
+                  head:
+                    entity: sensor.epson
+                    icon: mdi:printer
+                  items:
+                    - type: custom:card-modder
+                      style:
+                        --paper-item-icon-color: rgb(0, 255, 255)
+                      card:
+                        type: custom:hui-text-entity-row
+                        entity: sensor.epson_ink_level_cyan
+                    - type: custom:card-modder
+                      style:
+                        --paper-item-icon-color: rgb(255, 255, 0)
+                      card:
+                        type: custom:hui-text-entity-row
+                        entity: sensor.epson_ink_level_yellow
+                    - type: custom:card-modder
+                      style:
+                        --paper-item-icon-color: rgb(204, 255, 255)
+                      card:
+                        type: custom:hui-text-entity-row
+                        entity: sensor.epson_ink_level_light_cyan
+                    - type: custom:card-modder
+                      style:
+                        --paper-item-icon-color: rgb(0, 0, 0)
+                      card:
+                        type: custom:hui-text-entity-row
+                        entity: sensor.epson_ink_level_black
+                    - type: custom:card-modder
+                      style:
+                        --paper-item-icon-color: rgb(255, 0, 255)
+                      card:
+                        type: custom:hui-text-entity-row
+                        entity: sensor.epson_ink_level_magenta
+                    - type: custom:card-modder
+                      style:
+                        --paper-item-icon-color: rgb(231, 139, 231)
+                      card:
+                        type: custom:hui-text-entity-row
+                        entity: sensor.epson_ink_level_light_magenta
+
+          # Освещенность
+          - type: custom:card-modder
+            style:
+               border-radius: 10px
+            card:
+              type: custom:mini-graph-card
+              entity: sensor.illumination_f0b429aa26cd
+              detail: 1
+              labels: true
+              hours_to_show: 48
+              height: 120
+              line_color: var(--paper-item-icon-active-color)
+              line_width: 6
+              font_size: 80
+              decimals: 0
+              hide:
+                - icon
+
+
+  # Электричество
+  - title: Электричество
+    icon: mdi:flash
+    cards:
+      - type: vertical-stack
+        cards:
+          # Мощность
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - type: custom:fold-entity-row
+                  head:
+                    entity: sensor.power_load_total
+                    icon: mdi:flash-circle
+                  items:
+                    - sensor.load_switch_plug_158d0001003f15
+                    - sensor.load_switch_plug_158d00011016d0
+                    - sensor.load_light_hall_1
+                    - sensor.load_light_hall_2
+                    - sensor.load_light_livingroom_1
+                    - sensor.load_light_livingroom_2
+                    - sensor.load_light_kitchen
+                    - sensor.load_light_bedroom
+
+          # График мощности
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: custom:mini-graph-card
+              entity: sensor.power_load_total
+              detail: 1
+              labels: true
+              hours_to_show: 48
+              height: 160
+              line_color: var(--google-red-500)
+              line_width: 6
+              hide:
+                - icon
+                - name
+                - state
+
+          # Пустая карта
+          - type: custom:button-card
+            color_type: blank-card
+
+      - type: vertical-stack
+        cards:
+          # Потребление
+          - type: custom:card-modder
+            style:
+              border-radius: 10px
+            card:
+              type: entities
+              entities:
+                - type: custom:fold-entity-row
+                  head:
+                    entity: sensor.power_mqtt_total_month
+                    icon: mdi:counter
+                  items:
+                    - sensor.power_mqtt_month_plug1
+                    - sensor.power_mqtt_month_plug_camera
+                    - sensor.power_mqtt_month_light_hall_1
+                    - sensor.power_mqtt_month_light_hall_2
+                    - sensor.power_mqtt_month_light_livingroom_1
+                    - sensor.power_mqtt_month_light_livingroom_2
+                    - sensor.power_mqtt_month_light_kitchen
+                    - sensor.power_mqtt_month_light_bedroom
+
+          # Счетчики
+          - type: horizontal-stack
+            cards:
+              # Январь
+              - type: custom:counter-card
+                title: Январь
+                entity: sensor.power_mqtt_total_m1
+                scale: 19px
+              # Февраль
+              - type: custom:counter-card
+                title: Февраль
+                entity: sensor.power_mqtt_total_m2
+                scale: 19px
+              # Март
+              - type: custom:counter-card
+                title: Март
+                entity: sensor.power_mqtt_total_m3
+                scale: 19px
+
+          - type: horizontal-stack
+            cards:
+              # Апрель
+              - type: custom:counter-card
+                title: Апрель
+                entity: sensor.power_mqtt_total_m4
+                scale: 19px
+              # Май
+              - type: custom:counter-card
+                title: Май
+                entity: sensor.power_mqtt_total_m5
+                scale: 19px
+              # Июнь
+              - type: custom:counter-card
+                title: Июнь
+                entity: sensor.power_mqtt_total_m6
+                scale: 19px
+
+          - type: horizontal-stack
+            cards:
+              # Июль
+              - type: custom:counter-card
+                title: Июль
+                entity: sensor.power_mqtt_total_m7
+                scale: 19px
+              # Август
+              - type: custom:counter-card
+                title: Август
+                entity: sensor.power_mqtt_total_m8
+                scale: 19px
+              # Сентябрь
+              - type: custom:counter-card
+                title: Сентябрь
+                entity: sensor.power_mqtt_total_m9
+                scale: 19px
+
+          - type: horizontal-stack
+            cards:
+              # Октябрь
+              - type: custom:counter-card
+                title: Октябрь
+                entity: sensor.power_mqtt_total_m10
+                scale: 19px
+              # Ноябрь
+              - type: custom:counter-card
+                title: Ноябрь
+                entity: sensor.power_mqtt_total_m11
+                scale: 19px
+              # Декабрь
+              - type: custom:counter-card
+                title: Декабрь
+                entity: sensor.power_mqtt_total_m12
+                scale: 19px
+
+          - type: horizontal-stack
+            cards:
+              # Пустая карта
+              - type: custom:button-card
+                color_type: blank-card
+              # Год
+              - type: custom:counter-card
+                title: Всего / кВт⋅ч
+                entity: sensor.power_mqtt_total_year
+                scale: 19px
+              # Пустая карта
+              - type: custom:button-card
+                color_type: blank-card
