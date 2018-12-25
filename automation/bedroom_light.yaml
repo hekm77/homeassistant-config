@@ -1,0 +1,293 @@
+# ------------------------------------------------------------------------------
+# - Включение света по движению
+# ------------------------------------------------------------------------------
+- alias: Bedroom Motion 1
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0001173873
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: and
+          conditions:
+            - condition: sun
+              after: sunset
+              after_offset: "-01:00:00"
+            - condition: time
+              before: '21:00:00'
+        - condition: state
+          entity_id: light.bedroom
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.bedroom
+      data_template:
+        brightness_pct: 100
+        color_temp: 250
+
+- alias: Bedroom Motion 2
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0001173873
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: time
+          after: '21:00:00'
+          before: '22:00:00'
+        - condition: state
+          entity_id: light.bedroom
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.bedroom
+      data_template:
+        brightness_pct: 10
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Выключение света без движения
+# ------------------------------------------------------------------------------
+- alias: Bedroom No Motion
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d0001173873
+      to: 'off'
+      for:
+        minutes: 2
+  condition:
+    - condition: state
+      entity_id: light.bedroom
+      state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: light.bedroom
+
+# ------------------------------------------------------------------------------
+# - Включение света по одинарному клику
+# ------------------------------------------------------------------------------
+- alias: Bedroom Switch Click Light On
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d000104efc8
+        click_type: single
+  condition:
+    - condition: state
+      entity_id: light.bedroom
+      state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.bedroom
+      data_template:
+        brightness_pct: >
+          {% set h = now().strftime('%H') | int %}
+            {% if h >= 0 and h < 6 %}
+              1
+            {% elif h >= 6 and h < 8 %}
+              10
+            {% elif h >= 8 and h < 21 %}
+              100
+            {% elif h >= 21 and h < 22 %}
+              50
+            {% elif h >= 22 and h < 24 %}
+              10
+          {% endif %}
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Выключение света по одинарному клику
+# ------------------------------------------------------------------------------
+- alias: Bedroom Switch Click Light Off
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d000104efc8
+        click_type: single
+  condition:
+    - condition: state
+      entity_id: light.bedroom
+      state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: light.bedroom
+
+# ------------------------------------------------------------------------------
+# - Включение 25% яркости по двойному клику
+# ------------------------------------------------------------------------------
+- alias: Bedroom Switch Doble Click Light 25
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d000104efc8
+        click_type: double
+  action:
+    - service: light.turn_on
+      entity_id: light.bedroom
+      data_template:
+        brightness_pct: 25
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Включение 4000К по длинному нажатию
+# ------------------------------------------------------------------------------
+- alias: Bedroom Switch Long Click Light Max
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d000104efc8
+        click_type: long_click_press
+  action:
+    - service: light.turn_on
+      entity_id: light.bedroom
+      data_template:
+        brightness_pct: 100
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Запуск таймера. Выключение автоматизации по движению при любом нажатии
+# ------------------------------------------------------------------------------
+- alias: Bedroom Motion Off
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d000104efc8
+  condition:
+    - condition: state
+      entity_id: input_boolean.bedroom_motion_status
+      state: 'on'
+  action:
+    - service: timer.start
+      entity_id: timer.bedroom
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.bedroom_motion_status
+
+# ------------------------------------------------------------------------------
+# - Сброс, и запуск нового таймера по любому нажатию
+# ------------------------------------------------------------------------------
+- alias: Bedroom Reset Timer
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d000104efc8
+  condition:
+    - condition: state
+      entity_id: input_boolean.bedroom_motion_status
+      state: 'off'
+  action:
+    - service: timer.cancel
+      entity_id: timer.bedroom
+    - service: timer.start
+      entity_id: timer.bedroom
+
+# ------------------------------------------------------------------------------
+# - Включение автоматизации по движению после остановки таймера
+# ------------------------------------------------------------------------------
+- alias: Bedroom Motion On
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.bedroom
+  action:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.bedroom_motion_status
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.motion_sensor_158d0001173873
+          state: 'off'
+          for:
+            minutes: 1
+        - condition: state
+          entity_id: light.bedroom
+          state: 'on'
+    - service: light.turn_off
+      entity_id: light.bedroom
+
+# ------------------------------------------------------------------------------
+# - Включение / Выключение автоматизации по движению
+# ------------------------------------------------------------------------------
+- alias: Bedroom Automation ON_OFF
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.bedroom_motion_status
+  action:
+    - service_template: >
+        {% if is_state('input_boolean.bedroom_motion_status', 'on') %}
+          automation.turn_on
+        {% else %}
+          automation.turn_off
+        {% endif %}
+      entity_id:
+        - automation.bedroom_motion_1
+        - automation.bedroom_motion_2
+        - automation.bedroom_no_motion
+
+# ------------------------------------------------------------------------------
+# - Включение / Выключение автоматизации переключателем в GUI
+# ------------------------------------------------------------------------------
+- alias: Bedroom Automation ON_OFF Manual
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.bedroom_auto_status
+  action:
+    - service: timer.cancel
+      entity_id: timer.bedroom
+    - service_template: >
+        {% if is_state('input_boolean.bedroom_auto_status', 'on') %}
+          automation.turn_on
+        {% else %}
+          automation.turn_off
+        {% endif %}
+      entity_id:
+        - automation.bedroom_motion_1
+        - automation.bedroom_motion_2
+        - automation.bedroom_no_motion
+        - automation.bedroom_light_dimming
+        - automation.bedroom_motion_off
+        - automation.bedroom_reset_timer
+        - automation.bedroom_motion_on
+        - automation.bedroom_automation_on_off
+
+# ------------------------------------------------------------------------------
+# - Изменение яркости в заданное время
+# ------------------------------------------------------------------------------
+- alias: Bedroom Light Dimming
+  initial_state: true
+  trigger:
+    - platform: time
+      at: '21:00:00'
+    - platform: time
+      at: '22:00:00'
+  condition:
+    - condition: state
+      entity_id: light.bedroom
+      state: 'on'
+  action:
+    - service: light.turn_on
+      entity_id: light.bedroom
+      data_template:
+        brightness_pct: 10
+        color_temp: 250
+        transition: 3
