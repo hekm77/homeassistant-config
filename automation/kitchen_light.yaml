@@ -1,0 +1,317 @@
+# ------------------------------------------------------------------------------
+# - Включение света по движению
+# ------------------------------------------------------------------------------
+- alias: Kitchen Motion 1
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d00012928ac
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: and
+          conditions:
+            - condition: sun
+              after: sunset
+              after_offset: "-01:00:00"
+            - condition: time
+              before: '22:00:00'
+        - condition: state
+          entity_id: light.kitchen
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: 100
+        color_temp: 250
+
+- alias: Kitchen Motion 2
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d00012928ac
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: time
+          after: '22:00:00'
+          before: '23:59:59'
+        - condition: state
+          entity_id: light.kitchen
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: 10
+        color_temp: 250
+
+- alias: Kitchen Motion Night
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d00012928ac
+      to: 'on'
+  condition:
+    - condition: and
+      conditions:
+        - condition: and
+          conditions:
+            - condition: time
+              after: '00:00:00'
+            - condition: sun
+              before: sunrise
+        - condition: state
+          entity_id: light.kitchen
+          state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: 1
+        color_temp: 588
+
+# ------------------------------------------------------------------------------
+# - Выключение света без движения
+# ------------------------------------------------------------------------------
+- alias: Kitchen No Motion
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.motion_sensor_158d00012928ac
+      to: 'off'
+      for:
+        minutes: 5
+  condition:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: light.kitchen
+
+# ------------------------------------------------------------------------------
+# - Включение света по одинарному клику
+# ------------------------------------------------------------------------------
+- alias: Kitchen Switch Click Light On
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d0001256804
+        click_type: single
+  condition:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'off'
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: >
+          {% set h = now().strftime('%H') | int %}
+            {% if h >= 0 and h < 6 %}
+              1
+            {% elif h >= 6 and h < 8 %}
+              10
+            {% elif h >= 8 and h < 21 %}
+              100
+            {% elif h >= 21 and h < 22 %}
+              10
+            {% elif h >= 22 and h < 24 %}
+            1
+          {% endif %}
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Выключение света по одинарному клику
+# ------------------------------------------------------------------------------
+- alias: Kitchen Switch Click Light Off
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d0001256804
+        click_type: single
+  condition:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'on'
+  action:
+    - service: light.turn_off
+      entity_id: light.kitchen
+
+# ------------------------------------------------------------------------------
+# - Включение 25% яркости по двойному клику
+# ------------------------------------------------------------------------------
+- alias: Kitchen Switch Doble Click Light 25
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d0001256804
+        click_type: double
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: 25
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Включение 4000К по длинному нажатию
+# ------------------------------------------------------------------------------
+- alias: Kitchen Switch Long Click Light Max
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d0001256804
+        click_type: long_click_press
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: 100
+        color_temp: 250
+
+# ------------------------------------------------------------------------------
+# - Запуск таймера. Выключение автоматизации по движению при любом нажатии
+# ------------------------------------------------------------------------------
+- alias: Kitchen Motion Off
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d0001256804
+  condition:
+    - condition: state
+      entity_id: input_boolean.kitchen_motion_status
+      state: 'on'
+  action:
+    - service: timer.start
+      entity_id: timer.kitchen
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.kitchen_motion_status
+
+# ------------------------------------------------------------------------------
+# - Сброс, и запуск нового таймера по любому нажатию
+# ------------------------------------------------------------------------------
+- alias: Kitchen Reset Timer
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: xiaomi_aqara.click
+      event_data:
+        entity_id: binary_sensor.switch_158d0001256804
+  condition:
+    - condition: state
+      entity_id: input_boolean.kitchen_motion_status
+      state: 'off'
+  action:
+    - service: timer.cancel
+      entity_id: timer.kitchen
+    - service: timer.start
+      entity_id: timer.kitchen
+
+# ------------------------------------------------------------------------------
+# - Включение автоматизации по движению после остановки таймера
+# ------------------------------------------------------------------------------
+- alias: Kitchen Motion On
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.kitchen
+  action:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.kitchen_motion_status
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.motion_sensor_158d00012928ac
+          state: 'off'
+          for:
+            minutes: 1
+        - condition: state
+          entity_id: light.kitchen
+          state: 'on'
+    - service: light.turn_off
+      entity_id: light.kitchen
+
+# ------------------------------------------------------------------------------
+# - Включение / Выключение автоматизации по движению
+# ------------------------------------------------------------------------------
+- alias: Kitchen Automation ON_OFF
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.kitchen_motion_status
+  action:
+    - service_template: >
+        {% if is_state('input_boolean.kitchen_motion_status', 'on') %}
+          automation.turn_on
+        {% else %}
+          automation.turn_off
+        {% endif %}
+      entity_id:
+        - automation.kitchen_motion_1
+        - automation.kitchen_motion_2
+        - automation.kitchen_motion_night
+        - automation.kitchen_no_motion
+
+# ------------------------------------------------------------------------------
+# - Включение / Выключение автоматизации переключателем в GUI
+# ------------------------------------------------------------------------------
+- alias: Kitchen Automation ON_OFF Manual
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.kitchen_auto_status
+  action:
+    - service: timer.cancel
+      entity_id: timer.kitchen
+    - service_template: >
+        {% if is_state('input_boolean.kitchen_auto_status', 'on') %}
+          automation.turn_on
+        {% else %}
+          automation.turn_off
+        {% endif %}
+      entity_id:
+        - automation.kitchen_motion_1
+        - automation.kitchen_motion_2
+        - automation.kitchen_motion_night
+        - automation.kitchen_no_motion
+        - automation.kitchen_light_dimming
+        - automation.kitchen_motion_off
+        - automation.kitchen_reset_timer
+        - automation.kitchen_motion_on
+        - automation.kitchen_automation_on_off
+
+# ------------------------------------------------------------------------------
+# - Изменение яркости в заданное время
+# ------------------------------------------------------------------------------
+- alias: Kitchen Light Dimming
+  initial_state: true
+  trigger:
+    - platform: time
+      at: '22:00:00'
+  condition:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'on'
+  action:
+    - service: light.turn_on
+      entity_id: light.kitchen
+      data_template:
+        brightness_pct: 1
+        color_temp: 250
