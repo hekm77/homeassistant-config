@@ -1,0 +1,710 @@
+# ------------------------------------------------------------------------------
+# - Raspberry Pi
+# ------------------------------------------------------------------------------
+  - platform: command_line
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
+  - platform: systemmonitor
+    resources:
+      - type: processor_use
+      - type: memory_use_percent
+      - type: disk_use_percent
+        arg: /home
+      - type: disk_free
+        arg: /home
+
+# ------------------------------------------------------------------------------
+# - DarkSky
+# ------------------------------------------------------------------------------
+  - platform: darksky
+    api_key: !secret darksky_api
+    language: ru
+    update_interval: '00:10'
+    forecast:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+    monitored_conditions:
+      - icon
+      - summary
+      - precip_intensity
+      - precip_probability
+      - humidity
+      - temperature
+      - temperature_high
+      - temperature_low
+      - wind_speed
+      - wind_bearing
+      - pressure
+      - cloud_cover
+      - visibility
+      - uv_index
+
+# ------------------------------------------------------------------------------
+# - Солнце
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      sunset_time:
+        icon_template: mdi:weather-sunset-down
+        entity_id: sensor.time
+        value_template: '{{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom("%H:%M") }}'
+      sunrise_time:
+        icon_template: mdi:weather-sunset-up
+        entity_id: sensor.time
+        value_template: '{{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom("%H:%M") }}'
+
+# ------------------------------------------------------------------------------
+# - Луна
+# ------------------------------------------------------------------------------
+  - platform: moon
+  - platform: template
+    sensors:
+      moon_custom:
+        value_template: >
+          {% set m_phase = states('sensor.moon') %}
+            {% if m_phase == 'new_moon' %}
+              Новолуние
+            {% elif m_phase == 'waxing_crescent' %}
+              Растущий месяц
+            {% elif m_phase == 'first_quarter' %}
+              Первая четверть
+            {% elif m_phase == 'waxing_gibbous' %}
+              Растущая луна
+            {% elif m_phase == 'full_moon' %}
+              Полнолуние
+            {% elif m_phase == 'waning_gibbous' %}
+              Убывающая луна
+            {% elif m_phase == 'last_quarter' %}
+              Последняя четверть
+            {% elif m_phase == 'waning_crescent' %}
+              Спадающий месяц
+            {% else %}
+              Неизвестно
+            {% endif %}
+
+# ------------------------------------------------------------------------------
+# - Давление
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      dark_sky_pressure_custom:
+        unit_of_measurement: 'мм рт.ст.'
+        value_template: "{{ (states('sensor.dark_sky_pressure') | float * 0.75) | round(0) }}"
+
+# ------------------------------------------------------------------------------
+# - Ветер
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      wind_custom:
+        value_template: >
+          {% set value = states('sensor.dark_sky_wind_bearing') | float %}
+          {% set speed = (states('sensor.dark_sky_wind_speed') | float) | round(1) %}
+            {% if value >= 0 and value < 22.5 %}
+              Северный, {{ speed }} м/с
+            {% elif value >= 22.5 and value < 67.5 %}
+              Северо-Восточный, {{ speed }} м/с
+            {% elif value >= 67.5 and value < 112.5 %}
+              Восточный, {{ speed }} м/с
+            {% elif value >= 112.5 and value < 157.5 %}
+              Юго-Восточный, {{ speed }} м/с
+            {% elif value >= 157.5 and value < 202.5 %}
+              Южный, {{ speed }} м/с
+            {% elif value >= 202.5 and value < 247.5 %}
+              Юго-Западный, {{ speed }} м/с
+            {% elif value >= 247.5 and value < 292.5 %}
+              Западный, {{ speed }} м/с
+            {% elif value >= 292.5 and value < 337.5 %}
+              Северо-Западный, {{ speed }} м/с
+            {% elif value >= 337.5 and value <= 360 %}
+              Северный, {{ speed }} м/с
+            {% else %}
+              Безветренно
+            {% endif %}
+
+# ------------------------------------------------------------------------------
+# - Дни недели, температура мин/макс
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      day_1_ahead:
+        entity_id: sensor.time
+        value_template: >
+          {% if now().weekday() >= 6 %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() - 6] }}
+          {% else %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() + 1] }}
+          {% endif %}
+      day_2_ahead:
+        entity_id: sensor.time
+        value_template: >
+          {% if now().weekday() >= 5 %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() - 5] }}
+          {% else %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() + 2] }}
+          {% endif %}
+      day_3_ahead:
+        entity_id: sensor.time
+        value_template: >
+          {% if now().weekday() >= 4 %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() - 4] }}
+          {% else %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() + 3] }}
+          {% endif %}
+      day_4_ahead:
+        entity_id: sensor.time
+        value_template: >
+          {% if now().weekday() >= 3 %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() - 3] }}
+          {% else %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() + 4] }}
+          {% endif %}
+      day_5_ahead:
+        entity_id: sensor.time
+        value_template: >
+          {% if now().weekday() >= 2 %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() - 2] }}
+          {% else %}
+            {{ ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][now().weekday() + 5] }}
+          {% endif %}
+      temp_now:
+        value_template: "{{ (states('sensor.dark_sky_temperature') | float) | round(0) }}°"
+      temp_max_today:
+        value_template: "{{ (states('sensor.dark_sky_daytime_high_temperature') | float) | round(0) }}°"
+      temp_max_day_1_ahead:
+        value_template: "{{ (states('sensor.dark_sky_daytime_high_temperature_1') | float) | round(0) }}"
+      temp_min_day_1_ahead:
+        value_template: "{{ (states('sensor.dark_sky_overnight_low_temperature_1') | float) | round(0) }}"
+      temp_max_day_2_ahead:
+        value_template: "{{ (states('sensor.dark_sky_daytime_high_temperature_2') | float) | round(0) }}"
+      temp_min_day_2_ahead:
+        value_template: "{{ (states('sensor.dark_sky_overnight_low_temperature_2') | float) | round(0) }}"
+      temp_max_day_3_ahead:
+        value_template: "{{ (states('sensor.dark_sky_daytime_high_temperature_3') | float) | round(0) }}"
+      temp_min_day_3_ahead:
+        value_template: "{{ (states('sensor.dark_sky_overnight_low_temperature_3') | float) | round(0) }}"
+      temp_max_day_4_ahead:
+        value_template: "{{ (states('sensor.dark_sky_daytime_high_temperature_4') | float) | round(0) }}"
+      temp_min_day_4_ahead:
+        value_template: "{{ (states('sensor.dark_sky_overnight_low_temperature_4') | float) | round(0) }}"
+      temp_max_day_5_ahead:
+        value_template: "{{ (states('sensor.dark_sky_daytime_high_temperature_5') | float) | round(0) }}"
+      temp_min_day_5_ahead:
+        value_template: "{{ (states('sensor.dark_sky_overnight_low_temperature_5') | float) | round(0) }}"
+      precip_intensity_now:
+        value_template: "{{ (states('sensor.dark_sky_precip_intensity') | float) | round(2) }} мм/ч"
+      precip_probability_now:
+        value_template: "{{ (states('sensor.dark_sky_precip_probability') | float) | round(0) }} %"
+
+# ------------------------------------------------------------------------------
+# - Дата, время
+# ------------------------------------------------------------------------------
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+
+# ------------------------------------------------------------------------------
+# - Home Assistant Online
+# ------------------------------------------------------------------------------
+
+  - platform: uptime
+    name: Online
+    unit_of_measurement: minutes
+
+  - platform: template
+    sensors:
+      online_custom:
+        icon_template: mdi:clock
+        entity_id: sensor.time
+        unit_of_measurement: ' '
+        value_template: >
+          {% set uptime = states('sensor.online') | int %}
+          {% set minutes = (( uptime % 60) / 1) | int %}
+          {% set hours = ((uptime % 1440) / 60) | int %}
+          {% set days = (uptime / 1440) | int %}
+            {% if uptime < 1 %}
+              Меньше минуты
+            {% else %}
+              {% if days > 0 %}
+                {{ days }} д.
+              {% endif %}
+              {% if hours > 0 %}
+                {% if days > 0 %}
+                  {{ ' ' }}
+                {% endif %}
+                {{ hours }} ч.
+              {% endif %}
+              {% if minutes > 0 %}
+                {% if days > 0 or hours > 0 %}
+                  {{ ' ' }}
+                {% endif %}
+                  {{ minutes }} мин.
+              {% endif %}
+            {% endif %}
+
+# ------------------------------------------------------------------------------
+# - Состояние батареи датчиков
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      battery_door_window_sensor_158d000112f5ad:
+        entity_id: binary_sensor.door_window_sensor_158d000112f5ad
+        value_template: >
+          {% if is_state('binary_sensor.door_window_sensor_158d000112f5ad', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.door_window_sensor_158d000112f5ad', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:door
+        unit_of_measurement: '%'
+      battery_motion_sensor_158d0000f4470d:
+        entity_id: binary_sensor.motion_sensor_158d0000f4470d
+        value_template: >
+          {% if is_state('binary_sensor.motion_sensor_158d0000f4470d', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.motion_sensor_158d0000f4470d', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      battery_motion_sensor_158d0001108772:
+        entity_id: binary_sensor.motion_sensor_158d0001108772
+        value_template: >
+          {% if is_state('binary_sensor.motion_sensor_158d0001108772', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.motion_sensor_158d0001108772', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      battery_motion_sensor_158d00012928ac:
+        entity_id: binary_sensor.motion_sensor_158d00012928ac
+        value_template: >
+          {% if is_state('binary_sensor.motion_sensor_158d00012928ac', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.motion_sensor_158d00012928ac', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      battery_motion_sensor_158d00011c018c:
+        entity_id: binary_sensor.motion_sensor_158d00011c018c
+        value_template: >
+          {% if is_state('binary_sensor.motion_sensor_158d00011c018c', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.motion_sensor_158d00011c018c', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      battery_motion_sensor_158d0001173873:
+        entity_id: binary_sensor.motion_sensor_158d0001173873
+        value_template: >
+          {% if is_state('binary_sensor.motion_sensor_158d0001173873', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.motion_sensor_158d0001173873', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      battery_switch_158d0000f7e0a1:
+        entity_id: binary_sensor.switch_158d0000f7e0a1
+        value_template: >
+          {% if is_state('binary_sensor.switch_158d0000f7e0a1', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.switch_158d0000f7e0a1', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:power
+        unit_of_measurement: '%'
+      battery_switch_158d00010a98fa:
+        entity_id: binary_sensor.switch_158d00010a98fa
+        value_template: >
+          {% if is_state('binary_sensor.switch_158d00010a98fa', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.switch_158d00010a98fa', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:power
+        unit_of_measurement: '%'
+      battery_switch_158d00010f2389:
+        entity_id: binary_sensor.switch_158d00010f2389
+        value_template: >
+          {% if is_state('binary_sensor.switch_158d00010f2389', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.switch_158d00010f2389', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:power
+        unit_of_measurement: '%'
+      battery_switch_158d0001256804:
+        entity_id: binary_sensor.switch_158d0001256804
+        value_template: >
+          {% if is_state('binary_sensor.switch_158d0001256804', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.switch_158d0001256804', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:power
+        unit_of_measurement: '%'
+      battery_switch_158d000104efc8:
+        entity_id: binary_sensor.switch_158d000104efc8
+        value_template: >
+          {% if is_state('binary_sensor.switch_158d000104efc8', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('binary_sensor.switch_158d000104efc8', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:power
+        unit_of_measurement: '%'
+      battery_temperature_158d0001140c6a:
+        entity_id: sensor.temperature_158d0001140c6a
+        value_template: >
+          {% if is_state('sensor.temperature_158d0001140c6a', 'unavailable') %}
+            Недоступно
+          {% else %}
+            {{ state_attr('sensor.temperature_158d0001140c6a', 'battery_level') | round(0) }}
+          {% endif %}
+        icon_template: mdi:thermometer
+        unit_of_measurement: '%'
+
+# ------------------------------------------------------------------------------
+# - Потребление
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+    # Розетка
+      load_switch_plug_158d0001003f15:
+        entity_id: switch.plug_158d0001003f15
+        value_template: "{{ state_attr('switch.plug_158d0001003f15', 'load_power') }}"
+        icon_template: mdi:power-plug
+        unit_of_measurement: ' '
+    # Камера
+      load_switch_plug_158d00011016d0:
+        entity_id: switch.plug_158d00011016d0
+        value_template: "{{ state_attr('switch.plug_158d00011016d0', 'load_power') }}"
+        icon_template: mdi:power-plug
+        unit_of_measurement: ' '
+    # Холл 1
+      load_light_hall_1:
+        entity_id: light.hall_1
+        value_template: >
+          {% if is_state('light.hall_1', 'on') %}
+            {% set bri = state_attr('light.hall_1', 'brightness') | int %}
+              {{ (8.05 - ((255 - bri) * 0.0271)) | round(2) }}
+            {% elif is_state('light.hall_1', 'off') %}
+              0.96
+            {% else %}
+              0.0
+          {% endif %}
+        icon_template: mdi:lightbulb
+        unit_of_measurement: ' '
+    # Холл 2
+      load_light_hall_2:
+        entity_id: light.hall_2
+        value_template: >
+          {% if is_state('light.hall_2', 'on') %}
+            {% set bri = state_attr('light.hall_2', 'brightness') | int %}
+              {{ (8.05 - ((255 - bri) * 0.0271)) | round(2) }}
+            {% elif is_state('light.hall_2', 'off') %}
+              0.96
+            {% else %}
+              0.0
+          {% endif %}
+        icon_template: mdi:lightbulb
+        unit_of_measurement: ' '
+    # Зал Люстра
+      load_light_livingroom_1:
+        entity_id: light.livingroom_1
+        value_template: >
+          {% if is_state('light.livingroom_1', 'on') %}
+            {% set bri = state_attr('light.livingroom_1', 'brightness') | int %}
+            {% set ct  = state_attr('light.livingroom_1', 'color_temp') | int %}
+              {% if ct == 250 %}
+                {{ (9.48 - ((255 - bri) * 0.03)) | round(2) }}
+              {% elif ct == 588 and bri <= 36 %}
+                  1.6
+                {% else %}
+                  0.0
+              {% endif %}
+            {% elif is_state('light.livingroom_1', 'off') %}
+              1.3
+            {% else %}
+          {% endif %}
+        icon_template: mdi:ceiling-light
+        unit_of_measurement: ' '
+    # Зал Ночник
+      load_light_livingroom_2:
+        entity_id: light.livingroom_2
+        value_template: >
+          {% if is_state('light.livingroom_2', 'on') %}
+            {% set bri = state_attr('light.livingroom_2', 'brightness') | int %}
+            {% set ct  = state_attr('light.livingroom_2', 'color_temp') | int %}
+              {% if ct == 250 %}
+                {{ (9.48 - ((255 - bri) * 0.03)) | round(2) }}
+              {% elif ct == 588 and bri <= 36 %}
+                  1.6
+                {% else %}
+                  0.0
+              {% endif %}
+            {% elif is_state('light.livingroom_2', 'off') %}
+              1.3
+            {% else %}
+          {% endif %}
+        icon_template: mdi:lightbulb
+        unit_of_measurement: ' '
+    # Кухня Люстра
+      load_light_kitchen:
+        entity_id: light.kitchen
+        value_template: >
+          {% if is_state('light.kitchen', 'on') %}
+            {% set bri = state_attr('light.kitchen', 'brightness') | int %}
+            {% set ct  = state_attr('light.kitchen', 'color_temp') | int %}
+              {% if ct == 250 %}
+                {{ (9.48 - ((255 - bri) * 0.03)) | round(2) }}
+              {% elif ct == 588 and bri <= 36 %}
+                  1.6
+                {% else %}
+                  0.0
+              {% endif %}
+            {% elif is_state('light.kitchen', 'off') %}
+              1.3
+            {% else %}
+          {% endif %}
+        icon_template: mdi:ceiling-light
+        unit_of_measurement: ' '
+    # Спальня Люстра
+      load_light_bedroom:
+        entity_id: light.bedroom
+        value_template: >
+          {% if is_state('light.bedroom', 'on') %}
+            {% set bri = state_attr('light.bedroom', 'brightness') | int %}
+            {% set ct  = state_attr('light.bedroom', 'color_temp') | int %}
+              {% if ct == 250 %}
+                {{ (9.48 - ((255 - bri) * 0.03)) | round(2) }}
+              {% elif ct == 588 and bri <= 36 %}
+                  1.6
+                {% else %}
+                  0.0
+              {% endif %}
+            {% elif is_state('light.bedroom', 'off') %}
+              1.3
+            {% else %}
+          {% endif %}
+        icon_template: mdi:ceiling-light
+        unit_of_measurement: ' '
+    # Общее
+      power_load_total:
+        value_template: "{{ (states('sensor.load_switch_plug_158d0001003f15') | float +
+                             states('sensor.load_switch_plug_158d00011016d0') | float +
+                             states('sensor.load_light_hall_1') | float +
+                             states('sensor.load_light_hall_2') | float +
+                             states('sensor.load_light_livingroom_1') | float +
+                             states('sensor.load_light_livingroom_2') | float +
+                             states('sensor.load_light_kitchen') | float +
+                             states('sensor.load_light_bedroom') | float) | round(3) }}"
+        unit_of_measurement: 'Вт'
+
+# ------------------------------------------------------------------------------
+# - MQTT
+# ------------------------------------------------------------------------------
+  - platform: mqtt
+    state_topic: "power/plug1/month"
+    name: 'power mqtt month plug1'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/plug_camera/month"
+    name: 'power mqtt month plug camera'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/light_hall_1/month"
+    name: 'power mqtt month light hall 1'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/light_hall_2/month"
+    name: 'power mqtt month light hall 2'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/light_livingroom_1/month"
+    name: 'power mqtt month light livingroom 1'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/light_livingroom_2/month"
+    name: 'power mqtt month light livingroom 2'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/light_kitchen/month"
+    name: 'power mqtt month light kitchen'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/light_bedroom/month"
+    name: 'power mqtt month light bedroom'
+    unit_of_measurement: ' '
+
+  - platform: mqtt
+    state_topic: "power/month_total/1"
+    name: 'power mqtt total m1'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/2"
+    name: 'power mqtt total m2'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/3"
+    name: 'power mqtt total m3'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/4"
+    name: 'power mqtt total m4'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/5"
+    name: 'power mqtt total m5'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/6"
+    name: 'power mqtt total m6'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/7"
+    name: 'power mqtt total m7'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/8"
+    name: 'power mqtt total m8'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/9"
+    name: 'power mqtt total m9'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/10"
+    name: 'power mqtt total m10'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/11"
+    name: 'power mqtt total m11'
+    unit_of_measurement: ' '
+  - platform: mqtt
+    state_topic: "power/month_total/12"
+    name: 'power mqtt total m12'
+    unit_of_measurement: ' '
+
+  - platform: mqtt
+    state_topic: "power/month_total"
+    name: 'power mqtt total month'
+    unit_of_measurement: 'кВт⋅ч'
+  - platform: mqtt
+    state_topic: "power/year_total"
+    name: 'power mqtt total year'
+    unit_of_measurement: 'кВт⋅ч'
+
+
+# ------------------------------------------------------------------------------
+# - Размер базы данных MySQL
+# ------------------------------------------------------------------------------
+  - platform: sql
+    db_url: !secret mysql_db_url
+    queries:
+      - name: MySQL DB size
+        query: 'SELECT table_schema "database", Round(Sum((data_length + index_length) / 1024) / 1024, 1) "value" FROM information_schema.tables WHERE table_schema="homeassistant" GROUP BY table_schema;'
+        column: 'value'
+        unit_of_measurement: MB
+
+# ------------------------------------------------------------------------------
+# - Dune Status
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      dune_status:
+        value_template: >-
+          {% set source = state_attr('media_player.dunehd', 'media_title') %}
+          {% set status = states('media_player.dunehd') %}
+            {% if status == 'playing' and 'spacetv' in source %}
+              OTT Club
+            {% elif status == 'playing' and 'nfs' in source %}
+              DFI
+            {% elif status == 'on' and 'nfs' in source %}
+              Menu
+            {% elif status == 'playing' and 'network' in source %}
+              DFI
+            {% elif status == 'on' and 'network' in source %}
+              Menu
+            {% elif status == 'playing' and 'kinopub' in source %}
+              Kinopub
+            {% elif status == 'on' and 'kinopub' in source %}
+              Menu
+            {% elif status == 'on' and 'Not playing' in source %}
+              Menu
+            {% elif status == 'off' %}
+              OFF
+            {% else %}
+              Unknown
+            {% endif %}
+
+# ------------------------------------------------------------------------------
+# - Сертификат Lets Encrypt
+# ------------------------------------------------------------------------------
+  - platform: cert_expiry
+    host: !secret host
+    name: Lets Encrypt
+
+# ------------------------------------------------------------------------------
+# - Epson PX720WD
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      epson:
+        friendly_name: 'Epson PX720WD'
+        value_template: "{{ 'ON' if is_state('device_tracker.epson', 'home') else 'OFF' }}"
+
+  - platform: command_line
+    name: Epson Ink Level Cyan
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_C.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+
+  - platform: command_line
+    name: Epson Ink Level Yellow
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_Y.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+
+  - platform: command_line
+    name: Epson Ink Level Light Cyan
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_LC.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+
+  - platform: command_line
+    name: Epson Ink Level Black
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_K.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+
+  - platform: command_line
+    name: Epson Ink Level Magenta
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_M.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+
+  - platform: command_line
+    name: Epson Ink Level Light Magenta
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_LM.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+
+# ------------------------------------------------------------------------------
+# - Текст
+# ------------------------------------------------------------------------------
+  - platform: template
+    sensors:
+      text_battery_head:
+        entity_id: sensor.date
+        value_template: ' '
