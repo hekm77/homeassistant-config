@@ -1,0 +1,64 @@
+auto_start: false
+filter:
+  include_domains:
+    - light
+    - media_player
+    - scene
+    - switch
+  exclude_entities:
+    - media_player.sony_htnt5_2
+    - switch.plug_158d00011016d0
+    - switch.panic_light
+    - switch.device_tracker_1
+    - switch.device_tracker_2
+    - switch.device_tracker_3
+    - switch.dfi
+    - switch.ott_club
+    - switch.kinopub
+    - scene.light_off_livingroom
+    - scene.panic_light_off
+    - scene.panic_light_on
+  include_entities:
+    - input_boolean.hall_auto_status
+    - input_boolean.livingroom_auto_status
+    - input_boolean.kitchen_auto_status
+    - input_boolean.bedroom_auto_status
+    - input_boolean.dfi
+    - input_boolean.ott_club
+    - input_boolean.kinopub
+entity_config:
+  media_player.sony_bravia_tv:
+    name: Зал Телевизор
+    feature_list:
+      - feature: on_off
+  media_player.dunehd:
+    name: Зал Дюна
+    feature_list:
+      - feature: on_off
+  media_player.sony_htnt5:
+    name: Зал Саундбар
+    feature_list:
+      - feature: on_off
+  input_boolean.dfi:
+    name: Зал Кинозал
+  input_boolean.ott_club:
+    name: Зал ОТТ Клуб
+  input_boolean.kinopub:
+    name: Зал Кинопаб
+  input_boolean.hall_auto_status:
+    name: Холл Автоматизация
+  input_boolean.livingroom_auto_status:
+    name: Зал Автоматизация
+  input_boolean.kitchen_auto_status:
+    name: Кухня Автоматизация
+  input_boolean.bedroom_auto_status:
+    name: Спальня Автоматизация
+  switch.plug_158d0001003f15:
+    name: Спальня Розетка
+    type: outlet
+  scene.bright_livingroom:
+    name: Ярко
+  scene.movie_livingroom:
+    name: Кино
+  scene.night_light_livingroom:
+    name: Ночник
