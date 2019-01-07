@@ -1,0 +1,50 @@
+hall_motion_status:
+  name: Холл Motion
+  initial: on
+  icon: mdi:human-male
+hall_auto_status:
+  name: Холл
+  initial: on
+  icon: mdi:home-automation
+
+livingroom_motion_status:
+  name: Зал Motion
+  initial: on
+  icon: mdi:human-male
+livingroom_auto_status:
+  name: Зал
+  initial: on
+  icon: mdi:home-automation
+
+kitchen_motion_status:
+  name: Кухня Motion
+  initial: on
+  icon: mdi:human-male
+kitchen_auto_status:
+  name: Кухня
+  initial: on
+  icon: mdi:home-automation
+
+bedroom_motion_status:
+  name: Спальня Motion
+  initial: on
+bedroom_auto_status:
+  name: Спальня
+  initial: on
+  icon: mdi:home-automation
+
+dfi:
+  initial: off
+ott_club:
+  initial: off
+kinopub:
+  initial: off
+
+light_panic_status:
+  initial: off
+
+device_tracker:
+
+test:
+  name: Тест
+  initial: off
