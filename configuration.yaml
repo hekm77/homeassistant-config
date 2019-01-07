@@ -46,7 +46,7 @@ group: !include groups.yaml
 automation: !include_dir_merge_list automation
 script: !include_dir_merge_named scripts
 media_player: !include media_players.yaml
-input_boolean: !include bolean.yaml
+input_boolean: !include input_boolean.yaml
 switch: !include switches.yaml
 timer: !include timers.yaml
 notify: !include notify.yaml
