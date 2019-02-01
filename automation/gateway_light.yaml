@@ -59,7 +59,7 @@
 - alias: gateway light on time
   initial_state: true
   trigger:
-    - platform: time
+    - platform: time_pattern
       minutes: '/5'
       seconds: 00
   condition:
