@@ -55,3 +55,4 @@ homekit: !include homekit_config.yaml
 device_tracker: !include device_tracker.yaml
 scene: !include scenes.yaml
 input_datetime: !include input_datetime.yaml
+custom_updater: !include custom_updater.yaml
