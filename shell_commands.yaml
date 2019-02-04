@@ -8,7 +8,7 @@ dunehd_run_kinopub: '/usr/bin/curl -s "http://192.168.1.x/cgi-bin/do?cmd=launch_
 dunehd_run_ott_club: '/usr/bin/curl -s "http://192.168.1.x/cgi-bin/do?cmd=launch_media_url&media_url=plugin_launcher://i-ghosti"'
 dunehd_play_alarm1: '/usr/bin/curl -s "http://192.168.1.x/cgi-bin/do?cmd=launch_media_url&media_url=storage_name://SD_Card/Alarm_Sound_1.mp3"'
 dunehd_play_alarm2: '/usr/bin/curl -s "http://192.168.1.x/cgi-bin/do?cmd=launch_media_url&media_url=storage_name://SD_Card/Alarm_Sound_2.mp3"'
-renew_ssl: ~/home/homeassistant/dehydrated/dehydrated -c
+renew_ssl: '/home/homeassistant/dehydrated/dehydrated -c'
 
 light_set_rgb: /bin/bash -c "echo -ne '{\"id\":1, \"method\":\"set_scene\", \"params\":[\"auto_delay_off\", 50, 1]}\r\n' | nc -w1 192.168.1.x 55443"
 light_set_scene: /bin/bash -c "echo -ne '{\"id\":1, \"method\":\"set_scene\", \"params\":[\"color\", 1315890, 50]}\\r\\n' | nc -w1 192.168.1.x 55443"
