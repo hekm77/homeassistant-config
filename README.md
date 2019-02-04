@@ -24,6 +24,8 @@
   * [Pushover](https://pushover.net)
 * Обнаружение присутствия
   * [Кастомный компонент](https://community.home-assistant.io/t/composite-device-tracker-platform/67345/97?u=hekm77) для iOS девайсов
+* Отслеживание и обновление пользовательских карт / компонентов и python-скриптов
+  * [Кастомный компонент](https://github.com/custom-components/custom_updater)
 ## Home Assistant Lovelace UI
 На скриншотах измененная тема [midnight](https://community.home-assistant.io/t/midnight-theme/28598)
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_1.png" alt="Home Assistant Lovelace UI" />
@@ -34,6 +36,7 @@
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_6.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_7.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_8.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_9.png" alt="Home Assistant Lovelace UI" />
 
 ### Кастомные карты Lovelace
 * [Mini Graph Card](https://github.com/kalkih/mini-graph-card)
@@ -45,3 +48,4 @@
 * [Layout-card](https://github.com/thomasloven/lovelace-layout-card)
 * [Big number card](https://github.com/ciotlosm/custom-lovelace/tree/master/bignumber-card)
 * [Alarm control panel card](https://github.com/ciotlosm/custom-lovelace/tree/master/alarm_control_panel-card)
+* [Tracker card](https://github.com/custom-cards/tracker-card)
