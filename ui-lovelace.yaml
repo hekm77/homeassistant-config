@@ -1,21 +1,27 @@
 resources:
-  - url: /local/lovelace/alarm_control_panel-card.js
+  - url: /local/lovelace/alarm_control_panel-card.js?v=0.4.0
     type: js
   - url: /local/lovelace/counter-card.js
     type: js
-  - url: /local/lovelace/button-card.js
+  - url: /local/lovelace/button-card.js?v=0.0.5
     type: module
-  - url: /local/lovelace/mini-media-player-bundle.js?v=0.9.8
+  - url: /local/lovelace/mini-media-player-bundle.js?v=1.0.0
     type: module
-  - url: /local/lovelace/mini-graph-card-bundle.js?v=0.1.0
+  - url: /local/lovelace/mini-graph-card-bundle.js?v=0.2.1
     type: module
-  - url: /local/lovelace/card-modder.js
+  - url: /local/lovelace/card-modder.js?v=785dd6
     type: module
-  - url: /local/lovelace/card-tools.js
+  - url: /local/lovelace/card-tools.js?v=297fcc
     type: js
-  - url: /local/lovelace/fold-entity-row.js
+  - url: /local/lovelace/fold-entity-row.js?v=6d11d3
     type: js
-  - url: /local/lovelace/layout-card.js
+  - url: /local/lovelace/layout-card.js?v=a313b7
+    type: js
+  - url: /local/lovelace/tracker-card.js?v=0.3.0
+    type: js
+  - url: /local/lovelace/bignumber-card.js?v=0.0.1
+    type: js
+  - url: /local/lovelace/slider-entity-row.js?v=ba8f50
     type: js
 
 
@@ -85,7 +91,7 @@ views:
                 card:
                   type: entity-button
                   entity: scene.light_off_livingroom
-                  name: Выкл.
+                  name: Зал Off
                   icon: mdi:lightbulb-outline
                   hold_action: call-service
                   service: scene.turn_on
@@ -246,9 +252,11 @@ views:
                   group: true
                   name: Sony TV
                   icon: mdi:television
-                  hide_controls: true
-                  hide_volume: true
-                  power_color: true
+                  hide:
+                    controls: true
+                    volume: true
+                    source: true
+                    power_state: false
                 - type: divider
                   style:
                     height: 10px
@@ -259,10 +267,12 @@ views:
                   group: true
                   name: Dune 301
                   icon: mdi:audio-video
-                  hide_controls: true
-                  hide_volume: true
-                  power_color: true
-                  short_info: true
+                  info: short
+                  hide:
+                    controls: true
+                    volume: true
+                    source: true
+                    power_state: false
                 - type: divider
                   style:
                     height: 10px
@@ -273,9 +283,10 @@ views:
                   group: true
                   name: Sony NT5
                   icon: mdi:speaker
-                  hide_controls: true
-                  power_color: true
-                  show_source: small
+                  source: icon
+                  hide:
+                    controls: true
+                    power_state: false
                 - type: divider
                   style:
                     height: 10px
@@ -286,11 +297,11 @@ views:
                   group: true
                   name: Sony NT5 Cast
                   icon: mdi:cast
-                  hide_volume: true
-                  power_color: true
-                  scroll_info: true
-                  show_progress: true
-                  artwork: cover
+                  info: scroll
+                  hide:
+                    controls: true
+                    volume: true
+                    power_state: false
 
       - type: vertical-stack
         cards:
@@ -309,10 +320,11 @@ views:
                   name: ' '
                   group: true
                   icon: mdi:spotify
-                  hide_power: true
-                  scroll_info: true
-                  artwork_border: true
-                  show_source: full
+                  source: full
+                  info: scroll
+                  hide:
+                    power: true
+                    power_state: false
                 - type: divider
                   style:
                     height: 20px
@@ -323,10 +335,11 @@ views:
                   name: ' '
                   group: true
                   icon: mdi:spotify
-                  hide_power: true
-                  scroll_info: true
-                  artwork_border: true
-                  show_source: full
+                  source: full
+                  info: scroll
+                  hide:
+                    power: true
+                    power_state: false
                 - type: divider
                   style:
                     height: 20px
@@ -337,13 +350,14 @@ views:
                   name: ' '
                   group: true
                   icon: mdi:spotify
-                  hide_power: true
-                  scroll_info: true
-                  artwork_border: true
-                  show_source: full
+                  source: full
+                  info: scroll
+                  hide:
+                    power: true
+                    power_state: false
                 - type: divider
                   style:
-                    height: 20px
+                    height: 18px
 
 
   # Охрана
@@ -434,35 +448,45 @@ views:
           - type: custom:card-modder
             style:
               border-radius: 10px
+              overflow: hidden
             card:
               type: custom:mini-graph-card
               entity: sensor.temperature_158d0001140c6a
-              detail: 1
-              labels: true
               hours_to_show: 48
+              points_per_hour: 1
+              more_info: false
+              hour24: true
+              align_header: center
+              align_state: center
               height: 120
               line_color: '#EA811D'
               line_width: 6
               font_size: 120
-              hide:
-                - icon
+              show:
+                name: true
+                icon: false
 
           # Зал Влажность
           - type: custom:card-modder
             style:
               border-radius: 10px
+              overflow: hidden
             card:
               type: custom:mini-graph-card
               entity: sensor.humidity_158d0001140c6a
-              detail: 1
-              labels: true
               hours_to_show: 48
+              points_per_hour: 1
+              more_info: false
+              hour24: true
+              align_header: center
+              align_state: center
               height: 120
               line_color: var(--primary-color)
               line_width: 6
               font_size: 120
-              hide:
-                - icon
+              show:
+                name: true
+                icon: false
 
 
   # Информация
@@ -587,19 +611,24 @@ views:
           - type: custom:card-modder
             style:
                border-radius: 10px
+               overflow: hidden
             card:
               type: custom:mini-graph-card
               entity: sensor.illumination_f0b429aa26cd
-              detail: 1
-              labels: true
               hours_to_show: 48
+              points_per_hour: 1
+              more_info: false
+              hour24: true
+              align_header: center
+              align_state: center
               height: 120
               line_color: var(--paper-item-icon-active-color)
               line_width: 6
               font_size: 80
               decimals: 0
-              hide:
-                - icon
+              show:
+                name: true
+                icon: false
 
 
   # Электричество
@@ -633,19 +662,23 @@ views:
           - type: custom:card-modder
             style:
               border-radius: 10px
+              overflow: hidden
             card:
               type: custom:mini-graph-card
               entity: sensor.power_load_total
-              detail: 1
-              labels: true
               hours_to_show: 48
-              height: 160
+              points_per_hour: 1
+              more_info: false
+              hour24: true
+              align_state: center
+              height: 105
               line_color: var(--google-red-500)
               line_width: 6
-              hide:
-                - icon
-                - name
-                - state
+              font_size: 120
+              show:
+                name: false
+                icon: false
+                extrema: true
 
           # Пустая карта
           - type: custom:button-card
@@ -760,3 +793,23 @@ views:
               # Пустая карта
               - type: custom:button-card
                 color_type: blank-card
+
+
+  # Обновления
+  - title: Обновления
+    icon: mdi:update
+    cards:
+      - type: custom:card-modder
+        style:
+          border-radius: 10px
+        card:
+          type: custom:tracker-card
+          title: Обновления
+          name_text: Имя
+          current_text: Текущая
+          available_text: Доступная
+          check_text: Проверить
+          update_all_text: Обновить
+          trackers:
+            - sensor.custom_card_tracker
+            - sensor.custom_component_tracker
