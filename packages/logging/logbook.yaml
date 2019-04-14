@@ -1,0 +1,23 @@
+# Журнал в Lovelace
+# logbook:
+#   include:
+#     entities:
+#       - light.gateway_light_f0b429aa26cd
+#       - light.hall_1
+#       - light.hall_2
+#       - light.livingroom_1
+#       - light.livingroom_2
+#       - light.kitchen
+#       - light.bedroom
+#   exclude:
+#     domains:
+#       - alert
+#       - camera
+#       - media_player
+#       - sun
+#       - sensor
+#       - group
+#       - switch
+#       - script
+#       - device_tracker
+#       - automation
