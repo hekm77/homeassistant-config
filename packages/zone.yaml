@@ -1,0 +1,6 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Zone
+    zone.home:
+      hidden: true
