@@ -1,0 +1,58 @@
+# Кастомизация
+homeassistant:
+  customize:
+    sensor.command_sensor:
+      friendly_name: Температура
+    sensor.processor_use:
+      friendly_name: Процессор
+    sensor.memory_use_percent:
+      friendly_name: Память
+    sensor.disk_use_percent_home:
+      friendly_name: SD Card
+      icon: mdi:micro-sd
+    sensor.disk_free_home:
+      friendly_name: Свободно /home
+      icon: mdi:micro-sd
+    script.reboot_pi:
+      friendly_name: Перезагрузка
+      icon: mdi:restart
+    script.shutdown_pi:
+      friendly_name: Выключение
+      icon: mdi:power-off
+
+
+# Команды
+shell_command:
+  # Перезагрузка Raspberry Pi
+  reboot_pi: '/usr/bin/sudo /sbin/shutdown -r now'
+  # Выключение Raspberry Pi
+  shutdown_pi: '/usr/bin/sudo /sbin/shutdown now'
+
+
+# Сенсоры
+sensor:
+  # Raspberry Pi
+  - platform: command_line
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
+  - platform: systemmonitor
+    resources:
+      - type: processor_use
+      - type: memory_use_percent
+      - type: disk_use_percent
+        arg: /home
+      - type: disk_free
+        arg: /home
+
+
+# Скрипты
+script:
+  # Перезагрузка Raspberry Pi в Lovelace
+  reboot_pi:
+    sequence:
+      - service: shell_command.reboot_pi
+  # Выключение Raspberry Pi в Lovelace
+  shutdown_pi:
+    sequence:
+      - service: shell_command.shutdown_pi
