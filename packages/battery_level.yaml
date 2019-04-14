@@ -1,0 +1,149 @@
+# Кастомизация
+homeassistant:
+  customize:
+    sensor.battery_level_card_header:
+      friendly_name: Состояние батареи датчиков
+    sensor.front_door_sensor_battery_level:
+      friendly_name: Входная дверь
+    sensor.motion_sensor_hall_battery_level:
+      friendly_name: Холл ДД
+    sensor.motion_sensor_livingroom_battery_level:
+      friendly_name: Зал ДД
+    sensor.motion_sensor_kitchen_battery_level:
+      friendly_name: Кухня ДД
+    sensor.motion_sensor_bathroom_battery_level:
+      friendly_name: Ванная ДД
+    sensor.motion_sensor_bedroom_battery_level:
+      friendly_name: Спальня ДД
+    sensor.temperature_livingroom_battery_level:
+      friendly_name: Зал Климат
+    sensor.tradfri_wireless_dimmer_battery_level:
+      friendly_name: Холл Диммер
+      icon: mdi:power-off
+    sensor.smart_switch_alarm_battery_level:
+      friendly_name: Охрана Кнопка
+      icon: mdi:power
+    sensor.smart_switch_bedroom_battery_level:
+      friendly_name: Спальня Кнопка
+      icon: mdi:power
+    sensor.smart_switch_bathroom_battery_level:
+      friendly_name: Ванная Кнопка
+      icon: mdi:power
+    sensor.smart_switch_livingroom_battery_level:
+      friendly_name: Зал Кнопка
+      icon: mdi:power
+    sensor.smart_switch_kitchen_battery_level:
+      friendly_name: Кухня Кнопка
+      icon: mdi:power
+
+
+# Группа
+group:
+  # Сенсоры уровня заряда батареи датчиков
+  battery_levels:
+    name: Уровень заряда батареи
+    view: no
+    entities:
+      - sensor.front_door_sensor_battery_level
+      - sensor.motion_sensor_hall_battery_level
+      - sensor.motion_sensor_livingroom_battery_level
+      - sensor.motion_sensor_kitchen_battery_level
+      - sensor.motion_sensor_bedroom_battery_level
+      - sensor.motion_sensor_bathroom_battery_level
+      - sensor.smart_switch_alarm_battery_level
+      - sensor.smart_switch_bathroom_battery_level
+      - sensor.smart_switch_livingroom_battery_level
+      - sensor.smart_switch_kitchen_battery_level
+      - sensor.smart_switch_bedroom_battery_level
+      - sensor.tradfri_wireless_dimmer_battery_level
+      - sensor.temperature_livingroom_battery_level
+
+
+# Сенсоры уровня заряда батареи датчиков
+sensor:
+  - platform: template
+    sensors:
+      # Заголовок карты
+      battery_level_card_header:
+        entity_id: sensor.date
+        value_template: ' '
+      # Входная дверь
+      front_door_sensor_battery_level:
+        entity_id: binary_sensor.front_door_sensor
+        value_template: "{{ state_attr('binary_sensor.front_door_sensor', 'battery_level') | round(0) }}"
+        icon_template: mdi:door
+        unit_of_measurement: '%'
+      # Холл ДД
+      motion_sensor_hall_battery_level:
+        entity_id: binary_sensor.motion_sensor_hall
+        value_template: "{{ state_attr('binary_sensor.motion_sensor_hall', 'battery_level') | round(0) }}"
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      # Зал ДД
+      motion_sensor_livingroom_battery_level:
+        entity_id: binary_sensor.motion_sensor_livingroom
+        value_template: "{{ state_attr('binary_sensor.motion_sensor_livingroom', 'battery_level') | round(0) }}"
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      # Кухня ДД
+      motion_sensor_kitchen_battery_level:
+        entity_id: binary_sensor.motion_sensor_kitchen
+        value_template: "{{ state_attr('binary_sensor.motion_sensor_kitchen', 'battery_level') | round(0) }}"
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      # Ванная ДД
+      motion_sensor_bathroom_battery_level:
+        entity_id: binary_sensor.motion_sensor_bathroom
+        value_template: "{{ state_attr('binary_sensor.motion_sensor_bathroom', 'battery_level') | round(0) }}"
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      # Спальня ДД
+      motion_sensor_bedroom_battery_level:
+        entity_id: binary_sensor.motion_sensor_bedroom
+        value_template: "{{ state_attr('binary_sensor.motion_sensor_bedroom', 'battery_level') | round(0) }}"
+        icon_template: mdi:run-fast
+        unit_of_measurement: '%'
+      # Датчик температуры в зале
+      temperature_livingroom_battery_level:
+        entity_id: sensor.temperature_livingroom
+        value_template: "{{ state_attr('sensor.temperature_livingroom', 'battery_level') | round(0) }}"
+        icon_template: mdi:thermometer
+        unit_of_measurement: '%'
+
+
+# Автоматизации
+automation:
+  # Уведомление о низком уровне заряда батареи датчиков
+  - alias: alert_battery_level
+    initial_state: true
+    trigger:
+      - platform: time
+        at: '10:00:00'
+      - platform: time
+        at: '18:00:00'
+    condition:
+        - condition: template
+          value_template: >-
+            {% for entity_id in states.group.battery_levels.attributes.entity_id if states(entity_id) | int < 10 %}
+            {%- if loop.first -%}
+            {{ true }}
+            {%- endif -%}
+            {% endfor %}
+    action:
+      - service: notify.ios_alert_battery_level
+        data:
+          title: 'Низкий уровень заряда!'
+          message: >-
+            {% set output = '' %}
+            {% for entity_id in states.group.battery_levels.attributes.entity_id -%}
+            {%- set itemData = entity_id.split('.') -%}
+            {%- set friendly_name = states[itemData[0]][itemData[1]].attributes.friendly_name -%}
+            {%- if states(entity_id) | int < 10 -%}
+            {%- set output = output +friendly_name+' '+states(entity_id) +'%.                 ' -%}
+            {{ output }}
+            {%- endif -%}
+            {% endfor %}
+          data:
+            push:
+              sound: battery.m4r
+              badge: 0
