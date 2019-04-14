@@ -1,0 +1,8 @@
+- alias: dummy
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.test
+      to: 'on'
+  action:
+    - delay: 00:00:00
