@@ -1,0 +1,90 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Погода
+    sensor.smhi_temperature:
+      friendly_name: Температура
+    sensor.smhi_humidity:
+      friendly_name: Влажность
+    sensor.smhi_pressure:
+      friendly_name: Давление
+    sensor.smhi_cloud_coverage:
+      friendly_name: Облачность
+    sensor.wind_custom:
+      friendly_name: Ветер
+
+    # Солнце
+    sun.sun:
+      friendly_name: Солнце
+      hidden: true
+    sensor.sunrise_time:
+      friendly_name: Восход
+    sensor.sunset_time:
+      friendly_name: Закат
+
+
+# Сенсоры
+sensor:
+  # Восход / закат Солнца
+  - platform: template
+    sensors:
+      sunrise_time:
+        icon_template: mdi:weather-sunset-up
+        entity_id: sensor.time
+        value_template: "{{ as_timestamp(state_attr('sun.sun', 'next_rising')) | timestamp_custom('%H:%M') }}"
+      sunset_time:
+        icon_template: mdi:weather-sunset-down
+        entity_id: sensor.time
+        value_template: "{{ as_timestamp(state_attr('sun.sun', 'next_setting')) | timestamp_custom('%H:%M') }}"
+
+  # Луна
+  - platform: moon
+
+
+  # Ветер
+  - platform: template
+    sensors:
+      wind_custom:
+        value_template: >
+          {% set speed = (state_attr('weather.smhi', 'wind_speed') | float / 3.6) | round(1) %}
+          {% set value = ((state_attr('weather.smhi', 'wind_bearing') + 22.5) / 45) | int %}
+          {% set direction = ['Северный', 'Северо-Восточный', 'Восточный', 'Юго-Восточный', 'Южный', 'Юго-Западный', 'Западный', 'Северо-Западный', 'Северный'] %}
+            {{ direction[value] }}, {{ speed }}
+        unit_of_measurement: 'м/с'
+
+
+  # SMHI
+  - platform: template
+    sensors:
+      smhi_temperature:
+        entity_id: weather.smhi
+        value_template: "{{ state_attr('weather.smhi', 'temperature') | int }}"
+        unit_of_measurement: '°C'
+      smhi_humidity:
+        entity_id: weather.smhi
+        value_template: "{{ state_attr('weather.smhi', 'humidity') | int }}"
+        unit_of_measurement: '%'
+      smhi_pressure:
+        entity_id: weather.smhi
+        value_template: "{{ state_attr('weather.smhi', 'pressure') | int }}"
+        unit_of_measurement: 'hPa'
+      smhi_visibility:
+        entity_id: weather.smhi
+        value_template: "{{ state_attr('weather.smhi', 'visibility') | float }}"
+        unit_of_measurement: 'км'
+      smhi_cloud_coverage:
+        entity_id: weather.smhi
+        value_template: "{{ state_attr('weather.smhi', 'cloudiness') | int }}"
+        unit_of_measurement: '%'
+
+
+  # Уровень освещенности с погодных станций WeatherFlow
+  - platform: rest
+    resource: !secret weather_flow_url
+    name: outdoor_illuminance
+    json_attributes:
+      - obs
+    value_template: '{{ value_json["obs"][0]["brightness"] | float }}'
+    unit_of_measurement: 'Lx'
+    device_class: 'illuminance'
+    scan_interval: 300
