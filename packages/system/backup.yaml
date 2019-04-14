@@ -1,0 +1,50 @@
+# Кастомизация
+homeassistant:
+  customize:
+    script.backup_ha:
+      friendly_name: Резервная копия HА
+      icon: mdi:cloud-upload
+    script.backup_deconz:
+      friendly_name: Резервная копия deCONZ
+      icon: mdi:cloud-upload
+
+
+# Команды запуска shell-скриптов резервного копирования
+shell_command:
+  # Home Assistant
+  backup_ha: '/bin/bash /home/homeassistant/.homeassistant/shell_scripts/ha_backup.sh'
+  # deCONZ
+  backup_deconz: '/bin/bash /home/homeassistant/.homeassistant/shell_scripts/deconz_backup.sh'
+
+
+# Автоматизация
+automation:
+  # Резервное копирование Home Assistant / deCONZ в заданное время
+  - alias: backup
+    initial_state: true
+    trigger:
+      - platform: time
+        at: '01:00:00'
+    condition:
+      - condition: time
+        weekday:
+          - mon
+          - wed
+          - fri
+    action:
+      - service: shell_command.backup_deconz
+      - delay: 00:01:00
+      - service: shell_command.backup_ha
+
+
+# Скрипты
+script:
+  # Резервное копирование в Lovelace
+  # Home Assistant
+  backup_ha:
+    sequence:
+      - service: shell_command.backup_ha
+  # deCONZ
+  backup_deconz:
+    sequence:
+      - service: shell_command.backup_deconz
