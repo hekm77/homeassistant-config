@@ -1,0 +1,26 @@
+# Home Assistant log
+# : notset, debug, info, warn, warning, error, fatal, critical
+logger:
+  default: error
+  logs:
+    homeassistant.core: error
+    homeassistant.components.automation: error
+    homeassistant.components.binary_sensor: error
+    homeassistant.components.switch.switchbot: debug
+    homeassistant.components.switch: error
+    homeassistant.components.sensor.command_line: fatal
+    homeassistant.components.api: error
+    homeassistant.components.device_tracker: error
+    homeassistant.components.http: warn
+    homeassistant.components.media_player: critical
+    homeassistant.components.recorder: error
+    homeassistant.components.sensor.darksky: error
+    homeassistant.components.notify: error
+    homeassistant.components.light: warn
+    homeassistant.helpers.script: warn
+    homeassistant.helpers.entity: critical
+    homeassistant.helpers.entity_platform: critical
+    homeassistant.exceptions: info
+    homeassistant.components.mqtt: error
+    homeassistant.components.media_player.songpal: error
+    songpal: error
