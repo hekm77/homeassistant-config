@@ -1,0 +1,223 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Освещение
+    light.bedroom:
+      friendly_name: Спальня Люстра
+      icon: mdi:ceiling-light
+
+
+# Yeelight
+yeelight:
+  devices:
+    192.168.1.x:
+      name: bedroom
+
+
+# Таймер
+timer:
+  bedroom:
+    duration: '01:30:00'
+
+
+# Вкл / выкл автоматизации освещения в Lovelace
+input_boolean:
+  bedroom_automation:
+    name: Спальня
+    initial: on
+    icon: mdi:home-automation
+
+
+# Автоматизации
+automation:
+  # Включение при обнаружении движения
+  - alias: bedroom_light_on_motion
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bedroom
+        to: 'on'
+    condition:
+      - condition: and
+        conditions:
+          - condition: time
+            after: '08:00:00'
+            before: '22:00:00'
+          - condition: template
+            value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
+          - condition: state
+            entity_id: light.bedroom
+            state: 'off'
+          - condition: state
+            entity_id: timer.bedroom
+            state: 'idle'
+    action:
+      - service: light.turn_on
+        entity_id: light.bedroom
+        data_template:
+          brightness_pct: >
+            {% if now().hour >= 8 and now().hour < 21 %} 100
+            {% elif now().hour >= 21 and now().hour < 22 %} 10
+            {% endif %}
+          color_temp: 250
+
+
+  # Выключение без движения
+  - alias: bedroom_light_off_motion
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bedroom
+        to: 'off'
+        for:
+          minutes: 2
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bedroom
+        to: 'off'
+        for:
+          minutes: 30
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: light.bedroom
+            state: 'on'
+          - condition: state
+            entity_id: timer.bedroom
+            state: 'idle'
+    action:
+      - service: light.turn_off
+        entity_id: light.bedroom
+
+
+  # Включение по одинарному клику
+  - alias: bedroom_light_on_switch_click
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bedroom
+          event: 1002
+    condition:
+      - condition: state
+        entity_id: light.bedroom
+        state: 'off'
+    action:
+      - service: light.turn_on
+        entity_id: light.bedroom
+        data_template:
+          brightness_pct: >
+            {% if now().hour >= 0 and now().hour < 6 %} 1
+            {% elif now().hour >= 6 and now().hour < 8 %} 10
+            {% elif now().hour >= 8 and now().hour < 21 %} 100
+            {% elif now().hour >= 21 and now().hour < 24 %} 10
+            {% endif %}
+          color_temp: 250
+
+
+  # Выключение по одинарному клику
+  - alias: bedroom_light_off_switch_click
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bedroom
+          event: 1002
+    condition:
+      - condition: state
+        entity_id: light.bedroom
+        state: 'on'
+    action:
+      - service: light.turn_off
+        entity_id: light.bedroom
+
+
+  # Включение 25% яркости / 4000K по двойному клику
+  - alias: bedroom_light_25_switch_double_click
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bedroom
+          event: 1004
+    action:
+      - service: light.turn_on
+        entity_id: light.bedroom
+        data_template:
+          brightness_pct: 25
+          color_temp: 250
+
+
+  # Включение 100% яркости / 4000K по по длинному нажатию
+  - alias: bedroom_light_100_switch_long_press
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bedroom
+          event: 1001
+    action:
+      - service: light.turn_on
+        entity_id: light.bedroom
+        data_template:
+          brightness_pct: 100
+          color_temp: 250
+
+
+  # Запуск таймера при любом нажатии
+  - alias: bedroom_timer
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bedroom
+    action:
+      - service: timer.cancel
+        entity_id: timer.bedroom
+      - service: timer.start
+        entity_id: timer.bedroom
+
+
+  # Уменьшение яркости в заданное время
+  - alias: bedroom_light_decrease
+    initial_state: true
+    trigger:
+      - platform: time
+        at: '21:00:00'
+    condition:
+      - condition: state
+        entity_id: light.bedroom
+        state: 'on'
+    action:
+      - service: light.turn_on
+        entity_id: light.bedroom
+        data_template:
+          brightness_pct: 10
+          color_temp: 250
+          transition: 3
+
+
+  # Включение / выключение автоматизации переключателем в Lovelace
+  - alias: bedroom_automation_on_off
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: input_boolean.bedroom_automation
+    action:
+      - service: timer.cancel
+        entity_id: timer.bedroom
+      - service_template: >
+          {% if is_state('input_boolean.bedroom_automation', 'on') %}
+            automation.turn_on
+          {% else %}
+            automation.turn_off
+          {% endif %}
+        entity_id:
+          - automation.bedroom_light_on_motion
+          - automation.bedroom_light_off_motion
+          - automation.bedroom_light_decrease
