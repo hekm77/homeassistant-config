@@ -34,8 +34,9 @@ class CounterCard extends HTMLElement {
       }
       #title {
         font-size: calc(var(--base-unit) * 0.8);
-        line-height: calc(var(--base-unit) * 1);
-        color: var(--accent-color);
+        color: var(--primary-text-color);
+        opacity: 0.7;
+        letter-spacing: .05em;
       }
     `;
     card.appendChild(content);
