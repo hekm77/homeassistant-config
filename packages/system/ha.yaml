@@ -1,0 +1,71 @@
+# Кастомизация
+homeassistant:
+  customize:
+    sensor.date:
+      friendly_name: Дата
+    sensor.time:
+      friendly_name: Время
+    sensor.online_custom:
+      friendly_name: Online
+    script.ha_restart:
+      friendly_name: Перезагрузка
+      icon: mdi:restart
+
+
+# Команда
+shell_command:
+  # Перезагрузка Home Assistant
+  ha_restart: '/usr/bin/sudo /bin/systemctl restart home-assistant@homeassistant.service'
+
+
+# Сенсоры
+sensor:
+  # Дата / время
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+
+  # Home Assistant Online
+  - platform: uptime
+    name: Online
+    unit_of_measurement: minutes
+  - platform: template
+    sensors:
+      online_custom:
+        icon_template: mdi:clock
+        entity_id: sensor.time
+        unit_of_measurement: ' '
+        value_template: >
+          {% set uptime = states('sensor.online') | int %}
+          {% set minutes = (( uptime % 60) / 1) | int %}
+          {% set hours = ((uptime % 1440) / 60) | int %}
+          {% set days = (uptime / 1440) | int %}
+            {% if uptime < 1 %}
+              Меньше минуты
+            {% else %}
+              {% if days > 0 %}
+                {{ days }} д.
+              {% endif %}
+              {% if hours > 0 %}
+                {% if days > 0 %}
+                  {{ ' ' }}
+                {% endif %}
+                {{ hours }} ч.
+              {% endif %}
+              {% if minutes > 0 %}
+                {% if days > 0 or hours > 0 %}
+                  {{ ' ' }}
+                {% endif %}
+                  {{ minutes }} мин.
+              {% endif %}
+            {% endif %}
+
+
+# Скрипт
+script:
+  # Перезагрузка Home Assistant в Lovelace
+  ha_restart:
+    sequence:
+      - service: shell_command.ha_restart
