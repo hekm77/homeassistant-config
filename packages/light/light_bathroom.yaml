@@ -1,0 +1,198 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Освещение
+    light.bathroom:
+      friendly_name: Ванная Плафон
+
+
+# Таймер
+timer:
+  bathroom:
+    duration: '01:30:00'
+
+
+# Вкл / выкл автоматизации освещения в Lovelace
+input_boolean:
+  bathroom_automation:
+    name: Ванная
+    initial: on
+    icon: mdi:home-automation
+
+
+# Автоматизации
+automation:
+  # Включение при обнаружении движения
+  - alias: bathroom_light_on_motion
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bathroom
+        to: 'on'
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: light.bathroom
+            state: 'off'
+          - condition: state
+            entity_id: timer.bathroom
+            state: 'idle'
+    action:
+      - service: light.turn_on
+        entity_id: light.bathroom
+        data_template:
+          brightness_pct: >
+            {% if now().hour >= 0 and now().hour < 5 %} 5
+            {% else %} 100
+            {% endif %}
+
+
+  # Выключение без движения днем
+  - alias: bathroom_light_off_day_motion
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bathroom
+        to: 'off'
+        for:
+          minutes: 15
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bathroom
+        to: 'off'
+        for:
+          minutes: 30
+    condition:
+      - condition: and
+        conditions:
+          - condition: time
+            after: '05:00:00'
+            before: '23:30:00'
+          - condition: state
+            entity_id: light.bathroom
+            state: 'on'
+          - condition: state
+            entity_id: timer.bathroom
+            state: 'idle'
+    action:
+      - service: light.turn_off
+        entity_id: light.bathroom
+
+
+  # Выключение без движения ночью
+  - alias: bathroom_light_off_night_motion
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bathroom
+        to: 'off'
+        for:
+          minutes: 1
+      - platform: state
+        entity_id: binary_sensor.motion_sensor_bathroom
+        to: 'off'
+        for:
+          minutes: 30
+    condition:
+      - condition: and
+        conditions:
+          - condition: time
+            after: '23:30:00'
+            before: '05:00:00'
+          - condition: state
+            entity_id: light.bathroom
+            state: 'on'
+          - condition: state
+            entity_id: timer.bathroom
+            state: 'idle'
+    action:
+      - service: light.turn_off
+        entity_id: light.bathroom
+
+
+  # Включение по одинарному клику / сброс таймера
+  - alias: bathroom_light_on_switch_click
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bathroom
+          event: 1002
+    condition:
+      - condition: state
+        entity_id: light.bathroom
+        state: 'off'
+    action:
+      - service: light.turn_on
+        entity_id: light.bathroom
+        data_template:
+          brightness_pct: 100
+      - service: timer.cancel
+        entity_id: timer.bathroom
+
+
+  # Выключение по одинарному клику / сброс таймера
+  - alias: bathroom_light_off_switch_click
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bathroom
+          event: 1002
+    condition:
+      - condition: state
+        entity_id: light.bathroom
+        state: 'on'
+    action:
+      - service: light.turn_off
+        entity_id: light.bathroom
+      - service: timer.cancel
+        entity_id: timer.bathroom
+
+
+  # Включение 100% яркости по длинному нажатию / запуск таймера
+  - alias: bathroom_light_100_switch_long_press
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bathroom
+          event: 1001
+    action:
+      - service: light.turn_on
+        entity_id: light.bathroom
+        data_template:
+          brightness_pct: 50
+      - delay: 00:00:0.5
+      - service: light.turn_on
+        entity_id: light.bathroom
+        data_template:
+          brightness_pct: 100
+      - service: timer.cancel
+        entity_id: timer.bathroom
+      - service: timer.start
+        entity_id: timer.bathroom
+
+
+  # Включение / выключение автоматизации переключателем в Lovelace
+  - alias: bathroom_automation_on_off
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: input_boolean.bathroom_automation
+    action:
+      - service: timer.cancel
+        entity_id: timer.bathroom
+      - service_template: >
+          {% if is_state('input_boolean.bathroom_automation', 'on') %}
+            automation.turn_on
+          {% else %}
+            automation.turn_off
+          {% endif %}
+        entity_id:
+          - automation.bathroom_light_on_motion
+          - automation.bathroom_light_off_day_motion
+          - automation.bathroom_light_off_night_motion
