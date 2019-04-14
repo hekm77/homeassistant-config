@@ -1,0 +1,17 @@
+# Кастомные эффекты Yeelight
+yeelight:
+  custom_effects:
+    - name: 'Fire Flicker'
+      flow_params:
+        count: 0
+        transitions:
+          - TemperatureTransition: [1900, 1000, 80]
+          - TemperatureTransition: [1900, 2000, 60]
+          - SleepTransition:       [1000]
+    - name: 'Sunrise'
+      flow_params:
+        count: 1
+        transitions:
+          - RGBTransition: [255, 77, 0, 50, 1]
+          - TemperatureTransition: [1700, 360000, 10]
+          - TemperatureTransition: [2700, 540000, 100]
