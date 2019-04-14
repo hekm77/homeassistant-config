@@ -1,0 +1,79 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Epson Ink
+    sensor.epson_ink_level_cyan:
+      friendly_name: Cyan
+      icon: mdi:cup-water
+    sensor.epson_ink_level_yellow:
+      friendly_name: Yellow
+      icon: mdi:cup-water
+    sensor.epson_ink_level_light_cyan:
+      friendly_name: Light Cyan
+      icon: mdi:cup-water
+    sensor.epson_ink_level_black:
+      friendly_name: Black
+      icon: mdi:cup-water
+    sensor.epson_ink_level_magenta:
+      friendly_name: Magenta
+      icon: mdi:cup-water
+    sensor.epson_ink_level_light_magenta:
+      friendly_name: Light Magenta
+      icon: mdi:cup-water
+
+
+# Трекер устройства
+device_tracker:
+  # Ping
+  - platform: ping
+    interval_seconds: 60
+    consider_home: 300
+    hosts:
+      epson: 192.168.1.x
+
+
+# Сенсоры уровня чернил
+sensor:
+  # Epson PX720WD
+  # Заголовок карты
+  - platform: template
+    sensors:
+      epson:
+        friendly_name: 'Epson PX720WD'
+        value_template: "{{ 'ON' if is_state('device_tracker.epson', 'home') else 'OFF' }}"
+  # Cyan
+  - platform: command_line
+    name: Epson Ink Level Cyan
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_C.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+  # Yellow
+  - platform: command_line
+    name: Epson Ink Level Yellow
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_Y.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+  # Light Cyan
+  - platform: command_line
+    name: Epson Ink Level Light Cyan
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_LC.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+  # Black
+  - platform: command_line
+    name: Epson Ink Level Black
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_K.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+  # Magenta
+  - platform: command_line
+    name: Epson Ink Level Magenta
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_M.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
+  # Light Magenta
+  - platform: command_line
+    name: Epson Ink Level Light Magenta
+    command: /usr/bin/curl -k http://192.168.1.x/PRESENTATION/HTML/TOP/INDEX.HTML | awk -F"'" '/Ink_LM.PNG/' | awk '{x = index($2, "color2"); if (x==0) { value = substr ($9, 9, 2); printf "%.0f\n", value / 50 * 100; exit;} else {value = substr ($7, 9, 2); printf "%.0f\n", (50 - value) / 50 * 100; exit;}}'
+    unit_of_measurement: '%'
+    scan_interval: '24:00'
