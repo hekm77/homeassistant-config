@@ -1,0 +1,29 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Zigbee
+    binary_sensor.front_door_sensor:
+      device_class: door
+      friendly_name: Входная дверь
+    sensor.temperature_livingroom:
+      friendly_name: Зал Температура
+    sensor.humidity_livingroom:
+      friendly_name: Зал Влажность
+    binary_sensor.motion_sensor_hall:
+      friendly_name: Холл
+    binary_sensor.motion_sensor_livingroom:
+      friendly_name: Зал
+    binary_sensor.motion_sensor_kitchen:
+      friendly_name: Кухня
+    binary_sensor.motion_sensor_bathroom:
+      friendly_name: Ванная
+    binary_sensor.motion_sensor_bedroom:
+      friendly_name: Спальня
+    switch.smart_plug_camera:
+      friendly_name: Камера
+      icon: mdi:cctv
+      hidden: true
+    switch.smart_plug_bedroom:
+      friendly_name: Розетка
+      icon: mdi:power-socket-eu
+      hidden: true
