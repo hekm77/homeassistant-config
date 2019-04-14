@@ -1,5 +1,6 @@
 customElements.whenDefined('card-tools').then(() => {
-class FoldEntityRow extends cardTools.litElement() {
+let cardTools = customElements.get('card-tools');
+class FoldEntityRow extends cardTools.LitElement {
 
   static get properties() {
     return {
@@ -8,7 +9,7 @@ class FoldEntityRow extends cardTools.litElement() {
   }
 
   render() {
-    return cardTools.litHtml()`
+    return cardTools.LitHtml`
     ${this._renderStyle()}
     <div id=head>
       <div id=entity>
@@ -25,7 +26,7 @@ class FoldEntityRow extends cardTools.litElement() {
   }
 
   _renderStyle() {
-    return cardTools.litHtml()`
+    return cardTools.LitHtml`
     <style>
     #items {
       padding: 0 0 0 40px;
@@ -101,7 +102,7 @@ class FoldEntityRow extends cardTools.litElement() {
 
   _renderItem(conf, options) {
     const element = this._renderElement(conf, options);
-    return cardTools.litHtml()`<div> ${element} </div>`;
+    return cardTools.LitHtml`<div> ${element} </div>`;
   }
 
   setConfig(config) {
@@ -119,7 +120,7 @@ class FoldEntityRow extends cardTools.litElement() {
     if (config.entities)
       items = config.entities;
     if (head && head.split('.')[0] === "group")
-      items = cardTools.hass().states[head].attributes.entity_id;
+      items = cardTools.hass.states[head].attributes.entity_id;
 
     if(items)
       this._entities = items.map((e) => this._renderItem(e, config.group_config));
