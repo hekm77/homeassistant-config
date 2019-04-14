@@ -1,0 +1,32 @@
+# Кастомизация
+homeassistant:
+  customize:
+    sensor.lets_encrypt:
+      friendly_name: Сертификат Lets Encrypt
+      unit_of_measurement: д.
+
+
+# Команда
+shell_command:
+  # Обновление сертификата SSL
+  renew_ssl: '/home/homeassistant/dehydrated/dehydrated -c'
+
+
+# Сенсор
+sensor:
+  # Сертификат Lets Encrypt
+  - platform: cert_expiry
+    host: !secret host
+    name: Lets Encrypt
+
+
+# Автоматизация
+automation:
+  # Автообновление сертификата SSL
+  - alias: auto_renew_ssl_cert
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.lets_encrypt
+        below: 29
+    action:
+      - service: shell_command.renew_ssl
