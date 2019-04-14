@@ -1,0 +1,24 @@
+# MySQL Database
+recorder:
+  db_url: !secret mysql_db_url
+  exclude:
+    domains:
+      - updater
+      - scene
+      - script
+      - calendar
+      - sun
+      - weather
+      - automation
+      - device_tracker
+      - input_boolean
+      - input_datetime
+      - switch
+      - yeelight
+      - light
+    entities:
+      - group.all_automations
+      - group.all_devices
+      - group.all_lights
+      - group.all_scripts
+      - group.all_switches
