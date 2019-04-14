@@ -1,0 +1,11 @@
+# Кастомизация
+homeassistant:
+  customize:
+    sensor.illumination_f0b429aa26cd:
+      friendly_name: Холл Освещенность
+
+
+xiaomi_aqara:
+  discovery_retry: 5
+  gateways:
+    - key: !secret xiaomi_key
