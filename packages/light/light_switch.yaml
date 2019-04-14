@@ -1,0 +1,15 @@
+# Переключатель
+switch:
+  - platform: template
+    switches:
+      # Паника
+      panic_light:
+        friendly_name: Паника
+        value_template: "{{ is_state('input_boolean.light_panic_status', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          data:
+            entity_id: input_boolean.light_panic_status
+        turn_off:
+          service: input_boolean.turn_off
+          entity_id: input_boolean.light_panic_status
