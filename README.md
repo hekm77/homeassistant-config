@@ -36,7 +36,6 @@
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_6.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_7.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_8.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_9.png" alt="Home Assistant Lovelace UI" />
 
 ### Кастомные карты Lovelace
 * [Mini Graph Card](https://github.com/kalkih/mini-graph-card)
