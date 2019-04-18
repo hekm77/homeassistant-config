@@ -40,11 +40,14 @@ automation:
     condition:
       condition: and
       conditions:
+        - condition: template
+          value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
         - condition: state
           entity_id: light.kitchen
           state: 'off'
-        - condition: template
-          value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
+        - condition: state
+          entity_id: timer.kitchen
+          state: 'idle'
     action:
       - service: light.turn_on
         entity_id: light.kitchen
