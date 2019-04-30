@@ -9,7 +9,7 @@
         "resources": [
 	            "https://raw.githubusercontent.com/DSorlov/ha-sensor-sl/hasl/custom_components/hasl/sensor.py",
 	            "https://raw.githubusercontent.com/DSorlov/ha-sensor-sl/hasl/custom_components/hasl/services.yaml",
-               "https://raw.githubusercontent.com/DSorlov/ha-sensor-sl/hasl/custom_components/hasl/manifest.json"
+                    "https://raw.githubusercontent.com/DSorlov/ha-sensor-sl/hasl/custom_components/hasl/manifest.json"
         ]
     }
 }
