@@ -147,7 +147,7 @@ automation:
             {% if is_state('group.light_hall', 'off') %}
               3
             {% else %}
-              {% set bri = states.light.hall_1.attributes.brightness | int %}
+              {% set bri = state_attr('light.hall_1', 'brightness') | int %}
                 {{ [bri+123, 249] | min }}
             {% endif %}
       - service: timer.cancel
