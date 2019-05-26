@@ -16,8 +16,7 @@ homeassistant:
 
 frontend:
   themes: !include_dir_merge_named themes
-  javascript_version: latest
-
+  
 lovelace:
   mode: yaml
 
@@ -38,6 +37,8 @@ mobile_app:
 automation: !include automation.yaml
 script: !include script.yaml
 input_boolean: !include input_boolean.yaml
+
+person:
 
 # default_config:
 # customize_glob:
