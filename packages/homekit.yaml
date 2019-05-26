@@ -11,9 +11,9 @@ homekit:
       - media_player.sony_ht_nt5
       - switch.smart_plug_camera
       - switch.panic_light
-      - switch.dfi
-      - switch.ott_club
-      - switch.kinopub
+      - switch.device_tracker_1
+      - switch.device_tracker_2
+      - switch.device_tracker_3
       - scene.light_off_livingroom
       - scene.panic_light_off
       - scene.panic_light_on
