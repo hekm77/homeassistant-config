@@ -3,13 +3,17 @@ homeassistant:
   customize:
     # Сцены освещения
     scene.bright_livingroom:
-      friendly_name: Сцена Ярко
+      friendly_name: Ярко
+      icon: mdi:brightness-7
     scene.movie_livingroom:
-      friendly_name: Сцена Кино
+      friendly_name: Кино
+      icon: mdi:movie-roll
     scene.night_light_livingroom:
-      friendly_name: Сцена Ночник
+      friendly_name: Ночник
+      icon: mdi:weather-night
     scene.light_off_livingroom:
-      friendly_name: Зал Off
+      friendly_name: Выкл.
+      icon: mdi:lightbulb-outline
 
 
 # Сцены освещения
