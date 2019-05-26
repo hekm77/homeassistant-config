@@ -12,6 +12,8 @@ homeassistant:
       friendly_name: Облачность
     sensor.wind_custom:
       friendly_name: Ветер
+    sensor.outdoor_illuminance:
+      friendly_name: Освещенность
 
     # Солнце
     sun.sun:
@@ -78,7 +80,7 @@ sensor:
         unit_of_measurement: '%'
 
 
-  # Уровень освещенности с погодных станций WeatherFlow
+  # Уровень освещенности с публичных погодных станций WeatherFlow
   - platform: rest
     resource: !secret weather_flow_url
     name: outdoor_illuminance
