@@ -44,7 +44,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_UPDATE_INSTANT, default=True): cv.boolean,
 })
 
-REQUIREMENTS = ['python-miio>=0.3.7']
+REQUIREMENTS = ['python-miio>=0.4.5']
 
 ATTR_MODEL = 'model'
 ATTR_FIRMWARE_VERSION = 'firmware_version'
@@ -106,7 +106,7 @@ class XiaomiMiioGenericDevice(SwitchDevice):
         self._unique_id = "{}-{}-{}".format(device_info.model,
                                             device_info.mac_address,
                                             self._state_property)
-        self._icon = 'mdi:home'
+        self._icon = 'mdi:shield-home'
 
         self._available = None
         self._state = None
