@@ -1,3 +1,6 @@
+# This custom component is based on Xiaomi Raw
+# https://github.com/syssi/xiaomi_raw
+
 import asyncio
 from functools import partial
 import logging
