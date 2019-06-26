@@ -27,6 +27,8 @@ resources:
     type: js
   - url: /customcards/lovelace/button-card.js
     type: module
+  - url: /customcards/lovelace/bar-card.js
+    type: js
 
 
 
@@ -93,6 +95,7 @@ anchors:
   counter_card: &counter_card
     type: custom:counter-card
     scale: 19px
+
   # Blank Card
   blank_card: &blank_card
     type: custom:button-card
@@ -555,42 +558,33 @@ views:
                     entity: sensor.epson
                     icon: mdi:printer
                   items:
-                    - type: custom:card-modder
-                      style:
-                        --paper-item-icon-color: rgb(0, 255, 255)
-                      card:
-                        type: custom:hui-text-entity-row
-                        entity: sensor.epson_ink_level_cyan
-                    - type: custom:card-modder
-                      style:
-                        --paper-item-icon-color: rgb(255, 255, 0)
-                      card:
-                        type: custom:hui-text-entity-row
-                        entity: sensor.epson_ink_level_yellow
-                    - type: custom:card-modder
-                      style:
-                        --paper-item-icon-color: rgb(204, 255, 255)
-                      card:
-                        type: custom:hui-text-entity-row
-                        entity: sensor.epson_ink_level_light_cyan
-                    - type: custom:card-modder
-                      style:
-                        --paper-item-icon-color: rgb(0, 0, 0)
-                      card:
-                        type: custom:hui-text-entity-row
-                        entity: sensor.epson_ink_level_black
-                    - type: custom:card-modder
-                      style:
-                        --paper-item-icon-color: rgb(255, 0, 255)
-                      card:
-                        type: custom:hui-text-entity-row
-                        entity: sensor.epson_ink_level_magenta
-                    - type: custom:card-modder
-                      style:
-                        --paper-item-icon-color: rgb(231, 139, 231)
-                      card:
-                        type: custom:hui-text-entity-row
-                        entity: sensor.epson_ink_level_light_magenta
+                     - type: custom:card-modder
+                       style:
+                         box-shadow: none
+                       card:
+                         type: custom:bar-card
+                         columns: 6
+                         direction: up
+                         entities:
+                           - entity: sensor.epson_ink_level_cyan
+                             color: rgb(0, 255, 255)
+                           - entity: sensor.epson_ink_level_yellow
+                             color: rgb(255, 255, 0)
+                           - entity: sensor.epson_ink_level_light_cyan
+                             color: rgb(204, 255, 255)
+                           - entity: sensor.epson_ink_level_black
+                             color: rgb(0, 0, 0)
+                           - entity: sensor.epson_ink_level_magenta
+                             color: rgb(255, 0, 255)
+                           - entity: sensor.epson_ink_level_light_magenta
+                             color: rgb(231, 139, 231)
+                         height: 200px
+                         max: 100
+                         min: 0
+                         padding: 2px
+                         title_position: 'off'
+                         icon_position: inside
+                         width: 100%
 
           # Освещенность
           - <<: *basic_card_style
