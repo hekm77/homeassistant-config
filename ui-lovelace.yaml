@@ -32,8 +32,6 @@ resources:
     type: module
 
 
-
-
 anchors:
   # Basic Card Style
   basic_card_style: &basic_card_style
@@ -119,6 +117,8 @@ anchors:
     type: divider
     style:
       height: 20px
+
+
 
 title: Дом
 views:
@@ -723,7 +723,6 @@ views:
                 title: За год / кВт⋅ч
                 entity: sensor.energy_yearly_total
                 scale: 25px
-
 
 
   # Погода
