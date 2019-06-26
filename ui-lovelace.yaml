@@ -24,6 +24,8 @@ resources:
     type: module
   - url: /local/lovelace/card-tools.js
     type: js
+  - url: /local/lovelace/card-modder.js
+    type: js
   - url: /local/lovelace/lovelace-card-templater.js
     type: js
   - url: /local/lovelace/counter-card.js
