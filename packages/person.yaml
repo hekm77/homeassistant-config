@@ -9,31 +9,3 @@ device_tracker:
       host_1: 192.168.1.x
       host_2: 192.168.1.x
       host_3: 192.168.1.x
-
-
-# Сенсоры
-sensor:
-  # Цвет иконок Person
-  - platform: template
-    sensors:
-      person_user_1_icon_color:
-        value_template: >
-           {% if is_state('person.user_1', 'home') %}
-             var(--accent-color)
-           {% else %}
-             var(--disabled-text-color)
-           {% endif %}
-      person_user_2_icon_color:
-        value_template: >
-          {% if is_state('person.user_2', 'home') %}
-            var(--accent-color)
-          {% else %}
-            var(--disabled-text-color)
-          {% endif %}
-      person_user_3_icon_color:
-        value_template: >
-           {% if is_state('person.user_3', 'home') %}
-             var(--accent-color)
-           {% else %}
-             var(--disabled-text-color)
-           {% endif %}
