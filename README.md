@@ -29,8 +29,8 @@
   * [Pushover](https://pushover.net)
 * Обнаружение присутствия
   * [Кастомный компонент ping_arp](https://gist.github.com/JBelinchon/65405c85f228de027947c7ab38751687) для iOS девайсов
-* Отслеживание и обновление пользовательских карт / компонентов / python-скриптов
-  * [Кастомный компонент](https://github.com/custom-components/custom_updater)
+* Установка, обновление пользовательских карт / компонентов / python-скриптов
+  * [HACS](https://custom-components.github.io/hacs/)
 ## Home Assistant Lovelace UI
 На скриншотах измененная тема [midnight](https://community.home-assistant.io/t/midnight-theme/28598)
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_1.png" alt="Home Assistant Lovelace UI" />
