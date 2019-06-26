@@ -1,48 +1,52 @@
 resources:
-  - url: /customcards/lovelace/alarm_control_panel-card.js
+  # community_plugin
+  - url: /community_plugin/lovelace-card-mod/card-mod.js
+    type: module
+  - url: /community_plugin/lovelace-fold-entity-row/fold-entity-row.js
     type: js
-  - url: /customcards/lovelace/counter-card.js
+  - url: /community_plugin/lovelace-slider-entity-row/slider-entity-row.js
+    type: module
+  - url: /community_plugin/config-template-card/config-template-card.js
+    type: module
+  - url: /community_plugin/button-card/button-card.js
+    type: module
+  - url: /community_plugin/bar-card/bar-card.js
     type: js
-  - url: /customcards/lovelace/mini-media-player-bundle.js
+  - url: /community_plugin/mini-graph-card/mini-graph-card.js
     type: module
-  - url: /customcards/lovelace/mini-graph-card-bundle.js
+  - url: /community_plugin/mini-media-player/mini-media-player.js
     type: module
-  - url: /customcards/lovelace/card-modder.js
-    type: module
-  - url: /customcards/lovelace/card-tools.js
+
+  # custom
+  - url: /local/lovelace/alarm_control_panel-card.js
     type: js
-  - url: /customcards/lovelace/fold-entity-row.js
+  - url: /local/lovelace/simple-weather-card.bundle.js
+    type: module
+  - url: /local/lovelace/card-tools.js
     type: js
-  - url: /customcards/lovelace/tracker-card.js
-    type: module
-  - url: /customcards/lovelace/slider-entity-row.js
+  - url: /local/lovelace/lovelace-card-templater.js
     type: js
-  - url: /customcards/lovelace/simple-weather-card.bundle.js
-    type: module
-  - url: /customcards/lovelace/text-header.js
-    type: module
-  - url: /customcards/lovelace/config-template-card.js
-    type: module
-  - url: /customcards/lovelace/lovelace-card-templater.js
+  - url: /local/lovelace/counter-card.js
     type: js
-  - url: /customcards/lovelace/button-card.js
+  - url: /local/lovelace/text-header.js
     type: module
-  - url: /customcards/lovelace/bar-card.js
-    type: js
+
 
 
 
 anchors:
   # Basic Card Style
   basic_card_style: &basic_card_style
-    - type: custom:card-modder
-      style:
-        border-radius: 10px
-        overflow: hidden
+    style: |
+      ha-card {
+        border-radius: 10px;
+        overflow: hidden;
+      }
 
   # Light Scenes Button Card
   light_scenes_button_card: &light_scenes_button_card
     type: custom:button-card
+    <<: *basic_card_style
     styles:
       card:
         - font-size: 12px
@@ -53,6 +57,7 @@ anchors:
   # Toggle Button Card
   toggle_button_card: &toggle_button_card
     type: custom:button-card
+    <<: *basic_card_style
     styles:
       card:
         - font-size: 12px
@@ -81,6 +86,7 @@ anchors:
   # Graph Card
   graph_card: &graph_card
     type: custom:mini-graph-card
+    <<: *basic_card_style
     hours_to_show: 48
     points_per_hour: 0.5
     more_info: false
@@ -94,6 +100,7 @@ anchors:
   # Counter Card
   counter_card: &counter_card
     type: custom:counter-card
+    <<: *basic_card_style
     scale: 19px
 
   # Blank Card
@@ -101,7 +108,17 @@ anchors:
     type: custom:button-card
     color_type: blank-card
 
+  # Divider 10px
+  divider_10: &divider_10
+    type: divider
+    style:
+      height: 10px
 
+  # Divider 20px
+  divider_20: &divider_20
+    type: divider
+    style:
+      height: 20px
 
 title: Дом
 views:
@@ -112,30 +129,28 @@ views:
       - type: vertical-stack
         cards:
           # Холл
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:text-header
-                  text: Холл
-                - entity: group.light_hall
-                  name: Люстра
-                - type: custom:slider-entity-row
-                  entity: light.gateway_light_f0b429aa26cd
-                  toggle: true
-                  name: Шлюз
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:text-header
+                text: Холл
+              - entity: group.light_hall
+                name: Люстра
+              - type: custom:slider-entity-row
+                entity: light.gateway_light_f0b429aa26cd
+                toggle: true
+                name: Шлюз
 
           # Кухня
-          - <<: *basic_card_style
-            card:
-             type: entities
-             entities:
-               - type: custom:text-header
-                 text: Кухня
-               - type: custom:slider-entity-row
-                 entity: light.kitchen
-                 toggle: true
-                 name: Люстра
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:text-header
+                text: Кухня
+              - type: custom:slider-entity-row
+                entity: light.kitchen
+                toggle: true
+                name: Люстра
 
           # Пустая карта
           - <<: *blank_card
@@ -146,111 +161,98 @@ views:
           - type: horizontal-stack
             cards:
               # Ярко
-              - <<: *basic_card_style
-                card:
-                  <<: *light_scenes_button_card
-                  entity: scene.bright_livingroom
-                  color: '#EBEE6C'
-                  hold_action:
-                    action: call-service
-                    service: scene.turn_on
-                    service_data:
-                      entity_id: scene.bright_livingroom
+              - <<: *light_scenes_button_card
+                entity: scene.bright_livingroom
+                color: '#EBEE6C'
+                hold_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.bright_livingroom
               # Кино
-              - <<: *basic_card_style
-                card:
-                  <<: *light_scenes_button_card
-                  entity: scene.movie_livingroom
-                  color: '#847EEB'
-                  hold_action:
-                    action: call-service
-                    service: scene.turn_on
-                    service_data:
-                      entity_id: scene.movie_livingroom
+              - <<: *light_scenes_button_card
+                entity: scene.movie_livingroom
+                color: '#847EEB'
+                hold_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.movie_livingroom
               # Ночник
-              - <<: *basic_card_style
-                card:
-                  <<: *light_scenes_button_card
-                  entity: scene.night_light_livingroom
-                  color: '#D85420'
-                  hold_action:
-                    action: call-service
-                    service: scene.turn_on
-                    service_data:
-                      entity_id: scene.night_light_livingroom
+              -  <<: *light_scenes_button_card
+                 entity: scene.night_light_livingroom
+                 color: '#D85420'
+                 hold_action:
+                   action: call-service
+                   service: scene.turn_on
+                   service_data:
+                     entity_id: scene.night_light_livingroom
               # Выключение света в зале
-              - <<: *basic_card_style
-                card:
-                  <<: *light_scenes_button_card
-                  entity: scene.light_off_livingroom
-                  color: var(--disabled-text-color)
-                  hold_action:
-                    action: call-service
-                    service: scene.turn_on
-                    service_data:
-                      entity_id: scene.light_off_livingroom
+              - <<: *light_scenes_button_card
+                entity: scene.light_off_livingroom
+                color: var(--disabled-text-color)
+                hold_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.light_off_livingroom
 
           # Зал
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:text-header
-                  text: Зал
-                - type: custom:slider-entity-row
-                  entity: light.livingroom_1
-                  toggle: true
-                  name: Люстра
-                - type: custom:slider-entity-row
-                  entity: light.livingroom_2
-                  toggle: true
-                  name: Ночник
-                - type: custom:slider-entity-row
-                  entity: light.window_livingroom
-                  toggle: true
-                  name: Окно
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:text-header
+                text: Зал
+              - type: custom:slider-entity-row
+                entity: light.livingroom_1
+                toggle: true
+                name: Люстра
+              - type: custom:slider-entity-row
+                entity: light.livingroom_2
+                toggle: true
+                name: Ночник
+              - type: custom:slider-entity-row
+                entity: light.window_livingroom
+                toggle: true
+                name: Окно
 
           # Автоматизация освещения
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:fold-entity-row
-                  head: group.light_automation
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:fold-entity-row
+                head: group.light_automation
 
           # Тест
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - entity: input_boolean.test
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - entity: input_boolean.test
 
       # Спальня
       - type: vertical-stack
         cards:
-          - <<: *basic_card_style
-            card:
-             type: entities
-             entities:
-               - type: custom:text-header
-                 text: Спальня
-               - type: custom:slider-entity-row
-                 entity: light.bedroom
-                 toggle: true
-                 name: Люстра
-               - entity: switch.smart_plug_bedroom
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:text-header
+                text: Спальня
+              - type: custom:slider-entity-row
+                entity: light.bedroom
+                toggle: true
+                name: Люстра
+              - entity: switch.smart_plug_bedroom
 
           # Ванная
-          - <<: *basic_card_style
-            card:
-             type: entities
-             entities:
-               - type: custom:text-header
-                 text: Ванная
-               - type: custom:slider-entity-row
-                 entity: light.bathroom
-                 toggle: true
-                 name: Плафон
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:text-header
+                text: Ванная
+              - type: custom:slider-entity-row
+                entity: light.bathroom
+                toggle: true
+                name: Плафон
 
 
   # Медиа
@@ -262,102 +264,83 @@ views:
           - type: horizontal-stack
             cards:
               # Кинозал
-              - <<: *basic_card_style
-                card:
-                  <<: *toggle_button_card
-                  entity: input_boolean.dfi
+              - <<: *toggle_button_card
+                entity: input_boolean.dfi
               # ОТТ Клуб
-              - <<: *basic_card_style
-                card:
-                  <<: *toggle_button_card
-                  entity: input_boolean.ott_club
+              - <<: *toggle_button_card
+                entity: input_boolean.ott_club
               # Кинопаб
-              - <<: *basic_card_style
-                card:
-                  <<: *toggle_button_card
-                  entity: input_boolean.kinopub
+              - <<: *toggle_button_card
+                entity: input_boolean.kinopub
 
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                # Sony TV
-                - entity: media_player.sony_bravia_tv
-                  type: custom:mini-media-player
-                  group: true
-                  hide:
-                    controls: true
-                    volume: true
-                    source: true
-                    power_state: false
-                - type: divider
-                  style:
-                    height: 10px
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              # Sony TV
+              - entity: media_player.sony_bravia_tv
+                type: custom:mini-media-player
+                group: true
+                hide:
+                  controls: true
+                  volume: true
+                  source: true
+                  power_state: false
+              - <<: *divider_10
 
-                # Dune
-                - entity: media_player.dunehd
-                  type: custom:mini-media-player
-                  group: true
-                  info: short
-                  hide:
-                    controls: true
-                    volume: true
-                    source: true
-                    power_state: false
-                - type: divider
-                  style:
-                    height: 10px
+              # Dune
+              - entity: media_player.dunehd
+                type: custom:mini-media-player
+                group: true
+                info: short
+                hide:
+                  controls: true
+                  volume: true
+                  source: true
+                  power_state: false
+              - <<: *divider_10
 
-                # Sony NT 5
-                - entity: media_player.sony_htnt5
-                  type: custom:mini-media-player
-                  group: true
-                  hide:
-                    controls: true
-                    power_state: false
-                - type: divider
-                  style:
-                    height: 10px
+              # Sony NT 5
+              - entity: media_player.sony_htnt5
+                type: custom:mini-media-player
+                group: true
+                hide:
+                  controls: true
+                  power_state: false
+              - <<: *divider_10
 
-                # Sony NT 5 Cast
-                - entity: media_player.sony_ht_nt5
-                  type: custom:mini-media-player
-                  group: true
-                  info: scroll
-                  hide:
-                    controls: true
-                    volume: true
-                    power_state: false
+              # Sony NT 5 Cast
+              - entity: media_player.sony_ht_nt5
+                type: custom:mini-media-player
+                group: true
+                info: scroll
+                hide:
+                  controls: true
+                  volume: true
+                  power_state: false
 
       - type: vertical-stack
         cards:
-          - type: custom:card-modder
-            style:
-              border-radius: 10px
-              background: center / cover url(/local/icons/spotify.png) no-repeat
-              background-color: var(--paper-card-background-color)
-              background-size: 235px 300px
-            card:
-              type: entities
-              entities:
-                # Spotify Player 1
-                - entity: media_player.spotify
-                  <<: *spotify_card
-                - type: divider
-                  style:
-                    height: 20px
-                # Spotify Player 2
-                - entity: media_player.spotify_2
-                  <<: *spotify_card
-                - type: divider
-                  style:
-                    height: 20px
-                # Spotify Player 3
-                - entity: media_player.spotify_3
-                  <<: *spotify_card
-                - type: divider
-                  style:
-                    height: 20px
+          - type: entities
+            style: |
+              ha-card {
+                border-radius: 10px;
+                background: center / cover url(/local/icons/spotify.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 235px 300px;
+              }
+            entities:
+              # Spotify Player 1
+              - entity: media_player.spotify
+                <<: *spotify_card
+              - <<: *divider_20
+              # Spotify Player 2
+              - entity: media_player.spotify_2
+                <<: *spotify_card
+              - <<: *divider_20
+              # Spotify Player 3
+              - entity: media_player.spotify_3
+                <<: *spotify_card
+              - <<: *divider_20
 
 
   # Охрана
@@ -367,83 +350,77 @@ views:
       - type: vertical-stack
         cards:
           # Сигнализация
-          - <<: *basic_card_style
-            card:
-              type: custom:alarm_control_panel-card
-              entity: alarm_control_panel.ha_alarm
-              hide_keypad: true
-              title: Сигнализация
-              states:
-                - arm_away
+          - type: custom:alarm_control_panel-card
+            <<: *basic_card_style
+            entity: alarm_control_panel.ha_alarm
+            hide_keypad: true
+            title: Сигнализация
+            states:
+              - arm_away
 
           - type: horizontal-stack
             cards:
               # Камера
-              - <<: *basic_card_style
-                card:
-                  <<: *toggle_button_card
-                  entity: switch.smart_plug_camera
-                  icon: mdi:cctv
+              - <<: *toggle_button_card
+                entity: switch.smart_plug_camera
+                icon: mdi:cctv
               # Паника
-              - <<: *basic_card_style
-                card:
-                  <<: *toggle_button_card
-                  entity: switch.panic_light
-                  icon: mdi:alarm-light
+              - <<: *toggle_button_card
+                entity: switch.panic_light
+                icon: mdi:alarm-light
 
       # Пустая карта
       - <<: *blank_card
 
       # Датчики
-      - <<: *basic_card_style
-        card:
-          type: entities
-          entities:
-            - entity: binary_sensor.front_door_sensor
-              secondary_info: last-changed
-            - entity: binary_sensor.motion_sensor_hall
-              secondary_info: last-changed
-            - entity: binary_sensor.motion_sensor_livingroom
-              secondary_info: last-changed
-            - entity: binary_sensor.motion_sensor_kitchen
-              secondary_info: last-changed
-            - entity: binary_sensor.motion_sensor_bedroom
-              secondary_info: last-changed
-            - entity: binary_sensor.motion_sensor_bathroom
-              secondary_info: last-changed
+      - type: entities
+        <<: *basic_card_style
+        entities:
+          - entity: binary_sensor.front_door_sensor
+            secondary_info: last-changed
+          - entity: binary_sensor.motion_sensor_hall
+            secondary_info: last-changed
+          - entity: binary_sensor.motion_sensor_livingroom
+            secondary_info: last-changed
+          - entity: binary_sensor.motion_sensor_kitchen
+            secondary_info: last-changed
+          - entity: binary_sensor.motion_sensor_bedroom
+            secondary_info: last-changed
+          - entity: binary_sensor.motion_sensor_bathroom
+            secondary_info: last-changed
 
       - type: vertical-stack
         cards:
           # Person 1
-          - type: custom:card-modder
-            style:
-              border-radius: 10px
-              --paper-item-icon-color: "[[ sensor.person_user_1_icon_color.state ]]"
-            card:
-              type: entities
-              entities:
-                - entity: person.user_1
-                  secondary_info: last-changed
+          - type: entities
+            style: |
+              ha-card {
+                border-radius: 10px;
+                --paper-item-icon-color: [[ if(person.user_1 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
+              }
+            entities:
+              - entity: person.user_1
+                secondary_info: last-changed
           # Person 2
-          - type: custom:card-modder
-            style:
-              border-radius: 10px
-              --paper-item-icon-color: "[[ sensor.person_user_2_icon_color.state ]]"
-            card:
-              type: entities
-              entities:
-                - entity: person.user_2
-                  secondary_info: last-changed
+          - type: entities
+            style: |
+              ha-card {
+                border-radius: 10px;
+                --paper-item-icon-color: [[ if(person.user_2 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
+              }
+            entities:
+              - entity: person.user_2
+                secondary_info: last-changed
           # Person 3
-          - type: custom:card-modder
-            style:
-              border-radius: 10px
-              --paper-item-icon-color: "[[ sensor.person_user_3_icon_color.state ]]"
-            card:
-              type: entities
-              entities:
-                - entity: person.user_3
-                  secondary_info: last-changed
+          - type: entities
+            style: |
+              ha-card {
+                border-radius: 10px;
+                --paper-item-icon-color: [[ if(person.user_3 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
+              }
+            entities:
+              - entity: person.user_3
+                secondary_info: last-changed
 
 
   # Климат
@@ -453,28 +430,24 @@ views:
       - type: vertical-stack
         cards:
           # Зал Температура
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              line_color: '#EA811D'
-              height: 120
-              show:
-                name: true
-                icon: false
-              entities:
-                - sensor.temperature_livingroom
+          - <<: *graph_card
+            line_color: '#EA811D'
+            height: 120
+            show:
+              name: true
+              icon: false
+            entities:
+              - sensor.temperature_livingroom
 
           # Зал Влажность
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              line_color: var(--primary-color)
-              height: 120
-              show:
-                name: true
-                icon: false
-              entities:
-                - sensor.humidity_livingroom
+          - <<: *graph_card
+            line_color: var(--primary-color)
+            height: 120
+            show:
+              name: true
+              icon: false
+            entities:
+              - sensor.humidity_livingroom
 
 
   # Информация
@@ -484,119 +457,115 @@ views:
       - type: vertical-stack
         cards:
           # Home Assistant
-          - type: custom:card-modder
-            style:
-              border-radius: 10px
-              background: center / cover url(/local/icons/ha.png) no-repeat
-              background-color: var(--paper-card-background-color)
-              background-size: 266px 340px
-            card:
-              type: entities
-              entities:
-                - entity: sensor.time
-                - entity: sensor.date
-                - entity: sensor.mysql_db_size
-                - entity: sensor.online_custom
-                - entity: sensor.lets_encrypt
-                - entity: script.backup_ha
-                - entity: script.backup_deconz
-                - entity: script.ha_restart
+          - type: entities
+            style: |
+              ha-card {
+                border-radius: 10px;
+                background: center / cover url(/local/icons/ha.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 266px 340px;
+              }
+            entities:
+              - entity: sensor.time
+              - entity: sensor.date
+              - entity: sensor.mysql_db_size
+              - entity: sensor.online_custom
+              - entity: sensor.lets_encrypt
+              - entity: script.backup_ha
+              - entity: script.backup_deconz
+              - entity: script.ha_restart
 
       - type: vertical-stack
         cards:
           # Raspberry Pi
-          - type: custom:card-modder
-            style:
-              border-radius: 10px
-              background: center / cover url(/local/icons/rpi.png) no-repeat
-              background-color: var(--paper-card-background-color)
-              background-size: 200px 255px
-            card:
-              type: entities
-              entities:
-                - entity: sensor.command_sensor
-                - entity: sensor.processor_use
-                - entity: sensor.memory_use_percent
-                - entity: sensor.disk_use_percent_home
-                - entity: sensor.disk_free_home
-                - entity: script.reboot_pi
-                - entity: script.shutdown_pi
+          - type: entities
+            style: |
+              ha-card {
+                border-radius: 10px;
+                background: center / cover url(/local/icons/rpi.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 200px 255px;
+              }
+            entities:
+              - entity: sensor.command_sensor
+              - entity: sensor.processor_use
+              - entity: sensor.memory_use_percent
+              - entity: sensor.disk_use_percent_home
+              - entity: sensor.disk_free_home
+              - entity: script.reboot_pi
+              - entity: script.shutdown_pi
 
       - type: vertical-stack
         cards:
           # Состояние батареи датчиков
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:fold-entity-row
-                  head:
-                    entity: sensor.battery_level_card_header
-                    icon: mdi:car-battery
-                  items:
-                    - sensor.front_door_sensor_battery_level
-                    - sensor.motion_sensor_hall_battery_level
-                    - sensor.motion_sensor_livingroom_battery_level
-                    - sensor.motion_sensor_kitchen_battery_level
-                    - sensor.motion_sensor_bedroom_battery_level
-                    - sensor.motion_sensor_bathroom_battery_level
-                    - sensor.smart_switch_alarm_battery_level
-                    - sensor.smart_switch_bathroom_battery_level
-                    - sensor.smart_switch_livingroom_battery_level
-                    - sensor.smart_switch_kitchen_battery_level
-                    - sensor.smart_switch_bedroom_battery_level
-                    - sensor.tradfri_wireless_dimmer_battery_level
-                    - sensor.temperature_livingroom_battery_level
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:fold-entity-row
+                head:
+                  entity: sensor.battery_level_card_header
+                  icon: mdi:car-battery
+                items:
+                  - sensor.front_door_sensor_battery_level
+                  - sensor.motion_sensor_hall_battery_level
+                  - sensor.motion_sensor_livingroom_battery_level
+                  - sensor.motion_sensor_kitchen_battery_level
+                  - sensor.motion_sensor_bedroom_battery_level
+                  - sensor.motion_sensor_bathroom_battery_level
+                  - sensor.smart_switch_alarm_battery_level
+                  - sensor.smart_switch_bathroom_battery_level
+                  - sensor.smart_switch_livingroom_battery_level
+                  - sensor.smart_switch_kitchen_battery_level
+                  - sensor.smart_switch_bedroom_battery_level
+                  - sensor.tradfri_wireless_dimmer_battery_level
+                  - sensor.temperature_livingroom_battery_level
 
           # Epson PX720WD
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:fold-entity-row
-                  head:
-                    entity: sensor.epson
-                    icon: mdi:printer
-                  items:
-                     - type: custom:card-modder
-                       style:
-                         box-shadow: none
-                       card:
-                         type: custom:bar-card
-                         columns: 6
-                         direction: up
-                         entities:
-                           - entity: sensor.epson_ink_level_cyan
-                             color: rgb(0, 255, 255)
-                           - entity: sensor.epson_ink_level_yellow
-                             color: rgb(255, 255, 0)
-                           - entity: sensor.epson_ink_level_light_cyan
-                             color: rgb(204, 255, 255)
-                           - entity: sensor.epson_ink_level_black
-                             color: rgb(0, 0, 0)
-                           - entity: sensor.epson_ink_level_magenta
-                             color: rgb(255, 0, 255)
-                           - entity: sensor.epson_ink_level_light_magenta
-                             color: rgb(231, 139, 231)
-                         height: 200px
-                         max: 100
-                         min: 0
-                         padding: 2px
-                         title_position: 'off'
-                         icon_position: inside
-                         width: 100%
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:fold-entity-row
+                head:
+                  entity: sensor.epson
+                  icon: mdi:printer
+                items:
+                   - type: custom:card-modder
+                     style:
+                       box-shadow: none
+                     card:
+                       type: custom:bar-card
+                       columns: 6
+                       direction: up
+                       entities:
+                         - entity: sensor.epson_ink_level_cyan
+                           color: rgb(0, 255, 255)
+                         - entity: sensor.epson_ink_level_yellow
+                           color: rgb(255, 255, 0)
+                         - entity: sensor.epson_ink_level_light_cyan
+                           color: rgb(204, 255, 255)
+                         - entity: sensor.epson_ink_level_black
+                           color: rgb(0, 0, 0)
+                         - entity: sensor.epson_ink_level_magenta
+                           color: rgb(255, 0, 255)
+                         - entity: sensor.epson_ink_level_light_magenta
+                           color: rgb(231, 139, 231)
+                       height: 200px
+                       max: 100
+                       min: 0
+                       padding: 2px
+                       title_position: 'off'
+                       icon_position: inside
+                       width: 100%
 
           # Освещенность
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              line_color: var(--disabled-text-color)
-              height: 140
-              show:
-                name: true
-                icon: false
-              entities:
-                - sensor.illumination_f0b429aa26cd
+          - <<: *graph_card
+            line_color: var(--disabled-text-color)
+            height: 140
+            show:
+              name: true
+              icon: false
+            entities:
+              - sensor.illumination_f0b429aa26cd
 
 
   # Электричество
@@ -606,43 +575,42 @@ views:
       - type: vertical-stack
         cards:
           # Потребляемая мощность
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:fold-entity-row
-                  head:
-                    entity: sensor.power_total_card_header
-                  items:
-                    - sensor.power_smart_plug_bedroom
-                    - sensor.power_smart_plug_camera
-                    - sensor.power_light_hall_1
-                    - sensor.power_light_hall_2
-                    - sensor.power_light_livingroom_1
-                    - sensor.power_light_livingroom_2
-                    - sensor.power_light_window_livingroom
-                    - sensor.power_light_kitchen
-                    - sensor.power_light_bedroom
-                    - sensor.power_light_bathroom
-                # График мощности
-                - type: custom:mini-graph-card
-                  entities:
-                    - sensor.power_total
-                  hours_to_show: 48
-                  points_per_hour: 1
-                  more_info: false
-                  hour24: true
-                  align_state: center
-                  height: 110
-                  line_color: var(--google-red-500)
-                  line_width: 6
-                  font_size: 120
-                  show:
-                    graph: bar
-                    name: false
-                    icon: false
-                    extrema: true
-                    labels: false
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:fold-entity-row
+                head:
+                  entity: sensor.power_total_card_header
+                items:
+                  - sensor.power_smart_plug_bedroom
+                  - sensor.power_smart_plug_camera
+                  - sensor.power_light_hall_1
+                  - sensor.power_light_hall_2
+                  - sensor.power_light_livingroom_1
+                  - sensor.power_light_livingroom_2
+                  - sensor.power_light_window_livingroom
+                  - sensor.power_light_kitchen
+                  - sensor.power_light_bedroom
+                  - sensor.power_light_bathroom
+              # График мощности
+              - type: custom:mini-graph-card
+                entities:
+                  - sensor.power_total
+                hours_to_show: 48
+                points_per_hour: 1
+                more_info: false
+                hour24: true
+                align_state: center
+                height: 110
+                line_color: var(--google-red-500)
+                line_width: 6
+                font_size: 120
+                show:
+                  graph: bar
+                  name: false
+                  icon: false
+                  extrema: true
+                  labels: false
 
           # Пустая карта
           - <<: *blank_card
@@ -650,37 +618,36 @@ views:
       - type: vertical-stack
         cards:
           # Энергопотребление за месяц
-          - <<: *basic_card_style
-            card:
-              type: entities
-              entities:
-                - type: custom:fold-entity-row
-                  head:
-                    entity: sensor.energy_monthly_total_card_header
-                  items:
-                    - sensor.energy_monthly_smart_plug_bedroom
-                    - sensor.energy_monthly_smart_plug_camera
-                    - sensor.energy_monthly_light_hall_1
-                    - sensor.energy_monthly_light_hall_2
-                    - sensor.energy_monthly_light_livingroom_1
-                    - sensor.energy_monthly_light_livingroom_2
-                    - sensor.energy_monthly_light_window_livingroom
-                    - sensor.energy_monthly_light_kitchen
-                    - sensor.energy_monthly_light_bedroom
-                    - sensor.energy_monthly_light_bathroom
-                - type: custom:mini-graph-card
-                  entities:
-                    - entity: sensor.energy_monthly_total
-                      name: Энергопотребление за месяц
-                  align_header: center
-                  align_state: center
-                  height: 100
-                  font_size: 120
-                  show:
-                    graph: false
-                    icon: false
-                    name: false
-                    state: true
+          - type: entities
+            <<: *basic_card_style
+            entities:
+              - type: custom:fold-entity-row
+                head:
+                  entity: sensor.energy_monthly_total_card_header
+                items:
+                  - sensor.energy_monthly_smart_plug_bedroom
+                  - sensor.energy_monthly_smart_plug_camera
+                  - sensor.energy_monthly_light_hall_1
+                  - sensor.energy_monthly_light_hall_2
+                  - sensor.energy_monthly_light_livingroom_1
+                  - sensor.energy_monthly_light_livingroom_2
+                  - sensor.energy_monthly_light_window_livingroom
+                  - sensor.energy_monthly_light_kitchen
+                  - sensor.energy_monthly_light_bedroom
+                  - sensor.energy_monthly_light_bathroom
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.energy_monthly_total
+                    name: Энергопотребление за месяц
+                align_header: center
+                align_state: center
+                height: 100
+                font_size: 120
+                show:
+                  graph: false
+                  icon: false
+                  name: false
+                  state: true
 
           # Пустая карта
           - <<: *blank_card
@@ -752,27 +719,11 @@ views:
             cards:
               # Энергопотребление за год
               - type: custom:counter-card
+                <<: *basic_card_style
                 title: За год / кВт⋅ч
                 entity: sensor.energy_yearly_total
                 scale: 25px
 
-
-  # Обновления кастомных карт / компонентов
-  - title: Обновления
-    icon: mdi:update
-    cards:
-      - <<: *basic_card_style
-        card:
-          type: custom:tracker-card
-          title: Обновления
-          name_text: Имя
-          current_text: Текущая
-          available_text: Доступная
-          check_text: Проверить
-          update_all_text: Обновить
-          trackers:
-            - sensor.custom_card_tracker
-            - sensor.custom_component_tracker
 
 
   # Погода
@@ -781,194 +732,183 @@ views:
     cards:
       - type: vertical-stack
         cards:
-          - <<: *basic_card_style
-            card:
-              type: picture-elements
-              image: /local/weather/bg/bg.png
-              elements:
-                # Рассвет
-                - type: image
-                  image: /local/weather/icons/sunrise.png
-                  style:
-                    top: 20%
-                    left: 10%
-                    transform: none
-                    width: 13%
-                    pointer-events: none
-                - type: state-label
-                  entity: sensor.sunrise_time
-                  style:
-                    top: 75%
-                    left: 16%
-                    transform: translate(-50%, -50%)
-                    color: var(--secondary-text-color)
-                    font-size: 90%
-                    pointer-events: none
-                # Закат
-                - type: image
-                  image: /local/weather/icons/sunset.png
-                  style:
-                    top: 20%
-                    right: 10%
-                    transform: none
-                    width: 13%
-                    pointer-events: none
-                - type: state-label
-                  entity: sensor.sunset_time
-                  style:
-                    top: 75%
-                    right: 17%
-                    transform: translate(50%, -50%)
-                    color: var(--secondary-text-color)
-                    font-size: 90%
-                    pointer-events: none
-                # Фазы Луны
-                - type: image
-                  entity: sensor.moon
-                  state_image:
-                    'new_moon': /local/weather/moon/new_moon.png
-                    'waxing_crescent': /local/weather/moon/waxing_crescent.png
-                    'first_quarter': /local/weather/moon/first_quarter.png
-                    'waxing_gibbous': /local/weather/moon/waxing_gibbous.png
-                    'full_moon': /local/weather/moon/full_moon.png
-                    'waning_gibbous': /local/weather/moon/waning_gibbous.png
-                    'last_quarter': /local/weather/moon/last_quarter.png
-                    'waning_crescent': /local/weather/moon/waning_crescent.png
-                  style:
-                    top: 40%
-                    left: 50%
-                    transform: translate(-50%, -50%)
-                    width: 12%
-                    pointer-events: none
-                - type: state-label
-                  entity: sensor.moon
-                  style:
-                    top: 75%
-                    left: 50%
-                    transform: translate(-50%, -50%)
-                    color: var(--secondary-text-color)
-                    font-size: 90%
-                    letter-spacing: .05em
-                    pointer-events: none
+          - type: picture-elements
+            <<: *basic_card_style
+            image: /local/weather/bg/bg.png
+            elements:
+              # Рассвет
+              - type: image
+                image: /local/weather/icons/sunrise.png
+                style:
+                  top: 20%
+                  left: 10%
+                  transform: none
+                  width: 13%
+                  pointer-events: none
+              - type: state-label
+                entity: sensor.sunrise_time
+                style:
+                  top: 75%
+                  left: 16%
+                  transform: translate(-50%, -50%)
+                  color: var(--secondary-text-color)
+                  font-size: 90%
+                  pointer-events: none
+              # Закат
+              - type: image
+                image: /local/weather/icons/sunset.png
+                style:
+                  top: 20%
+                  right: 10%
+                  transform: none
+                  width: 13%
+                  pointer-events: none
+              - type: state-label
+                entity: sensor.sunset_time
+                style:
+                  top: 75%
+                  right: 17%
+                  transform: translate(50%, -50%)
+                  color: var(--secondary-text-color)
+                  font-size: 90%
+                  pointer-events: none
+              # Фазы Луны
+              - type: image
+                entity: sensor.moon
+                state_image:
+                  'new_moon': /local/weather/moon/new_moon.png
+                  'waxing_crescent': /local/weather/moon/waxing_crescent.png
+                  'first_quarter': /local/weather/moon/first_quarter.png
+                  'waxing_gibbous': /local/weather/moon/waxing_gibbous.png
+                  'full_moon': /local/weather/moon/full_moon.png
+                  'waning_gibbous': /local/weather/moon/waning_gibbous.png
+                  'last_quarter': /local/weather/moon/last_quarter.png
+                  'waning_crescent': /local/weather/moon/waning_crescent.png
+                style:
+                  top: 40%
+                  left: 50%
+                  transform: translate(-50%, -50%)
+                  width: 12%
+                  pointer-events: none
+              - type: state-label
+                entity: sensor.moon
+                style:
+                  top: 75%
+                  left: 50%
+                  transform: translate(-50%, -50%)
+                  color: var(--secondary-text-color)
+                  font-size: 90%
+                  letter-spacing: .05em
+                  pointer-events: none
 
           # График температуры
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              height: 80
-              line_color: '#EA811D'
-              show:
-                icon: false
-                extrema: true
-                labels: false
-              entities:
-                - entity: sensor.smhi_temperature
+          - <<: *graph_card
+            height: 80
+            line_color: '#EA811D'
+            show:
+              icon: false
+              extrema: true
+              labels: false
+            entities:
+              - entity: sensor.smhi_temperature
 
       # Прогноз погоды
       - type: vertical-stack
         cards:
-          - <<: *basic_card_style
-            card:
-              type: custom:simple-weather-card
-              entity: weather.smhi
-              name: ' '
+          - type: custom:simple-weather-card
+            <<: *basic_card_style
+            entity: weather.smhi
+            name: ' '
 
           # Освещенность
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              height: 100
-              show:
-                graph: false
-                icon: false
-                state: true
-              entities:
-                - entity: sensor.outdoor_illuminance
+          - <<: *graph_card
+            height: 100
+            show:
+              graph: false
+              icon: false
+              state: true
+            entities:
+              - entity: sensor.outdoor_illuminance
 
           # График давления
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              height: 100
-              line_color: var(--disabled-text-color)
-              show:
-                icon: false
-                labels: false
-              entities:
-                - sensor.smhi_pressure
+          - <<: *graph_card
+            height: 100
+            line_color: var(--disabled-text-color)
+            show:
+              icon: false
+              labels: false
+            entities:
+              - sensor.smhi_pressure
 
       - type: vertical-stack
         cards:
-          - <<: *basic_card_style
-            card:
-              type: picture-elements
-              image: /local/weather/bg/bg.png
-              elements:
-                # Видимость
-                - type: image
-                  image: /local/weather/icons/visibility.png
-                  style:
-                    top: 20%
-                    left: 10%
-                    transform: none
-                    width: 13%
-                    pointer-events: none
-                - type: state-label
-                  entity: sensor.smhi_visibility
-                  style:
-                    top: 75%
-                    left: 16%
-                    transform: translate(-50%, -50%)
-                    color: var(--secondary-text-color)
-                    font-size: 90%
-                    pointer-events: none
-                # Ветер
-                - type: image
-                  image: /local/weather/icons/wind.png
-                  style:
-                    top: 40%
-                    left: 50%
-                    transform: translate(-50%, -50%)
-                    width: 12%
-                    pointer-events: none
-                - type: state-label
-                  entity: sensor.wind_custom
-                  style:
-                    top: 75%
-                    left: 50%
-                    transform: translate(-50%, -50%)
-                    color: var(--secondary-text-color)
-                    font-size: 90%
-                    letter-spacing: .05em
-                    pointer-events: none
-                # Облачность
-                - type: image
-                  image: /local/weather/icons/cloudy.png
-                  style:
-                    top: 20%
-                    right: 10%
-                    transform: none
-                    width: 14%
-                    pointer-events: none
-                - type: state-label
-                  entity: sensor.smhi_cloud_coverage
-                  style:
-                    top: 75%
-                    right: 16%
-                    transform: translate(50%, -50%)
-                    color: var(--secondary-text-color)
-                    font-size: 90%
-                    pointer-events: none
+          - type: picture-elements
+            <<: *basic_card_style
+            image: /local/weather/bg/bg.png
+            elements:
+              # Видимость
+              - type: image
+                image: /local/weather/icons/visibility.png
+                style:
+                  top: 20%
+                  left: 10%
+                  transform: none
+                  width: 13%
+                  pointer-events: none
+              - type: state-label
+                entity: sensor.smhi_visibility
+                style:
+                  top: 75%
+                  left: 16%
+                  transform: translate(-50%, -50%)
+                  color: var(--secondary-text-color)
+                  font-size: 90%
+                  pointer-events: none
+              # Ветер
+              - type: image
+                image: /local/weather/icons/wind.png
+                style:
+                  top: 40%
+                  left: 50%
+                  transform: translate(-50%, -50%)
+                  width: 12%
+                  pointer-events: none
+              - type: state-label
+                entity: sensor.wind_custom
+                style:
+                  top: 75%
+                  left: 50%
+                  transform: translate(-50%, -50%)
+                  color: var(--secondary-text-color)
+                  font-size: 90%
+                  letter-spacing: .05em
+                  pointer-events: none
+              # Облачность
+              - type: image
+                image: /local/weather/icons/cloudy.png
+                style:
+                  top: 20%
+                  right: 10%
+                  transform: none
+                  width: 14%
+                  pointer-events: none
+              - type: state-label
+                entity: sensor.smhi_cloud_coverage
+                style:
+                  top: 75%
+                  right: 16%
+                  transform: translate(50%, -50%)
+                  color: var(--secondary-text-color)
+                  font-size: 90%
+                  pointer-events: none
 
           # График влажности
-          - <<: *basic_card_style
-            card:
-              <<: *graph_card
-              height: 80
-              line_color: '#2980B9'
-              show:
-                icon: false
-                extrema: true
-                labels: false
-              entities:
-                - entity: sensor.smhi_humidity
+          - <<: *graph_card
+            height: 80
+            line_color: '#2980B9'
+            show:
+              icon: false
+              extrema: true
+              labels: false
+            entities:
+              - entity: sensor.smhi_humidity
