@@ -16,7 +16,7 @@ homeassistant:
 
 frontend:
   themes: !include_dir_merge_named themes
-  
+
 lovelace:
   mode: yaml
 
@@ -40,6 +40,12 @@ input_boolean: !include input_boolean.yaml
 
 person:
 
+zeroconf:
+
+hacs:
+  token: !secret github_token
+
+# ssdp:
 # default_config:
 # customize_glob:
 # discovery:
