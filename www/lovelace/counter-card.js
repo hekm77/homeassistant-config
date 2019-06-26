@@ -25,7 +25,6 @@ class CounterCard extends HTMLElement {
         text-align: center;
         --base-unit: ${cardConfig.scale};
         padding: calc(var(--base-unit)*0.6) calc(var(--base-unit)*0.3);
-        border-radius: 10px;
       }
       #value {
         font-size: calc(var(--base-unit) * 1.1);
