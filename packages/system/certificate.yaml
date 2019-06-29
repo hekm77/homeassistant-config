@@ -10,6 +10,7 @@ homeassistant:
 shell_command:
   # Обновление сертификата SSL
   renew_ssl: '/home/homeassistant/dehydrated/dehydrated -c'
+  restart_nginx: '/usr/bin/sudo /bin/systemctl restart nginx'
 
 
 # Сенсор
@@ -24,9 +25,16 @@ sensor:
 automation:
   # Автообновление сертификата SSL
   - alias: auto_renew_ssl_cert
+    initial_state: true
     trigger:
-      - platform: numeric_state
-        entity_id: sensor.lets_encrypt
-        below: 29
+      - platform: time
+        at: '01:30:00'
+    condition:
+      - condition: template
+        value_template: "{{ states('sensor.lets_encrypt') | int < 29 }}"
     action:
       - service: shell_command.renew_ssl
+      - delay: 00:05:00
+      - service: shell_command.restart_nginx
+      - delay: 00:00:10
+      - service: shell_command.ha_restart
