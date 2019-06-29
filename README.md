@@ -47,6 +47,7 @@
 * [button-card](https://github.com/custom-cards/button-card)
 * [config-template-card](https://github.com/custom-cards/config-template-card)
 * [lovelace-card-mod](https://github.com/thomasloven/lovelace-card-mod)
+* [lovelace-card-modder](https://github.com/thomasloven/lovelace-card-modder)
 * [lovelace-card-templater](https://github.com/gadgetchnnel/lovelace-card-templater)
 * [lovelace-card-tools](https://github.com/thomasloven/lovelace-card-tools)
 * [lovelace-fold-entity-row](https://github.com/thomasloven/lovelace-fold-entity-row)
