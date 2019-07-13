@@ -16,17 +16,19 @@ resources:
     type: module
   - url: /community_plugin/mini-media-player/mini-media-player.js
     type: module
+  - url: /community_plugin/simple-weather-card/simple-weather-card.js
+    type: module
+  - url: /community_plugin/lovelace-card-templater/card-templater.js
+    type: js
+  - url: /community_plugin/vertical-stack-in-card/vertical-stack-in-card.js
+    type: js
 
   # custom
   - url: /local/lovelace/alarm_control_panel-card.js
     type: js
-  - url: /local/lovelace/simple-weather-card.bundle.js
-    type: module
   - url: /local/lovelace/card-tools.js
     type: js
   - url: /local/lovelace/card-modder.js
-    type: js
-  - url: /local/lovelace/lovelace-card-templater.js
     type: js
   - url: /local/lovelace/counter-card.js
     type: js
