@@ -9,3 +9,11 @@ xiaomi_aqara:
   discovery_retry: 5
   gateways:
     - key: !secret xiaomi_key
+
+
+# Xiaomi Gateway Alarm
+switch:
+  - platform: xiaomi_gateway_alarm
+    name: Xiaomi Gateway Alarm
+    host: 192.168.1.x
+    token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx # Gateway token
