@@ -1,6 +1,7 @@
 # HomeKit Config
 homekit:
   auto_start: false
+  safe_mode: true
   filter:
     include_domains:
       - light
@@ -8,21 +9,16 @@ homekit:
       - scene
       - switch
     exclude_entities:
+      - light.all
+      - light.hall_1
+      - light.hall_2
       - media_player.sony_ht_nt5
       - switch.smart_plug_camera
       - switch.panic_light
-      - switch.device_tracker_1
-      - switch.device_tracker_2
-      - switch.device_tracker_3
       - scene.light_off_livingroom
       - scene.panic_light_off
       - scene.panic_light_on
     include_entities:
-      - input_boolean.hall_automation
-      - input_boolean.livingroom_automation
-      - input_boolean.kitchen_automation
-      - input_boolean.bedroom_automation
-      - input_boolean.bathroom_automation
       - input_boolean.dfi
       - input_boolean.ott_club
       - input_boolean.kinopub
@@ -45,16 +41,6 @@ homekit:
       name: Зал ОТТ Клуб
     input_boolean.kinopub:
       name: Зал Кинопаб
-    input_boolean.hall_automation:
-      name: Холл Автоматизация
-    input_boolean.livingroom_automation:
-      name: Зал Автоматизация
-    input_boolean.kitchen_automation:
-      name: Кухня Автоматизация
-    input_boolean.bedroom_automation:
-      name: Спальня Автоматизация
-    input_boolean.bathroom_automation:
-      name: Спальня Автоматизация
     switch.smart_plug_bedroom:
       name: Спальня Розетка
       type: outlet
