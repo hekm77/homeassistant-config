@@ -1,46 +1,43 @@
+
 # Кастомизация
 homeassistant:
   customize:
     # Epson Ink
     sensor.epson_ink_level_cyan:
       friendly_name: Cyan
-      icon: mdi:cup-water
+      icon: mdi:water
     sensor.epson_ink_level_yellow:
       friendly_name: Yellow
-      icon: mdi:cup-water
+      icon: mdi:water
     sensor.epson_ink_level_light_cyan:
       friendly_name: Light Cyan
-      icon: mdi:cup-water
+      icon: mdi:water
     sensor.epson_ink_level_black:
       friendly_name: Black
-      icon: mdi:cup-water
+      icon: mdi:water
     sensor.epson_ink_level_magenta:
       friendly_name: Magenta
-      icon: mdi:cup-water
+      icon: mdi:water
     sensor.epson_ink_level_light_magenta:
       friendly_name: Light Magenta
-      icon: mdi:cup-water
+      icon: mdi:water
+    binary_sensor.epson_px720wd:
+      friendly_name: Epson PX720WD
+      icon: mdi:printer
 
 
 # Трекер устройства
-device_tracker:
+binary_sensor:
   # Ping
   - platform: ping
-    interval_seconds: 60
-    consider_home: 300
-    hosts:
-      epson: 192.168.1.x
+    host: 192.168.1.x
+    name: Epson PX720WD
+    count: 2
+    scan_interval: 90
 
 
 # Сенсоры уровня чернил
 sensor:
-  # Epson PX720WD
-  # Заголовок карты
-  - platform: template
-    sensors:
-      epson:
-        friendly_name: 'Epson PX720WD'
-        value_template: "{{ 'ON' if is_state('device_tracker.epson', 'home') else 'OFF' }}"
   # Cyan
   - platform: command_line
     name: Epson Ink Level Cyan
