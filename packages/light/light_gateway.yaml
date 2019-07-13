@@ -21,7 +21,7 @@ automation:
           - condition: and
             conditions:
               - condition: time
-                after: '23:00:00'
+                after: '00:00:00'
               - condition: sun
                 before: sunrise
           - condition: state
@@ -50,7 +50,7 @@ automation:
           - condition: and
             conditions:
               - condition: time
-                after: '23:00:00'
+                after: '00:00:00'
               - condition: sun
                 before: sunrise
           - condition: state
@@ -83,7 +83,7 @@ automation:
             state: 'off'
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
-            state: disarmed
+            state: 'disarmed'
     action:
       - service: light.turn_on
         entity_id: light.gateway_light_f0b429aa26cd
