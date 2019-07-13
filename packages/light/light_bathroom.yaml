@@ -12,12 +12,19 @@ timer:
     duration: '01:30:00'
 
 
-# Вкл / выкл автоматизации освещения в Lovelace
 input_boolean:
+  # Вкл / выкл автоматизации освещения в Lovelace
   bathroom_automation:
     name: Ванная
     initial: on
     icon: mdi:home-automation
+
+
+# Скрипт
+script:
+  light_bathroom:
+    sequence:
+      - delay: 00:00:1.5
 
 
 # Автоматизации
@@ -39,6 +46,8 @@ automation:
             entity_id: timer.bathroom
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_bathroom
       - service: light.turn_on
         entity_id: light.bathroom
         data_template:
@@ -75,6 +84,8 @@ automation:
             entity_id: timer.bathroom
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_bathroom
       - service: light.turn_off
         entity_id: light.bathroom
 
@@ -106,11 +117,13 @@ automation:
             entity_id: timer.bathroom
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_bathroom
       - service: light.turn_off
         entity_id: light.bathroom
 
 
-  # Включение по одинарному клику / сброс таймера
+  # Включение по одинарному клику
   - alias: bathroom_light_on_switch_click
     initial_state: true
     trigger:
@@ -128,11 +141,9 @@ automation:
         entity_id: light.bathroom
         data_template:
           brightness_pct: 100
-      - service: timer.cancel
-        entity_id: timer.bathroom
 
 
-  # Выключение по одинарному клику / сброс таймера
+  # Выключение по одинарному клику
   - alias: bathroom_light_off_switch_click
     initial_state: true
     trigger:
@@ -148,8 +159,6 @@ automation:
     action:
       - service: light.turn_off
         entity_id: light.bathroom
-      - service: timer.cancel
-        entity_id: timer.bathroom
 
 
   # Включение 100% яркости по длинному нажатию / запуск таймера
@@ -162,6 +171,8 @@ automation:
           id: smart_switch_bathroom
           event: 1001
     action:
+      - service: script.turn_on
+        entity_id: script.light_bathroom
       - service: light.turn_on
         entity_id: light.bathroom
         data_template:
@@ -174,6 +185,26 @@ automation:
       - service: timer.cancel
         entity_id: timer.bathroom
       - service: timer.start
+        entity_id: timer.bathroom
+
+
+  # Сброс таймера при включении / выключении вручную
+  - alias: bathroom_timer
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: light.bathroom
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: script.light_bathroom
+            state: 'off'
+          - condition: state
+            entity_id: alarm_control_panel.ha_alarm
+            state: 'disarmed'
+    action:
+      - service: timer.cancel
         entity_id: timer.bathroom
 
 
