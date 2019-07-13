@@ -40,11 +40,10 @@ input_boolean: !include input_boolean.yaml
 
 person:
 
-zeroconf:
-
 hacs:
   token: !secret github_token
 
+# zeroconf:
 # ssdp:
 # default_config:
 # customize_glob:
