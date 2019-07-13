@@ -89,4 +89,4 @@ sensor:
     value_template: '{{ value_json["obs"][0]["brightness"] | float }}'
     unit_of_measurement: 'Lx'
     device_class: 'illuminance'
-    scan_interval: 300
+    scan_interval: 600
