@@ -6,6 +6,9 @@ homeassistant:
       friendly_name: Холл-1
     light.hall_2:
       friendly_name: Холл-2
+    light.hall:
+      friendly_name: Холл Люстра
+      icon: mdi:ceiling-light
 
 
 # Yeelight
@@ -18,11 +21,9 @@ yeelight:
 
 
 # Группа
-group:
-  # Холл Люстра
-  light_hall:
-    name: Холл Люстра
-    view: no
+light:
+  - platform: group
+    name: Hall
     entities:
       - light.hall_1
       - light.hall_2
@@ -34,12 +35,19 @@ timer:
     duration: '01:00:00'
 
 
-# Вкл / выкл автоматизации освещения в Lovelace
 input_boolean:
+  # Вкл / выкл автоматизации освещения в Lovelace
   hall_automation:
     name: Холл
     initial: on
     icon: mdi:home-automation
+
+
+# Скрипт
+script:
+  light_hall:
+    sequence:
+      - delay: 00:00:1.5
 
 
 # Автоматизации
@@ -58,14 +66,16 @@ automation:
             after: '06:00:00'
             before: '23:00:00'
           - condition: state
-            entity_id: group.light_hall
+            entity_id: light.hall
             state: 'off'
           - condition: state
             entity_id: timer.hall
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_hall
       - service: light.turn_on
-        entity_id: group.light_hall
+        entity_id: light.hall
         data_template:
           brightness_pct: >
             {% if now().hour >= 6 and now().hour < 8 %} 10
@@ -92,17 +102,19 @@ automation:
       - condition: and
         conditions:
           - condition: state
-            entity_id: group.light_hall
+            entity_id: light.hall
             state: 'on'
           - condition: state
             entity_id: timer.hall
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_hall
       - service: light.turn_off
-        entity_id: group.light_hall
+        entity_id: light.hall
 
 
-  # Включение диммером / запуск таймера днем
+  # Включение диммером днем
   - alias: hall_light_on_day_dimmer
     initial_state: true
     trigger:
@@ -117,16 +129,12 @@ automation:
         before: '23:00:00'
     action:
       - service: light.turn_on
-        entity_id: group.light_hall
+        entity_id: light.hall
         data_template:
           brightness_pct: 100
-      - service: timer.cancel
-        entity_id: timer.hall
-      - service: timer.start
-        entity_id: timer.hall
 
 
-  # Включение диммером / запуск таймера ночью
+  # Включение диммером ночью
   - alias: hall_light_on_night_dimmer
     initial_state: true
     trigger:
@@ -141,22 +149,18 @@ automation:
         before: '06:00:00'
     action:
       - service: light.turn_on
-        entity_id: group.light_hall
+        entity_id: light.hall
         data_template:
           brightness: >
-            {% if is_state('group.light_hall', 'off') %}
+            {% if is_state('light.hall', 'off') %}
               3
             {% else %}
-              {% set bri = state_attr('light.hall_1', 'brightness') | int %}
+              {% set bri = state_attr('light.hall', 'brightness') | int %}
                 {{ [bri+123, 249] | min }}
             {% endif %}
-      - service: timer.cancel
-        entity_id: timer.hall
-      - service: timer.start
-        entity_id: timer.hall
 
 
-  # Выключение диммером / запуск таймера
+  # Выключение диммером
   - alias: hall_light_off_dimmer
     initial_state: true
     trigger:
@@ -167,7 +171,25 @@ automation:
           event: 4002
     action:
       - service: light.turn_off
-        entity_id: group.light_hall
+        entity_id: light.hall
+
+
+  # Запуск таймера при включении / выключении вручную
+  - alias: hall_timer
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: light.hall
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: script.light_hall
+            state: 'off'
+          - condition: state
+            entity_id: alarm_control_panel.ha_alarm
+            state: 'disarmed'
+    action:
       - service: timer.cancel
         entity_id: timer.hall
       - service: timer.start
@@ -182,11 +204,13 @@ automation:
         at: '21:00:00'
     condition:
       - condition: state
-        entity_id: group.light_hall
+        entity_id: light.hall
         state: 'on'
     action:
+      - service: script.turn_on
+        entity_id: script.light_hall
       - service: light.turn_on
-        entity_id: group.light_hall
+        entity_id: light.hall
         data_template:
           brightness_pct: 1
 
