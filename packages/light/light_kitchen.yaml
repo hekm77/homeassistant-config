@@ -20,12 +20,19 @@ timer:
     duration: '01:00:00'
 
 
-# Вкл / выкл автоматизации освещения в Lovelace
 input_boolean:
+  # Вкл / выкл автоматизации освещения в Lovelace
   kitchen_automation:
     name: Кухня
     initial: on
     icon: mdi:home-automation
+
+
+# Скрипт
+script:
+  light_kitchen:
+    sequence:
+      - delay: 00:00:1.5
 
 
 # Автоматизации
@@ -49,6 +56,8 @@ automation:
           entity_id: timer.kitchen
           state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_kitchen
       - service: light.turn_on
         entity_id: light.kitchen
         data_template:
@@ -90,6 +99,8 @@ automation:
             entity_id: timer.kitchen
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_kitchen
       - service: light.turn_off
         entity_id: light.kitchen
 
@@ -121,6 +132,8 @@ automation:
             entity_id: timer.kitchen
             state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_kitchen
       - service: light.turn_off
         entity_id: light.kitchen
 
@@ -188,7 +201,7 @@ automation:
           color_temp: 250
 
 
-  # Включение 100% яркости / 4000K по по длинному нажатию
+  # Включение 100% яркости / 4000K по длинному нажатию
   - alias: kitchen_light_100_switch_long_press
     initial_state: true
     trigger:
@@ -205,14 +218,21 @@ automation:
           color_temp: 250
 
 
-  # Запуск таймера при любом нажатии
+  # Запуск таймера при включении / выключении вручную
   - alias: kitchen_timer
     initial_state: true
     trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_kitchen
+      - platform: state
+        entity_id: light.kitchen
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: script.light_kitchen
+            state: 'off'
+          - condition: state
+            entity_id: alarm_control_panel.ha_alarm
+            state: 'disarmed'
     action:
       - service: timer.cancel
         entity_id: timer.kitchen
@@ -227,10 +247,17 @@ automation:
       - platform: time
         at: '22:00:00'
     condition:
-      - condition: state
-        entity_id: light.kitchen
-        state: 'on'
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: light.kitchen
+            state: 'on'
+          - condition: state
+            entity_id: timer.kitchen
+            state: 'idle'
     action:
+      - service: script.turn_on
+        entity_id: script.light_kitchen
       - service: light.turn_on
         entity_id: light.kitchen
         data_template:
