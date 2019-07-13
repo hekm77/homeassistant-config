@@ -14,7 +14,7 @@ automation:
             value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
-            state: armed_away
+            state: 'armed_away'
     action:
       - condition: state
         entity_id: script.fake_presence
