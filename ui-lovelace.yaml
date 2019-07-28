@@ -32,8 +32,7 @@ resources:
     type: js
   - url: /local/lovelace/counter-card.js
     type: js
-  - url: /local/lovelace/text-header.js
-    type: module
+
 
 
 anchors:
@@ -42,6 +41,7 @@ anchors:
     style: |
       ha-card {
         border-radius: 10px;
+        border: solid 1px rgba(255, 255, 255, 0.15);
         overflow: hidden;
       }
 
@@ -134,11 +134,28 @@ views:
         cards:
           # Холл
           - type: entities
-            <<: *basic_card_style
+            title: Холл
+            show_header_toggle: false
+            style: |
+              ha-card {
+                border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/hall_reeder.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 9.8em;
+              }
+              .card-header {
+                color: var(--secondary-text-color);
+                font-size: 1.4em;
+                font-weight: 400;
+                padding: 24px 16px 16px 24px;
+                opacity: .75;
+                letter-spacing: var(--mcg-title-letter-spacing, normal);
+              }
             entities:
-              - type: custom:text-header
-                text: Холл
-              - entity: group.light_hall
+              - type: custom:slider-entity-row
+                entity: light.hall
+                toggle: true
                 name: Люстра
               - type: custom:slider-entity-row
                 entity: light.gateway_light_f0b429aa26cd
@@ -147,10 +164,25 @@ views:
 
           # Кухня
           - type: entities
-            <<: *basic_card_style
+            title: Кухня
+            show_header_toggle: false
+            style: |
+              ha-card {
+                border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/kitchen_reeder.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 9em;
+              }
+              .card-header {
+                color: var(--secondary-text-color);
+                font-size: 1.4em;
+                font-weight: 400;
+                padding: 24px 16px 16px 24px;
+                opacity: .75;
+                letter-spacing: var(--mcg-title-letter-spacing, normal);
+              }
             entities:
-              - type: custom:text-header
-                text: Кухня
               - type: custom:slider-entity-row
                 entity: light.kitchen
                 toggle: true
@@ -203,10 +235,25 @@ views:
 
           # Зал
           - type: entities
-            <<: *basic_card_style
+            title: Зал
+            show_header_toggle: false
+            style: |
+              ha-card {
+                border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/livingroom_reeder.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 14em;
+              }
+              .card-header {
+                color: var(--secondary-text-color);
+                font-size: 1.4em;
+                font-weight: 400;
+                padding: 24px 16px 16px 24px;
+                opacity: .75;
+                letter-spacing: var(--mcg-title-letter-spacing, normal);
+              }
             entities:
-              - type: custom:text-header
-                text: Зал
               - type: custom:slider-entity-row
                 entity: light.livingroom_1
                 toggle: true
@@ -226,21 +273,29 @@ views:
             entities:
               - type: custom:fold-entity-row
                 head: group.light_automation
-
-          # Тест
-          - type: entities
-            <<: *basic_card_style
-            entities:
-              - entity: input_boolean.test
-
       # Спальня
       - type: vertical-stack
         cards:
           - type: entities
-            <<: *basic_card_style
+            title: Спальня
+            show_header_toggle: false
+            style: |
+              ha-card {
+                border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/bedroom_reeder.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 9.8em;
+              }
+              .card-header {
+                color: var(--secondary-text-color);
+                font-size: 1.4em;
+                font-weight: 400;
+                padding: 24px 16px 16px 24px;
+                opacity: .75;
+                letter-spacing: var(--mcg-title-letter-spacing, normal);
+              }
             entities:
-              - type: custom:text-header
-                text: Спальня
               - type: custom:slider-entity-row
                 entity: light.bedroom
                 toggle: true
@@ -249,10 +304,25 @@ views:
 
           # Ванная
           - type: entities
-            <<: *basic_card_style
+            title: Ванная
+            show_header_toggle: false
+            style: |
+              ha-card {
+                border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/bathroom_reeder.png) no-repeat;
+                background-color: var(--paper-card-background-color);
+                background-size: 9em;
+              }
+              .card-header {
+                color: var(--secondary-text-color);
+                font-size: 1.4em;
+                font-weight: 400;
+                padding: 24px 16px 16px 24px;
+                opacity: .75;
+                letter-spacing: var(--mcg-title-letter-spacing, normal);
+              }
             entities:
-              - type: custom:text-header
-                text: Ванная
               - type: custom:slider-entity-row
                 entity: light.bathroom
                 toggle: true
@@ -328,9 +398,10 @@ views:
             style: |
               ha-card {
                 border-radius: 10px;
-                background: center / cover url(/local/icons/spotify.png) no-repeat;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/spotify_reeder.png) no-repeat;
                 background-color: var(--paper-card-background-color);
-                background-size: 235px 300px;
+                background-size: 14em;
               }
             entities:
               # Spotify Player 1
@@ -355,7 +426,19 @@ views:
         cards:
           # Сигнализация
           - type: custom:alarm_control_panel-card
-            <<: *basic_card_style
+            style: |
+              ha-card {
+                border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+              }
+              .card-header {
+                color: var(--secondary-text-color);
+                font-size: 1.4em;
+                font-weight: 400;
+                padding: 24px 16px 16px 20px;
+                opacity: .75;
+                letter-spacing: var(--mcg-title-letter-spacing, normal);
+              }
             entity: alarm_control_panel.ha_alarm
             hide_keypad: true
             title: Сигнализация
@@ -378,7 +461,14 @@ views:
 
       # Датчики
       - type: entities
-        <<: *basic_card_style
+        style: |
+          ha-card {
+            border-radius: 10px;
+            border: solid 1px rgba(255, 255, 255, 0.15);
+            background: center / cover url(/local/icons/shield_reeder.png) no-repeat;
+            background-color: var(--paper-card-background-color);
+            background-size: 9.8em;
+          }
         entities:
           - entity: binary_sensor.front_door_sensor
             secondary_info: last-changed
@@ -400,6 +490,7 @@ views:
             style: |
               ha-card {
                 border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
                 --paper-item-icon-color: [[ if(person.user_1 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
               }
             entities:
@@ -410,6 +501,7 @@ views:
             style: |
               ha-card {
                 border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
                 --paper-item-icon-color: [[ if(person.user_2 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
               }
             entities:
@@ -420,6 +512,7 @@ views:
             style: |
               ha-card {
                 border-radius: 10px;
+                border: solid 1px rgba(255, 255, 255, 0.15);
                 --paper-item-icon-color: [[ if(person.user_3 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
               }
             entities:
@@ -435,7 +528,7 @@ views:
         cards:
           # Зал Температура
           - <<: *graph_card
-            line_color: '#EA811D'
+            line_color: '#F7BE4F'
             height: 120
             show:
               name: true
@@ -445,7 +538,7 @@ views:
 
           # Зал Влажность
           - <<: *graph_card
-            line_color: var(--primary-color)
+            line_color: '#2980B9'
             height: 120
             show:
               name: true
@@ -465,9 +558,10 @@ views:
             style: |
               ha-card {
                 border-radius: 10px;
-                background: center / cover url(/local/icons/ha.png) no-repeat;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/ha_reeder.png) no-repeat;
                 background-color: var(--paper-card-background-color);
-                background-size: 266px 340px;
+                background-size: 14em;
               }
             entities:
               - entity: sensor.time
@@ -486,9 +580,10 @@ views:
             style: |
               ha-card {
                 border-radius: 10px;
-                background: center / cover url(/local/icons/rpi.png) no-repeat;
+                border: solid 1px rgba(255, 255, 255, 0.15);
+                background: center / cover url(/local/icons/rpi_reeder.png) no-repeat;
                 background-color: var(--paper-card-background-color);
-                background-size: 200px 255px;
+                background-size: 14em;
               }
             entities:
               - entity: sensor.command_sensor
@@ -506,10 +601,8 @@ views:
             <<: *basic_card_style
             entities:
               - type: custom:fold-entity-row
-                head:
-                  entity: sensor.battery_level_card_header
-                  icon: mdi:car-battery
-                items:
+                head: sensor.battery_level_card_header
+                entities:
                   - sensor.front_door_sensor_battery_level
                   - sensor.motion_sensor_hall_battery_level
                   - sensor.motion_sensor_livingroom_battery_level
@@ -526,40 +619,47 @@ views:
 
           # Epson PX720WD
           - type: entities
-            <<: *basic_card_style
+            style:
+              .: |
+                ha-card {
+                  border-radius: 10px;
+                  border: solid 1px rgba(255, 255, 255, 0.15);
+                }
             entities:
               - type: custom:fold-entity-row
-                head:
-                  entity: sensor.epson
-                  icon: mdi:printer
-                items:
-                   - type: custom:card-modder
-                     style:
-                       box-shadow: none
-                     card:
-                       type: custom:bar-card
-                       columns: 6
-                       direction: up
-                       entities:
-                         - entity: sensor.epson_ink_level_cyan
-                           color: rgb(0, 255, 255)
-                         - entity: sensor.epson_ink_level_yellow
-                           color: rgb(255, 255, 0)
-                         - entity: sensor.epson_ink_level_light_cyan
-                           color: rgb(204, 255, 255)
-                         - entity: sensor.epson_ink_level_black
-                           color: rgb(0, 0, 0)
-                         - entity: sensor.epson_ink_level_magenta
-                           color: rgb(255, 0, 255)
-                         - entity: sensor.epson_ink_level_light_magenta
-                           color: rgb(231, 139, 231)
-                       height: 200px
-                       max: 100
-                       min: 0
-                       padding: 2px
-                       title_position: 'off'
-                       icon_position: inside
-                       width: 100%
+                head: binary_sensor.epson_px720wd
+                entities:
+                  - type: custom:hui-entities-card
+                    style: |
+                      ha-card {
+                        --ha-card-box-shadow: none;
+                      }
+                    entities:
+                      - type: custom:hui-vertical-stack-card
+                        cards:
+                          - type: custom:bar-card
+                            columns: 6
+                            direction: up
+                            entities:
+                              - entity: sensor.epson_ink_level_cyan
+                                color: rgb(0, 255, 255)
+                              - entity: sensor.epson_ink_level_yellow
+                                color: rgb(255, 255, 0)
+                              - entity: sensor.epson_ink_level_light_cyan
+                                color: rgb(204, 255, 255)
+                              - entity: sensor.epson_ink_level_black
+                                color: rgb(0, 0, 0)
+                              - entity: sensor.epson_ink_level_magenta
+                                color: rgb(255, 0, 255)
+                              - entity: sensor.epson_ink_level_light_magenta
+                                color: rgb(231, 139, 231)
+                            height: 200px
+                            max: 100
+                            min: 0
+                            padding: 2px
+                            title_position: 'off'
+                            icon_position: inside
+                            width: 100%
 
           # Освещенность
           - <<: *graph_card
@@ -580,12 +680,35 @@ views:
         cards:
           # Потребляемая мощность
           - type: entities
-            <<: *basic_card_style
+            style:
+              .: |
+                ha-card {
+                  border-radius: 10px;
+                  border: solid 1px rgba(255, 255, 255, 0.15);
+                }
+              "#states div":
+                fold-entity-row:
+                  $:
+                   "#head":
+                     entity-row-maker:
+                       hui-section-row:
+                         $: |
+                           div.divider {
+                             height: 0px;
+                           }
+                           div.label {
+                             color: var(--secondary-text-color);
+                             font-size: 1.2em;
+                             font-weight: 400;
+                             opacity: .75;
+                             letter-spacing: var(--mcg-title-letter-spacing, normal);
+                           }
             entities:
               - type: custom:fold-entity-row
                 head:
-                  entity: sensor.power_total_card_header
-                items:
+                  type: section
+                  label: Потребляемая мощность
+                entities:
                   - sensor.power_smart_plug_bedroom
                   - sensor.power_smart_plug_camera
                   - sensor.power_light_hall_1
@@ -623,12 +746,35 @@ views:
         cards:
           # Энергопотребление за месяц
           - type: entities
-            <<: *basic_card_style
+            style:
+              .: |
+                ha-card {
+                  border-radius: 10px;
+                  border: solid 1px rgba(255, 255, 255, 0.15);
+                }
+              "#states div":
+                fold-entity-row:
+                  $:
+                   "#head":
+                     entity-row-maker:
+                       hui-section-row:
+                         $: |
+                           div.divider {
+                             height: 0px;
+                           }
+                           div.label {
+                             color: var(--secondary-text-color);
+                             font-size: 1.2em;
+                             font-weight: 400;
+                             opacity: .75;
+                             letter-spacing: var(--mcg-title-letter-spacing, normal);
+                           }
             entities:
               - type: custom:fold-entity-row
                 head:
-                  entity: sensor.energy_monthly_total_card_header
-                items:
+                  type: section
+                  label: Энергопотребление за месяц
+                entities:
                   - sensor.energy_monthly_smart_plug_bedroom
                   - sensor.energy_monthly_smart_plug_camera
                   - sensor.energy_monthly_light_hall_1
@@ -807,7 +953,7 @@ views:
           # График температуры
           - <<: *graph_card
             height: 80
-            line_color: '#EA811D'
+            line_color: '#F7BE4F'
             show:
               icon: false
               extrema: true
