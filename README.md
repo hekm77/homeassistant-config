@@ -32,14 +32,14 @@
 * Установка, обновление пользовательских карт / компонентов / python-скриптов
   * [HACS](https://custom-components.github.io/hacs/)
 ## Home Assistant Lovelace UI
-На скриншотах измененная тема [midnight](https://community.home-assistant.io/t/midnight-theme/28598)
+На скриншотах тема [reeder](https://github.com/hekm77/homeassistant-config/blob/master/themes/reeder.yaml)
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_1.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_2.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_3.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_4.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_5.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_6.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_8.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_7.png" alt="Home Assistant Lovelace UI" />
 
 ### Кастомные карты Lovelace
 * [alarm-control-panel-card](https://github.com/ciotlosm/custom-lovelace/tree/master/alarm_control_panel-card)
