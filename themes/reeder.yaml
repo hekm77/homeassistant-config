@@ -1,7 +1,7 @@
 reeder:
   # Main colors
   primary-color: "#888888"                     # Header
-  accent-color: "#F7BE4F"                      # Accent color
+  accent-color: "#C29356"                      # Accent color
   dark-primary-color: "var(--accent-color)"    # Hyperlinks
   light-primary-color: "var(--accent-color)"   # Horizontal line in about
 
