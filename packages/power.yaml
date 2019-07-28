@@ -2,9 +2,6 @@
 homeassistant:
   customize:
     # Сенсоры энергопотребления
-    sensor.energy_monthly_total_card_header:
-      friendly_name: Энергопотребление за месяц
-      icon: mdi:counter
     sensor.energy_monthly_smart_plug_bedroom:
       friendly_name: Розетка
     sensor.energy_monthly_smart_plug_camera:
@@ -32,9 +29,6 @@ homeassistant:
       friendly_name: За год
 
     # Сенсоры потребляемой мощности
-    sensor.power_total_card_header:
-      friendly_name: Потребляемая мощность
-      icon: mdi:flash-circle
     sensor.power_total:
       friendly_name: Потребляемая мощность
       icon: mdi:flash-circle
@@ -339,10 +333,6 @@ sensor:
     unit_prefix: k
   - platform: template
     sensors:
-      # Заголовок карты "Потребляемая мощность"
-      power_total_card_header:
-        entity_id: sensor.date
-        value_template: ' '
       # Общая потребляемая мощность
       power_total:
         value_template: "{{ (states('sensor.power_smart_plug_bedroom') | float
@@ -359,9 +349,6 @@ sensor:
   # Заголовок карты "Энергопотребление за месяц"
   - platform: template
     sensors:
-      energy_monthly_total_card_header:
-        entity_id: sensor.date
-        value_template: ' '
   # Общее энергопотребление
   - platform: integration
     source: sensor.power_total
