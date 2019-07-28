@@ -273,6 +273,7 @@ views:
             entities:
               - type: custom:fold-entity-row
                 head: group.light_automation
+                
       # Спальня
       - type: vertical-stack
         cards:
