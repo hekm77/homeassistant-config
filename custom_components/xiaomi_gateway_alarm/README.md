@@ -1,4 +1,9 @@
 # Xiaomi Gateway Alarm
+
+This custom component is based on [Xiaomi Raw](https://github.com/syssi/xiaomi_raw)
+
+Credits: Thanks to [Rytilahti](https://github.com/rytilahti/python-miio) and [syssi](https://github.com/syssi/xiaomi_raw)
+
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/switch_xiaomi_gateway_alarm.png" alt="Home Assistant Lovelace UI" 
 />
 ### Installation
