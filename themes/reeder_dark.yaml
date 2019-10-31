@@ -10,7 +10,6 @@ reeder_dark:
   text-primary-color: "var(--primary-text-color)"
   secondary-text-color: "rgba(255, 255, 255, 0.7)"
   disabled-text-color: "var(--primary-color)"
-  mcg-title-letter-spacing: ".05em"
 
   # Background / sidebar
   primary-background-color: "#464646"
@@ -30,10 +29,12 @@ reeder_dark:
   sidebar-selected-text-color: "var(--primary-text-color)"
   sidebar-selected-icon-color: "var(--primary-text-color)"
 
-  # Paper card
-  paper-card-header-color: "var(--accent-color)"
+  # Card
+  ha-card-header-color: "rgba(255, 255, 255, 0.6)"
+  ha-card-header-font-size: "1.4em"
+  ha-card-background: "#4C4C4C"
   paper-card-background-color: "#4C4C4C"
-  card-background-color: "var(--paper-card-background-color)"
+  card-background-color: "var(--ha-card-background)"
   paper-listbox-background-color: "#333333"
   paper-dialog-background-color: "#333333"
   paper-item-icon-color: "var(--primary-text-color)"
@@ -60,12 +61,10 @@ reeder_dark:
   label-badge-text-color: "var(--primary-text-color)"
 
   # Switches
-  paper-toggle-button-checked-button-color: "var(--accent-color)"
-  paper-toggle-button-checked-bar-color: "var(--primary-text-color)"
-  paper-toggle-button-checked-ink-color: "var(--accent-color)"
-  paper-toggle-button-unchecked-button-color: "var(--primary-color)"
-  paper-toggle-button-unchecked-bar-color: "var(--primary-color)"
-  paper-toggle-button-unchecked-ink-color: "var(--primary-color)"
+  switch-checked-color: "var(--accent-color)"
+  switch-unchecked-color: "var(--primary-color)"
+  switch-unchecked-button-color: "var(--primary-color)"
+  switch-unchecked-track-color: "var(--primary-color)"
 
   # Sliders
   paper-slider-knob-color: "var(--accent-color)"
@@ -104,3 +103,14 @@ reeder_dark:
   lumo-shade-10pct: "rgba(0,0,0, .1)"
   lumo-shade-5pct: "rgba(255,255,255, .05)"
   lumo-tint-5pct: "#333333"
+
+  # HACS
+  hacs-badge-color: "#2980B9"
+  hacs-badge-text-color: "var(--text-primary-color)"
+  hacs-status-installed: "var(--google-green-500)"
+  hacs-status-pending-restart: "var(--google-red-500)"
+  hacs-status-pending-update: "#FFA73B"
+
+  # Mini Graph Card
+  mcg-title-letter-spacing: ".05em"
+  mcg-title-font-weight: "500"
