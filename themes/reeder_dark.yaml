@@ -7,8 +7,8 @@ reeder_dark:
 
   # Text
   primary-text-color: "#FFFFFF"
-  text-primary-color: "var(--primary-text-color)"
-  secondary-text-color: "rgba(255, 255, 255, 0.7)"
+  text-primary-color: "#FFFFFF"
+  secondary-text-color: "#C1C1C1"
   disabled-text-color: "var(--primary-color)"
 
   # Background / sidebar
@@ -30,18 +30,19 @@ reeder_dark:
   sidebar-selected-icon-color: "var(--primary-text-color)"
 
   # Card
-  ha-card-header-color: "rgba(255, 255, 255, 0.6)"
+  ha-card-header-color: "var(--secondary-text-color)"
   ha-card-header-font-size: "1.4em"
-  ha-card-background: "#4C4C4C"
+  ha-card-background: "var(--paper-card-background-color)"
   paper-card-background-color: "#4C4C4C"
   card-background-color: "var(--ha-card-background)"
   paper-listbox-background-color: "#333333"
   paper-dialog-background-color: "#333333"
   paper-item-icon-color: "var(--primary-text-color)"
   paper-item-icon-active-color: "var(--accent-color)"
-  paper-item-icon_-_color: "#62C454"
+  state-icon-unavailable-color: "var(--google-red-500)"
+  paper-item-icon_-_color: "var(--google-green-500)"
   paper-item-selected_-_background-color: "#333333"
-  paper-tabs-selection-bar-color: "#62C454"
+  paper-tabs-selection-bar-color: "var(--google-green-500)"
 
   # Card shadow / border
   ha-card-box-shadow: "0px 5px 5px rgba(0, 0, 0, .3), inset 0px 0px 1px rgba(255, 255, 255, 0.5)"
@@ -55,13 +56,17 @@ reeder_dark:
 
   # Labels
   ha-label-badge-color: "var(--accent-color)"
-  label-badge-red: "var(--accent-color)"
-  label-badge-border-color: "#62C454"
+  label-badge-border-color: "var(--google-green-500)"
   label-badge-background-color: "#464646"
   label-badge-text-color: "var(--primary-text-color)"
+  label-badge-green: "var(--google-green-500)"
+  label-badge-red: "var(--google-red-500)"
+  label-badge-yellow: "var(--accent-color)"
+  label-badge-blue: "#09C6D5"
 
   # Switches
-  switch-checked-color: "var(--accent-color)"
+  switch-checked-color: "#BBBBBB"
+  switch-checked-button-color: "var(--accent-color)"
   switch-unchecked-color: "var(--primary-color)"
   switch-unchecked-button-color: "var(--primary-color)"
   switch-unchecked-track-color: "var(--primary-color)"
@@ -78,20 +83,20 @@ reeder_dark:
 
   # Google
   google-red-500: "#E45E65"
-  google-green-500: "#39E949"
+  google-green-500: "#0EE770"
 
   # History / Logbook
   lumo-primary-text-color: "var(--primary-text-color)"
   lumo-secondary-text-color: "#333333"
-  lumo-primary-color: "#FFFFFF"
+  lumo-primary-color: "var(--primary-text-color)"
   lumo-primary-contrast-color: "var(--lumo-secondary-text-color)"
   lumo-primary-color-50pct: "rgba(255, 255, 255, .5)"
   lumo-primary-color-10pct: "rgba(255, 255, 255, .1)"
   lumo-body-text-color: "var(--primary-text-color)"
-  lumo-base-color: "#333333"
+  lumo-base-color: "var(--lumo-secondary-text-color)"
   lumo-header-text-color: "var(--secondary-text-color)"
   lumo-tertiary-text-color: "var(--lumo-body-text-color)"
-  lumo-shade: "#333333"
+  lumo-shade: "var(--lumo-secondary-text-color)"
   lumo-shade-90pct: "rgba(0,0,0, .9)"
   lumo-shade-80pct: "rgba(0,0,0, .8)"
   lumo-shade-70pct: "rgba(0,0,0, .7)"
@@ -102,10 +107,10 @@ reeder_dark:
   lumo-shade-20pct: "rgba(0,0,0, .2)"
   lumo-shade-10pct: "rgba(0,0,0, .1)"
   lumo-shade-5pct: "rgba(255,255,255, .05)"
-  lumo-tint-5pct: "#333333"
+  lumo-tint-5pct: "var(--lumo-secondary-text-color)"
 
   # HACS
-  hacs-badge-color: "#2980B9"
+  hacs-badge-color: "#09C6D5"
   hacs-badge-text-color: "var(--text-primary-color)"
   hacs-status-installed: "var(--google-green-500)"
   hacs-status-pending-restart: "var(--google-red-500)"
@@ -114,3 +119,6 @@ reeder_dark:
   # Mini Graph Card
   mcg-title-letter-spacing: ".05em"
   mcg-title-font-weight: "500"
+
+  # Mini Media Player
+  mini-media-player-icon-color: "var(--primary-text-color)"
