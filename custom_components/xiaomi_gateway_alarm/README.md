@@ -20,3 +20,4 @@ switch:
     host: 192.168.1.x
     token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx # Gateway token
 ```
+[Retrieving the Access Token](https://www.home-assistant.io/integrations/vacuum.xiaomi_miio/#retrieving-the-access-token)
