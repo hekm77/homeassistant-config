@@ -46,6 +46,8 @@ automation:
             entity_id: timer.bathroom
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_bathroom
       - service: script.turn_on
         entity_id: script.light_bathroom
       - service: light.turn_on
@@ -84,6 +86,8 @@ automation:
             entity_id: timer.bathroom
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_bathroom
       - service: script.turn_on
         entity_id: script.light_bathroom
       - service: light.turn_off
@@ -117,6 +121,8 @@ automation:
             entity_id: timer.bathroom
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_bathroom
       - service: script.turn_on
         entity_id: script.light_bathroom
       - service: light.turn_off
@@ -200,12 +206,35 @@ automation:
           - condition: state
             entity_id: script.light_bathroom
             state: 'off'
+          - condition: template
+            value_template: "{{ states('sensor.online') | int > 1 }}"
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
             state: 'disarmed'
     action:
       - service: timer.cancel
         entity_id: timer.bathroom
+
+
+  # Увеличение яркости в заданное время
+  - alias: bathroom_light_increase
+    initial_state: true
+    trigger:
+      - platform: time
+        at: '05:00:00'
+    condition:
+      - condition: state
+        entity_id: light.bathroom
+        state: 'on'
+    action:
+      - service: script.turn_off
+        entity_id: script.light_bathroom
+      - service: script.turn_on
+        entity_id: script.light_bathroom
+      - service: light.turn_on
+        entity_id: light.bathroom
+        data_template:
+          brightness_pct: 100
 
 
   # Включение / выключение автоматизации переключателем в Lovelace
