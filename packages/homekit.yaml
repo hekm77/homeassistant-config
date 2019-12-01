@@ -1,27 +1,31 @@
 # HomeKit Config
 homekit:
-  auto_start: false
+  auto_start: False
   safe_mode: true
   filter:
-    include_domains:
-      - light
-      - media_player
-      - scene
-      - switch
-    exclude_entities:
-      - light.all
-      - light.hall_1
-      - light.hall_2
-      - media_player.sony_ht_nt5
-      - switch.smart_plug_camera
-      - switch.panic_light
-      - scene.light_off_livingroom
-      - scene.panic_light_off
-      - scene.panic_light_on
     include_entities:
+      - light.hall
+      - light.livingroom_1
+      - light.livingroom_2
+      - light.window_livingroom
+      - light.kitchen
+      - light.bedroom
+      - light.bathroom
+      - light.gateway_light
+      - media_player.dunehd
+      - media_player.sony_htnt5
+      - media_player.sony_bravia_tv
+      - script.dunehd_fastforward
+      - script.dunehd_play_pause
+      - script.sony_htnt5_volume_mute
+      - script.light_livingroom_bright
+      - script.light_livingroom_movie
+      - script.light_livingroom_night
+      - switch.smart_plug_bedroom
       - input_boolean.dfi
       - input_boolean.ott_club
       - input_boolean.kinopub
+      - input_boolean.youtube
   entity_config:
     media_player.sony_bravia_tv:
       name: Зал Телевизор
@@ -35,21 +39,15 @@ homekit:
       name: Зал Саундбар
       feature_list:
         - feature: on_off
-    input_boolean.dfi:
-      name: Зал Кинозал
-    input_boolean.ott_club:
-      name: Зал ОТТ Клуб
-    input_boolean.kinopub:
-      name: Зал Кинопаб
     switch.smart_plug_bedroom:
       name: Спальня Розетка
       type: outlet
-    scene.bright_livingroom:
-      name: Ярко
-    scene.movie_livingroom:
-      name: Кино
-    scene.night_light_livingroom:
-      name: Ночник
+    script.light_livingroom_bright:
+      name: Сцена Ярко
+    script.light_livingroom_movie:
+      name: Сцена Кино
+    script.light_livingroom_night:
+      name: Сцена Ночь
 
 
 # Автоматизация
