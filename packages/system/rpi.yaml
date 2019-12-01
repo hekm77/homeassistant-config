@@ -13,10 +13,10 @@ homeassistant:
     sensor.disk_free_home:
       friendly_name: Свободно /home
       icon: mdi:micro-sd
-    script.reboot_pi:
+    script.pi_reboot:
       friendly_name: Перезагрузка
       icon: mdi:restart
-    script.shutdown_pi:
+    script.pi_shutdown:
       friendly_name: Выключение
       icon: mdi:power-off
 
@@ -24,9 +24,9 @@ homeassistant:
 # Команды
 shell_command:
   # Перезагрузка Raspberry Pi
-  reboot_pi: '/usr/bin/sudo /sbin/shutdown -r now'
+  pi_reboot: ssh -p your_port root@192.168.1.x "sudo shutdown -r now"
   # Выключение Raspberry Pi
-  shutdown_pi: '/usr/bin/sudo /sbin/shutdown now'
+  pi_shutdown: ssh -p your_port root@192.168.1.x "sudo shutdown now"
 
 
 # Сенсоры
@@ -49,10 +49,12 @@ sensor:
 # Скрипты
 script:
   # Перезагрузка Raspberry Pi в Lovelace
-  reboot_pi:
+  pi_reboot:
     sequence:
-      - service: shell_command.reboot_pi
+      - delay: 00:00:0.5
+      - service: shell_command.pi_reboot
   # Выключение Raspberry Pi в Lovelace
-  shutdown_pi:
+  pi_shutdown:
     sequence:
-      - service: shell_command.shutdown_pi
+      - delay: 00:00:0.5
+      - service: shell_command.pi_shutdown
