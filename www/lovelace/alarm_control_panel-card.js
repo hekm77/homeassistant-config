@@ -7,9 +7,9 @@ class AlarmControlPanelCard extends HTMLElement {
       'armed_custom_bypass': 'mdi:security',
       'armed_home': 'mdi:shield-home',
       'armed_night': 'mdi:shield-home',
-      'disarmed': 'mdi:shield-check',
+      'disarmed': 'mdi:shield-off',
       'pending': 'mdi:shield-outline',
-      'triggered': 'hass:bell-ring',
+      'triggered': 'mdi:bell-ring',
     }
   }
 
@@ -284,10 +284,10 @@ class AlarmControlPanelCard extends HTMLElement {
         ${(this._config.hide_keypad ||
 	   !entity.attributes.code_format) ? 'padding-bottom: 16px;' : '' }
         position: relative;
-        --alarm-color-disarmed: var(--label-badge-green);
+        --alarm-color-disarmed: var(--secondary-text-color);
         --alarm-color-pending: var(--label-badge-yellow);
         --alarm-color-triggered: var(--label-badge-red);
-        --alarm-color-armed: var(--label-badge-red);
+        --alarm-color-armed: var(--label-badge-green);
         --alarm-color-autoarm: rgba(0, 153, 255, .1);
         --alarm-state-color: var(--alarm-color-armed);
         --base-unit: ${this._config.scale};
@@ -296,13 +296,13 @@ class AlarmControlPanelCard extends HTMLElement {
       }
       ha-icon {
         color: var(--alarm-state-color);
-	width: 24px;
-	height: 24px;
+	      width: 24px;
+	      height: 24px;
       }
       ha-label-badge-icon {
         --ha-label-badge-color: var(--alarm-state-color);
         --label-badge-text-color: var(--alarm-state-color);
-        --label-badge-background-color: var(--paper-card-background-color);
+        --label-badge-background-color: var(--ha-card-background);
         color: var(--alarm-state-color);
         position: absolute;
         right: 12px;
@@ -375,6 +375,9 @@ class AlarmControlPanelCard extends HTMLElement {
         text-overflow: ellipsis;
         line-height: normal;
       }
+      .armed {
+        --alarm-state-color: var(--alarm-color-armed);
+      }
       .disarmed {
         --alarm-state-color: var(--alarm-color-disarmed);
       }
@@ -435,10 +438,10 @@ class AlarmControlPanelCard extends HTMLElement {
       .actions mwc-button {
         min-width: calc(var(--base-unit) * 9);
         color: var(--primary-color);
-		margin-top: 0px;
-		margin-right: 4px;
-		margin-bottom: 0px;
-		margin-left: 4px;
+		    margin-top: 0px;
+		    margin-right: 4px;
+		    margin-bottom: 0px;
+		    margin-left: 4px;
       }
       .actions .autoarm {
         background: var(--alarm-color-autoarm);
