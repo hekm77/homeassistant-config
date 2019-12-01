@@ -72,6 +72,8 @@ automation:
             entity_id: timer.hall
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_hall
       - service: script.turn_on
         entity_id: script.light_hall
       - service: light.turn_on
@@ -108,6 +110,8 @@ automation:
             entity_id: timer.hall
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_hall
       - service: script.turn_on
         entity_id: script.light_hall
       - service: light.turn_off
@@ -207,6 +211,8 @@ automation:
         entity_id: light.hall
         state: 'on'
     action:
+      - service: script.turn_off
+        entity_id: script.light_hall
       - service: script.turn_on
         entity_id: script.light_hall
       - service: light.turn_on
