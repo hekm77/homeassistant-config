@@ -6,18 +6,25 @@ homeassistant:
       icon: mdi:car-battery
     sensor.front_door_sensor_battery_level:
       friendly_name: Входная дверь
+      icon: mdi:door
     sensor.motion_sensor_hall_battery_level:
       friendly_name: Холл ДД
+      icon: mdi:run-fast
     sensor.motion_sensor_livingroom_battery_level:
       friendly_name: Зал ДД
+      icon: mdi:run-fast
     sensor.motion_sensor_kitchen_battery_level:
       friendly_name: Кухня ДД
+      icon: mdi:run-fast
     sensor.motion_sensor_bathroom_battery_level:
       friendly_name: Ванная ДД
+      icon: mdi:run-fast
     sensor.motion_sensor_bedroom_battery_level:
       friendly_name: Спальня ДД
+      icon: mdi:run-fast
     sensor.temperature_livingroom_battery_level:
       friendly_name: Зал Климат
+      icon: mdi:thermometer
     sensor.tradfri_wireless_dimmer_battery_level:
       friendly_name: Холл Диммер
       icon: mdi:power-off
@@ -60,56 +67,13 @@ group:
       - sensor.temperature_livingroom_battery_level
 
 
-# Сенсоры уровня заряда батареи датчиков
+# Заголовок карты
 sensor:
   - platform: template
     sensors:
-      # Заголовок карты
       battery_level_card_header:
         entity_id: sensor.date
         value_template: ' '
-      # Входная дверь
-      front_door_sensor_battery_level:
-        entity_id: binary_sensor.front_door_sensor
-        value_template: "{{ state_attr('binary_sensor.front_door_sensor', 'battery_level') | round(0) }}"
-        icon_template: mdi:door
-        unit_of_measurement: '%'
-      # Холл ДД
-      motion_sensor_hall_battery_level:
-        entity_id: binary_sensor.motion_sensor_hall
-        value_template: "{{ state_attr('binary_sensor.motion_sensor_hall', 'battery_level') | round(0) }}"
-        icon_template: mdi:run-fast
-        unit_of_measurement: '%'
-      # Зал ДД
-      motion_sensor_livingroom_battery_level:
-        entity_id: binary_sensor.motion_sensor_livingroom
-        value_template: "{{ state_attr('binary_sensor.motion_sensor_livingroom', 'battery_level') | round(0) }}"
-        icon_template: mdi:run-fast
-        unit_of_measurement: '%'
-      # Кухня ДД
-      motion_sensor_kitchen_battery_level:
-        entity_id: binary_sensor.motion_sensor_kitchen
-        value_template: "{{ state_attr('binary_sensor.motion_sensor_kitchen', 'battery_level') | round(0) }}"
-        icon_template: mdi:run-fast
-        unit_of_measurement: '%'
-      # Ванная ДД
-      motion_sensor_bathroom_battery_level:
-        entity_id: binary_sensor.motion_sensor_bathroom
-        value_template: "{{ state_attr('binary_sensor.motion_sensor_bathroom', 'battery_level') | round(0) }}"
-        icon_template: mdi:run-fast
-        unit_of_measurement: '%'
-      # Спальня ДД
-      motion_sensor_bedroom_battery_level:
-        entity_id: binary_sensor.motion_sensor_bedroom
-        value_template: "{{ state_attr('binary_sensor.motion_sensor_bedroom', 'battery_level') | round(0) }}"
-        icon_template: mdi:run-fast
-        unit_of_measurement: '%'
-      # Датчик температуры в зале
-      temperature_livingroom_battery_level:
-        entity_id: sensor.temperature_livingroom
-        value_template: "{{ state_attr('sensor.temperature_livingroom', 'battery_level') | round(0) }}"
-        icon_template: mdi:thermometer
-        unit_of_measurement: '%'
 
 
 # Автоматизации
