@@ -1,13 +1,14 @@
+# Кастомизация
 homeassistant:
   customize:
     binary_sensor.desktop:
       friendly_name: Desktop
       icon: mdi:desktop-classic
 
-
+# Сенсор
 binary_sensor:
   - platform: ping
     host: 192.168.1.x
     name: Desktop
     count: 2
-    scan_interval: 90
+    scan_interval: 30
