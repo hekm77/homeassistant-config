@@ -10,6 +10,16 @@ homeassistant:
     light.window_livingroom:
       friendly_name: Зал Окно
       icon: mdi:lamp
+    # Сцены освещения
+    script.light_livingroom_bright:
+      friendly_name: Ярко
+      icon: mdi:brightness-7
+    script.light_livingroom_movie:
+      friendly_name: Кино
+      icon: mdi:movie-roll
+    script.light_livingroom_night:
+      friendly_name: Ночь
+      icon: mdi:weather-night
 
 
 # Yeelight
@@ -39,11 +49,60 @@ input_boolean:
     icon: mdi:home-automation
 
 
-# Скрипт
+# Скрипты
 script:
   light_livingroom:
     sequence:
       - delay: 00:00:1.5
+
+
+  # Ярко
+  light_livingroom_bright:
+    sequence:
+      - service: light.turn_on
+        entity_id:
+          - light.livingroom_1
+          - light.livingroom_2
+        data:
+          brightness_pct: 100
+          color_temp: 250
+          transition: 3
+
+
+  # Кино
+  light_livingroom_movie:
+    sequence:
+      - service: light.turn_on
+        entity_id: light.livingroom_2
+        data:
+          brightness_pct: 15
+          rgb_color: [102, 102, 255]
+          transition: 3
+      - condition: state
+        entity_id: light.livingroom_1
+        state: 'on'
+      - service: light.turn_off
+        entity_id: light.livingroom_1
+        data:
+          transition: 3
+
+
+  # Ночь
+  light_livingroom_night:
+    sequence:
+      - service: light.turn_on
+        entity_id: light.livingroom_2
+        data:
+          brightness_pct: 1
+          color_temp: 588
+          transition: 3
+      - condition: state
+        entity_id: light.livingroom_1
+        state: 'on'
+      - service: light.turn_off
+        entity_id: light.livingroom_1
+        data:
+          transition: 3
 
 
 # Автоматизации
@@ -267,6 +326,8 @@ automation:
                 entity_id: light.livingroom_2
                 state: 'on'
     action:
+      - service: script.turn_off
+        entity_id: script.light_livingroom
       - service: script.turn_on
         entity_id: script.light_livingroom
       - service: light.turn_off
@@ -283,8 +344,9 @@ automation:
   - alias: livingroom_2_light_on
     initial_state: true
     trigger:
-      - platform: template
-        value_template: "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
+      - platform: time_pattern
+        minutes: '/5'
+        seconds: 00
     condition:
       - condition: and
         conditions:
@@ -292,9 +354,11 @@ automation:
             conditions:
               - condition: sun
                 after: sunset
-                after_offset: "-00:30:00"
+                after_offset: '-00:30:00'
               - condition: time
                 before: '22:50:00'
+          - condition: template
+            value_template: "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
           - condition: state
             entity_id: light.livingroom_2
             state: 'off'
@@ -305,6 +369,8 @@ automation:
             entity_id: alarm_control_panel.ha_alarm
             state: 'disarmed'
     action:
+      - service: script.turn_off
+        entity_id: script.light_livingroom
       - service: script.turn_on
         entity_id: script.light_livingroom
       - service: light.turn_on
@@ -319,8 +385,9 @@ automation:
   - alias: livingroom_window_light_on
     initial_state: true
     trigger:
-      - platform: template
-        value_template: "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
+      - platform: time_pattern
+        minutes: '/5'
+        seconds: 00
     condition:
       - condition: and
         conditions:
@@ -328,14 +395,18 @@ automation:
             conditions:
               - condition: sun
                 after: sunset
-                after_offset: "-00:30:00"
+                after_offset: '-00:30:00'
               - condition: time
                 before: '22:50:00'
+          - condition: template
+            value_template: "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
           - condition: state
             entity_id: light.window_livingroom
             state: 'off'
     action:
       - delay: 00:00:05
+      - service: script.turn_off
+        entity_id: script.light_livingroom
       - service: script.turn_on
         entity_id: script.light_livingroom
       - service: light.turn_on
@@ -356,6 +427,8 @@ automation:
           - condition: state
             entity_id: script.light_livingroom
             state: 'off'
+          - condition: template
+            value_template: "{{ states('sensor.online') | int > 1 }}"
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
             state: 'disarmed'
@@ -371,28 +444,33 @@ automation:
     initial_state: true
     trigger:
       - platform: time
-        at: '23:00:00'
+        at: '23:00'
       - platform: time
-        at: '23:00:05'
+        at: '23:01'
     condition:
       - condition: or
         conditions:
-          - condition: state
-            entity_id: light.livingroom_2
-            state: 'on'
-          - condition: state
-            entity_id: light.window_livingroom
-            state: 'on'
+          - condition: template
+            value_template: "{{ trigger.now.minute == 0 and is_state('light.window_livingroom', 'on') }}"
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: timer.livingroom_2
+                state: 'idle'
+              - condition: template
+                value_template: "{{ trigger.now.minute == 1 and is_state('light.livingroom_2', 'on') }}"
     action:
+      - service: script.turn_off
+        entity_id: script.light_livingroom
       - service: script.turn_on
         entity_id: script.light_livingroom
       - service: light.turn_off
         data_template:
           entity_id: >
-            {% if is_state('light.livingroom_2', 'on') and is_state('timer.livingroom_2', 'idle') %}
-              light.livingroom_2
-            {% elif is_state('light.window_livingroom', 'on') %}
+            {% if trigger.now.minute == 0 %}
               light.window_livingroom
+            {% else %}
+              light.livingroom_2
             {% endif %}
 
 
@@ -403,34 +481,31 @@ automation:
       - platform: time
         at: '21:30:00'
       - platform: time
-        at: '21:30:05'
+        at: '23:00:00'
     condition:
       - condition: or
         conditions:
+          - condition: template
+            value_template: "{{ trigger.now.hour == 21 and (state_attr('light.window_livingroom', 'brightness') | int / 2.55) | int > 25 }}"
           - condition: and
             conditions:
               - condition: state
-                entity_id: light.livingroom_1
-                state: 'on'
+                entity_id: timer.livingroom_1
+                state: 'idle'
               - condition: template
-                value_template: "{{ (state_attr('light.livingroom_1', 'brightness') | int) > 25 }}"
-          - condition: and
-            conditions:
-              - condition: state
-                entity_id: light.window_livingroom
-                state: 'on'
-              - condition: template
-                value_template: "{{ (state_attr('light.window_livingroom', 'brightness') | int) > 25 }}"
+                value_template: "{{ trigger.now.hour == 23 and (state_attr('light.livingroom_1', 'brightness') | int / 2.55) | int > 25 }}"
     action:
+      - service: script.turn_off
+        entity_id: script.light_livingroom
       - service: script.turn_on
         entity_id: script.light_livingroom
       - service: light.turn_on
         data_template:
           entity_id: >
-            {% if is_state('light.livingroom_1', 'on') and is_state('timer.livingroom_1', 'idle') %}
-              light.livingroom_1
-            {% elif is_state('light.window_livingroom', 'on') and is_state('timer.livingroom_3', 'idle') %}
+            {% if trigger.now.hour == 21 %}
               light.window_livingroom
+            {% else %}
+              light.livingroom_1
             {% endif %}
           brightness_pct: 25
 
