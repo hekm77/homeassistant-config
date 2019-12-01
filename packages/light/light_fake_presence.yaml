@@ -15,12 +15,37 @@ automation:
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
             state: 'armed_away'
+          - condition: state
+            entity_id: script.fake_presence
+            state: 'off'
     action:
-      - condition: state
-        entity_id: script.fake_presence
-        state: 'off'
       - service: script.turn_on
         entity_id: script.fake_presence_on
+
+
+  - alias: fake_presence_off
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: script.fake_presence
+        to: 'off'
+        for:
+          minutes: 10
+    condition:
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: "{{ states('sensor.outdoor_illuminance') | int > 2000 }}"
+          - condition: state
+            entity_id: alarm_control_panel.ha_alarm
+            state: 'armed_away'
+    action:
+      - service: light.turn_off
+        entity_id:
+          - light.kitchen
+          - light.livingroom_1
+          - light.bedroom
+          - light.bathroom
 
 
 # Скрипты
@@ -42,7 +67,10 @@ script:
       - service: script.turn_on
         entity_id: script.fake_presence_on
 
+
   fake_presence_on:
     sequence:
+      - condition: template
+        value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
       - service: script.turn_on
         entity_id: script.fake_presence
