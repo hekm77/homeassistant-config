@@ -3,63 +3,49 @@ resources:
   - url: /community_plugin/lovelace-card-mod/card-mod.js
     type: module
   - url: /community_plugin/lovelace-fold-entity-row/fold-entity-row.js
-    type: js
-  - url: /community_plugin/lovelace-slider-entity-row/slider-entity-row.js
     type: module
-  - url: /community_plugin/config-template-card/config-template-card.js
+  - url: /community_plugin/lovelace-slider-entity-row/slider-entity-row.js
     type: module
   - url: /community_plugin/button-card/button-card.js
     type: module
   - url: /community_plugin/bar-card/bar-card.js
     type: js
-  - url: /community_plugin/mini-graph-card/mini-graph-card.js
+  - url: /community_plugin/mini-graph-card/mini-graph-card-bundle.js
     type: module
-  - url: /community_plugin/mini-media-player/mini-media-player.js
+  - url: /community_plugin/mini-media-player/mini-media-player-bundle.js
     type: module
-  - url: /community_plugin/simple-weather-card/simple-weather-card.js
+  - url: /community_plugin/simple-weather-card/simple-weather-card-bundle.js
     type: module
-  - url: /community_plugin/lovelace-card-templater/card-templater.js
-    type: js
   - url: /community_plugin/vertical-stack-in-card/vertical-stack-in-card.js
+    type: js
+  - url: /community_plugin/lovelace-swipe-navigation/swipe-navigation.js
     type: js
 
   # custom
   - url: /local/lovelace/alarm_control_panel-card.js
     type: js
-  - url: /local/lovelace/card-tools.js
-    type: js
-  - url: /local/lovelace/card-modder.js
-    type: js
   - url: /local/lovelace/counter-card.js
     type: js
+  - url: /local/lovelace/chart-colors.js
+    type: js
 
 
+swipe_nav:
+  wrap: false
+  prevent_default: true
+  swipe_amount: 15
 
 anchors:
-  # Basic Card Style
-  basic_card_style: &basic_card_style
-    style: |
-      ha-card {
-        border-radius: 10px;
-        border: solid 1px rgba(255, 255, 255, 0.15);
-        overflow: hidden;
-      }
-
-  # Light Scenes Button Card
-  light_scenes_button_card: &light_scenes_button_card
-    type: custom:button-card
-    <<: *basic_card_style
-    styles:
-      card:
-        - font-size: 12px
-        - font-weight: bold
-    tap_action:
-      action: none
+  # Light Card
+  light_card: &light_card
+    type: custom:slider-entity-row
+    hide_when_off: true
+    toggle: true
+    step: 1
 
   # Toggle Button Card
   toggle_button_card: &toggle_button_card
     type: custom:button-card
-    <<: *basic_card_style
     styles:
       card:
         - font-size: 12px
@@ -81,17 +67,31 @@ anchors:
     icon: mdi:spotify
     source: full
     info: scroll
+    volume_stateless: true
     hide:
       power: true
       power_state: false
 
+ # Person Card
+  person_card: &person_card
+    secondary_info: last-changed
+    style: |
+      :host {
+        --paper-item-icon-color:
+          {% if is_state(config.entity, 'home') %}
+            var(--accent-color)
+          {% else %}
+            var(--disabled-text-color)
+          {% endif %}
+          ;
+      }
+
   # Graph Card
   graph_card: &graph_card
     type: custom:mini-graph-card
-    <<: *basic_card_style
     hours_to_show: 48
     points_per_hour: 0.5
-    more_info: false
+    tap_action: none
     hour24: true
     align_header: center
     align_state: center
@@ -102,7 +102,6 @@ anchors:
   # Counter Card
   counter_card: &counter_card
     type: custom:counter-card
-    <<: *basic_card_style
     scale: 19px
 
   # Blank Card
@@ -122,6 +121,37 @@ anchors:
     style:
       height: 20px
 
+  # Adguard Sensor Card
+  adguard_sensor_card: &adguard_sensor_card
+    type: custom:mini-graph-card
+    tap_action: none
+    group: true
+    align_header: left
+    align_state: left
+    font_size_header: 12
+    font_size: 120
+    show:
+      graph: false
+      icon: false
+      state: true
+
+  # Adguard Graph Card
+  adguard_graph_card: &adguard_graph_card
+    type: custom:mini-graph-card
+    tap_action: none
+    hours_to_show: 48
+    points_per_hour: 0.5
+    hour24: true
+    align_header: center
+    line_width: 6
+    font_size: 120
+    decimals: 0
+    height: 120
+    show:
+      name: true
+      icon: false
+      labels: false
+      labels_secondary: false
 
 
 title: Дом
@@ -138,28 +168,21 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/hall_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 9.8em;
               }
               .card-header {
-                color: var(--secondary-text-color);
-                font-size: 1.4em;
-                font-weight: 400;
                 padding: 24px 16px 16px 24px;
-                opacity: .75;
-                letter-spacing: var(--mcg-title-letter-spacing, normal);
+                letter-spacing: var(--mcg-title-letter-spacing);
+                font-weight: var(--mcg-title-font-weight);
               }
             entities:
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.hall
-                toggle: true
                 name: Люстра
-              - type: custom:slider-entity-row
-                entity: light.gateway_light_f0b429aa26cd
-                toggle: true
+              - <<: *light_card
+                entity: light.gateway_light
                 name: Шлюз
 
           # Кухня
@@ -168,24 +191,18 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/kitchen_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 9em;
               }
               .card-header {
-                color: var(--secondary-text-color);
-                font-size: 1.4em;
-                font-weight: 400;
                 padding: 24px 16px 16px 24px;
-                opacity: .75;
-                letter-spacing: var(--mcg-title-letter-spacing, normal);
+                letter-spacing: var(--mcg-title-letter-spacing);
+                font-weight: var(--mcg-title-font-weight);
               }
             entities:
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.kitchen
-                toggle: true
                 name: Люстра
 
           # Пустая карта
@@ -197,41 +214,53 @@ views:
           - type: horizontal-stack
             cards:
               # Ярко
-              - <<: *light_scenes_button_card
-                entity: scene.bright_livingroom
-                color: '#EBEE6C'
+              - type: custom:button-card
+                entity: script.light_livingroom_bright
+                styles:
+                  card:
+                    - font-size: 12px
+                    - font-weight: '500'
+                  icon:
+                    - color: '#EBEE6C'
+                tap_action:
+                  action: none
                 hold_action:
                   action: call-service
-                  service: scene.turn_on
+                  service: script.turn_on
                   service_data:
-                    entity_id: scene.bright_livingroom
+                    entity_id: script.light_livingroom_bright
               # Кино
-              - <<: *light_scenes_button_card
-                entity: scene.movie_livingroom
-                color: '#847EEB'
+              - type: custom:button-card
+                entity: script.light_livingroom_movie
+                styles:
+                  card:
+                    - font-size: 12px
+                    - font-weight: '500'
+                  icon:
+                    - color: '#847EEB'
+                tap_action:
+                  action: none
                 hold_action:
                   action: call-service
-                  service: scene.turn_on
+                  service: script.turn_on
                   service_data:
-                    entity_id: scene.movie_livingroom
+                    entity_id: script.light_livingroom_movie
               # Ночник
-              -  <<: *light_scenes_button_card
-                 entity: scene.night_light_livingroom
-                 color: '#D85420'
-                 hold_action:
-                   action: call-service
-                   service: scene.turn_on
-                   service_data:
-                     entity_id: scene.night_light_livingroom
-              # Выключение света в зале
-              - <<: *light_scenes_button_card
-                entity: scene.light_off_livingroom
-                color: var(--disabled-text-color)
+              - type: custom:button-card
+                entity: script.light_livingroom_night
+                styles:
+                  card:
+                    - font-size: 12px
+                    - font-weight: '500'
+                  icon:
+                    - color: '#D85420'
+                tap_action:
+                  action: none
                 hold_action:
                   action: call-service
-                  service: scene.turn_on
+                  service: script.turn_on
                   service_data:
-                    entity_id: scene.light_off_livingroom
+                    entity_id: script.light_livingroom_night
 
           # Зал
           - type: entities
@@ -239,41 +268,32 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/livingroom_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 14em;
               }
               .card-header {
-                color: var(--secondary-text-color);
-                font-size: 1.4em;
-                font-weight: 400;
                 padding: 24px 16px 16px 24px;
-                opacity: .75;
-                letter-spacing: var(--mcg-title-letter-spacing, normal);
+                letter-spacing: var(--mcg-title-letter-spacing);
+                font-weight: var(--mcg-title-font-weight);
               }
             entities:
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.livingroom_1
-                toggle: true
                 name: Люстра
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.livingroom_2
-                toggle: true
                 name: Ночник
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.window_livingroom
-                toggle: true
                 name: Окно
 
           # Автоматизация освещения
           - type: entities
-            <<: *basic_card_style
             entities:
               - type: custom:fold-entity-row
                 head: group.light_automation
-                
+
       # Спальня
       - type: vertical-stack
         cards:
@@ -282,24 +302,18 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/bedroom_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 9.8em;
               }
               .card-header {
-                color: var(--secondary-text-color);
-                font-size: 1.4em;
-                font-weight: 400;
                 padding: 24px 16px 16px 24px;
-                opacity: .75;
-                letter-spacing: var(--mcg-title-letter-spacing, normal);
+                letter-spacing: var(--mcg-title-letter-spacing);
+                font-weight: var(--mcg-title-font-weight);
               }
             entities:
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.bedroom
-                toggle: true
                 name: Люстра
               - entity: switch.smart_plug_bedroom
 
@@ -309,24 +323,18 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/bathroom_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 9em;
               }
               .card-header {
-                color: var(--secondary-text-color);
-                font-size: 1.4em;
-                font-weight: 400;
                 padding: 24px 16px 16px 24px;
-                opacity: .75;
-                letter-spacing: var(--mcg-title-letter-spacing, normal);
+                letter-spacing: var(--mcg-title-letter-spacing);
+                font-weight: var(--mcg-title-font-weight);
               }
             entities:
-              - type: custom:slider-entity-row
+              - <<: *light_card
                 entity: light.bathroom
-                toggle: true
                 name: Плафон
 
 
@@ -347,9 +355,11 @@ views:
               # Кинопаб
               - <<: *toggle_button_card
                 entity: input_boolean.kinopub
+              # YouTube
+              - <<: *toggle_button_card
+                entity: input_boolean.youtube
 
           - type: entities
-            <<: *basic_card_style
             entities:
               # Sony TV
               - entity: media_player.sony_bravia_tv
@@ -398,10 +408,8 @@ views:
           - type: entities
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/spotify_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 14em;
               }
             entities:
@@ -428,17 +436,10 @@ views:
           # Сигнализация
           - type: custom:alarm_control_panel-card
             style: |
-              ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
-              }
               .card-header {
-                color: var(--secondary-text-color);
-                font-size: 1.4em;
-                font-weight: 400;
                 padding: 24px 16px 16px 20px;
-                opacity: .75;
-                letter-spacing: var(--mcg-title-letter-spacing, normal);
+                letter-spacing: var(--mcg-title-letter-spacing);
+                font-weight: var(--mcg-title-font-weight);
               }
             entity: alarm_control_panel.ha_alarm
             hide_keypad: true
@@ -464,10 +465,8 @@ views:
       - type: entities
         style: |
           ha-card {
-            border-radius: 10px;
-            border: solid 1px rgba(255, 255, 255, 0.15);
             background: center / cover url(/local/icons/shield_reeder.png) no-repeat;
-            background-color: var(--paper-card-background-color);
+            background-color: var(--ha-card-background);
             background-size: 9.8em;
           }
         entities:
@@ -488,37 +487,28 @@ views:
         cards:
           # Person 1
           - type: entities
-            style: |
-              ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
-                --paper-item-icon-color: [[ if(person.user_1 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
-              }
             entities:
               - entity: person.user_1
-                secondary_info: last-changed
+                icon: mdi:emoticon-cool
+                <<: *person_card
           # Person 2
           - type: entities
-            style: |
-              ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
-                --paper-item-icon-color: [[ if(person.user_2 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
-              }
             entities:
               - entity: person.user_2
-                secondary_info: last-changed
+                icon: mdi:emoticon-kiss
+                <<: *person_card
           # Person 3
           - type: entities
-            style: |
-              ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
-                --paper-item-icon-color: [[ if(person.user_3 == "home", "var(--accent-color)", "var(--disabled-text-color)") ]];
-              }
             entities:
               - entity: person.user_3
-                secondary_info: last-changed
+                icon: mdi:face-profile
+                <<: *person_card
+          # Person 4
+          - type: entities
+            entities:
+              - entity: person.user_4
+                icon: mdi:face-woman
+                <<: *person_card
 
 
   # Климат
@@ -529,7 +519,7 @@ views:
         cards:
           # Зал Температура
           - <<: *graph_card
-            line_color: '#F7BE4F'
+            line_color: '#C29356'
             height: 120
             show:
               name: true
@@ -558,10 +548,8 @@ views:
           - type: entities
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/ha_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 14em;
               }
             entities:
@@ -570,8 +558,8 @@ views:
               - entity: sensor.mysql_db_size
               - entity: sensor.online_custom
               - entity: sensor.lets_encrypt
-              - entity: script.backup_ha
-              - entity: script.backup_deconz
+              - entity: script.ha_backup
+              - entity: script.ha_update
               - entity: script.ha_restart
 
       - type: vertical-stack
@@ -580,10 +568,8 @@ views:
           - type: entities
             style: |
               ha-card {
-                border-radius: 10px;
-                border: solid 1px rgba(255, 255, 255, 0.15);
                 background: center / cover url(/local/icons/rpi_reeder.png) no-repeat;
-                background-color: var(--paper-card-background-color);
+                background-color: var(--ha-card-background);
                 background-size: 14em;
               }
             entities:
@@ -592,14 +578,13 @@ views:
               - entity: sensor.memory_use_percent
               - entity: sensor.disk_use_percent_home
               - entity: sensor.disk_free_home
-              - entity: script.reboot_pi
-              - entity: script.shutdown_pi
+              - entity: script.pi_reboot
+              - entity: script.pi_shutdown
 
       - type: vertical-stack
         cards:
           # Состояние батареи датчиков
           - type: entities
-            <<: *basic_card_style
             entities:
               - type: custom:fold-entity-row
                 head: sensor.battery_level_card_header
@@ -620,47 +605,41 @@ views:
 
           # Epson PX720WD
           - type: entities
-            style:
-              .: |
-                ha-card {
-                  border-radius: 10px;
-                  border: solid 1px rgba(255, 255, 255, 0.15);
-                }
             entities:
               - type: custom:fold-entity-row
                 head: binary_sensor.epson_px720wd
                 entities:
-                  - type: custom:hui-entities-card
+                  - type: custom:mod-card
                     style: |
                       ha-card {
                         --ha-card-box-shadow: none;
                       }
-                    entities:
-                      - type: custom:hui-vertical-stack-card
-                        cards:
-                          - type: custom:bar-card
-                            columns: 6
-                            direction: up
-                            entities:
-                              - entity: sensor.epson_ink_level_cyan
-                                color: rgb(0, 255, 255)
-                              - entity: sensor.epson_ink_level_yellow
-                                color: rgb(255, 255, 0)
-                              - entity: sensor.epson_ink_level_light_cyan
-                                color: rgb(204, 255, 255)
-                              - entity: sensor.epson_ink_level_black
-                                color: rgb(0, 0, 0)
-                              - entity: sensor.epson_ink_level_magenta
-                                color: rgb(255, 0, 255)
-                              - entity: sensor.epson_ink_level_light_magenta
-                                color: rgb(231, 139, 231)
-                            height: 200px
-                            max: 100
-                            min: 0
-                            padding: 2px
-                            title_position: 'off'
-                            icon_position: inside
-                            width: 100%
+                    card:
+                      type: custom:vertical-stack-in-card
+                      cards:
+                        - type: custom:bar-card
+                          columns: 6
+                          direction: up
+                          entities:
+                            - entity: sensor.epson_ink_level_cyan
+                              color: rgb(0, 255, 255)
+                            - entity: sensor.epson_ink_level_yellow
+                              color: rgb(255, 255, 0)
+                            - entity: sensor.epson_ink_level_light_cyan
+                              color: rgb(204, 255, 255)
+                            - entity: sensor.epson_ink_level_black
+                              color: rgb(0, 0, 0)
+                            - entity: sensor.epson_ink_level_magenta
+                              color: rgb(255, 0, 255)
+                            - entity: sensor.epson_ink_level_light_magenta
+                              color: rgb(231, 139, 231)
+                          height: 200px
+                          max: 100
+                          min: 0
+                          padding: 2px
+                          title_position: 'off'
+                          icon_position: inside
+                          width: 100%
 
           # Освещенность
           - <<: *graph_card
@@ -670,7 +649,7 @@ views:
               name: true
               icon: false
             entities:
-              - sensor.illumination_f0b429aa26cd
+              - sensor.gateway_illumination
 
 
   # Электричество
@@ -683,27 +662,36 @@ views:
           - type: entities
             style:
               .: |
-                ha-card {
-                  border-radius: 10px;
-                  border: solid 1px rgba(255, 255, 255, 0.15);
+                .card-content {
+                  padding: 1px 1px 0px 1px;
                 }
-              "#states div":
-                fold-entity-row:
-                  $:
-                   "#head":
-                     entity-row-maker:
-                       hui-section-row:
-                         $: |
-                           div.divider {
-                             height: 0px;
-                           }
-                           div.label {
-                             color: var(--secondary-text-color);
-                             font-size: 1.2em;
-                             font-weight: 400;
-                             opacity: .75;
-                             letter-spacing: var(--mcg-title-letter-spacing, normal);
-                           }
+              "#states > div:nth-child(1) > fold-entity-row":
+                $:
+                 "#head > entity-row-maker > hui-section-row":
+                   $: |
+                     div.divider {
+                       height: 0px;
+                     }
+                     div.label {
+                       color: var(--ha-card-header-color);
+                       font-size: var(--ha-card-header-font-size);
+                       letter-spacing: var(--mcg-title-letter-spacing);
+                       font-weight: var(--mcg-title-font-weight);
+                     }
+              "#states div > fold-entity-row":
+                $: |
+                  div#head {
+                    padding: 16px 16px 0px 16px;
+                  }
+                  div#items {
+                    padding: 0px 24px 0px 0px;
+                  }
+              "#states > div:nth-child(2) > mini-graph-card":
+                $: |
+                  ha-card {
+                    border-radius: 0px;
+                    --ha-card-box-shadow: none;
+                  }
             entities:
               - type: custom:fold-entity-row
                 head:
@@ -726,7 +714,7 @@ views:
                   - sensor.power_total
                 hours_to_show: 48
                 points_per_hour: 1
-                more_info: false
+                tap_action: none
                 hour24: true
                 align_state: center
                 height: 110
@@ -749,27 +737,25 @@ views:
           - type: entities
             style:
               .: |
-                ha-card {
-                  border-radius: 10px;
-                  border: solid 1px rgba(255, 255, 255, 0.15);
-                }
-              "#states div":
-                fold-entity-row:
-                  $:
-                   "#head":
-                     entity-row-maker:
-                       hui-section-row:
-                         $: |
-                           div.divider {
-                             height: 0px;
-                           }
-                           div.label {
-                             color: var(--secondary-text-color);
-                             font-size: 1.2em;
-                             font-weight: 400;
-                             opacity: .75;
-                             letter-spacing: var(--mcg-title-letter-spacing, normal);
-                           }
+              "#states > div:nth-child(1) > fold-entity-row":
+                $:
+                 "#head > entity-row-maker > hui-section-row":
+                   $: |
+                     div.divider {
+                       height: 0px;
+                     }
+                     div.label {
+                       color: var(--ha-card-header-color);
+                       font-size: var(--ha-card-header-font-size);
+                       letter-spacing: var(--mcg-title-letter-spacing);
+                       font-weight: var(--mcg-title-font-weight);
+                     }
+              "#states > div:nth-child(2) > mini-graph-card":
+                $: |
+                  ha-card {
+                    border-radius: 0px;
+                    --ha-card-box-shadow: none;
+                  }
             entities:
               - type: custom:fold-entity-row
                 head:
@@ -790,6 +776,7 @@ views:
                 entities:
                   - entity: sensor.energy_monthly_total
                     name: Энергопотребление за месяц
+                tap_action: none
                 align_header: center
                 align_state: center
                 height: 100
@@ -870,7 +857,6 @@ views:
             cards:
               # Энергопотребление за год
               - type: custom:counter-card
-                <<: *basic_card_style
                 title: За год / кВт⋅ч
                 entity: sensor.energy_yearly_total
                 scale: 25px
@@ -878,12 +864,11 @@ views:
 
   # Погода
   - title: Погода
-    icon: mdi:weather-partlycloudy
+    icon: mdi:weather-partly-cloudy
     cards:
       - type: vertical-stack
         cards:
           - type: picture-elements
-            <<: *basic_card_style
             image: /local/weather/bg/bg.png
             elements:
               # Рассвет
@@ -954,7 +939,7 @@ views:
           # График температуры
           - <<: *graph_card
             height: 80
-            line_color: '#F7BE4F'
+            line_color: '#C29356'
             show:
               icon: false
               extrema: true
@@ -966,7 +951,6 @@ views:
       - type: vertical-stack
         cards:
           - type: custom:simple-weather-card
-            <<: *basic_card_style
             entity: weather.smhi
             name: ' '
 
@@ -993,7 +977,6 @@ views:
       - type: vertical-stack
         cards:
           - type: picture-elements
-            <<: *basic_card_style
             image: /local/weather/bg/bg.png
             elements:
               # Видимость
@@ -1062,3 +1045,104 @@ views:
               labels: false
             entities:
               - entity: sensor.smhi_humidity
+
+
+  # Adguard
+  - title: Adguard
+    icon: mdi:shield-check-outline
+    cards:
+      - <<: *adguard_graph_card
+        line_color: '#2980B9'
+        entities:
+          - entity: sensor.adguard_dns_queries
+            unit: ' '
+          - entity: sensor.adguard_average_processing_speed
+            show_state: true
+            show_graph: false
+            y_axis: secondary
+
+      - <<: *adguard_graph_card
+        line_color: var(--google-red-500)
+        entities:
+          - entity: sensor.adguard_dns_queries_blocked
+            unit: ' '
+          - entity: sensor.adguard_dns_queries_blocked_ratio
+            show_state: true
+            show_graph: false
+            y_axis: secondary
+
+      - type: entities
+        style:
+          .: |
+            ha-card {
+              color: var(--secondary-text-color);
+              font-size: 1.18em;
+              font-weight: var(--mcg-title-font-weight);
+              letter-spacing: var(--mcg-title-letter-spacing);
+            }
+        entities:
+          - switch.adguard_protection
+
+      - type: entities
+        style:
+          .: |
+            ha-card {
+              color: var(--secondary-text-color);
+              font-size: 1.18em;
+              font-weight: var(--mcg-title-font-weight);
+              letter-spacing: var(--mcg-title-letter-spacing);
+            }
+          "#states > div > mini-graph-card":
+            $: |
+              div {
+                padding: 0px 0px 0px 72px;
+              }
+        entities:
+          - switch.adguard_safe_browsing
+          - <<: *adguard_sensor_card
+            entities:
+              - entity: sensor.adguard_safe_browsing_blocked
+                unit: ' '
+          - switch.adguard_filtering
+          - <<: *adguard_sensor_card
+            entities:
+              - entity: sensor.adguard_rules_count
+                unit: ' '
+
+      - type: entities
+        style:
+          .: |
+            ha-card {
+              color: var(--secondary-text-color);
+              font-size: 1.18em;
+              font-weight: var(--mcg-title-font-weight);
+              letter-spacing: var(--mcg-title-letter-spacing);
+            }
+        entities:
+          - switch.adguard_query_log
+
+      - type: entities
+        style:
+          .: |
+            ha-card {
+              color: var(--secondary-text-color);
+              font-size: 1.18em;
+              font-weight: var(--mcg-title-font-weight);
+              letter-spacing: var(--mcg-title-letter-spacing);
+            }
+          "#states > div > mini-graph-card":
+            $: |
+              div {
+                padding: 0px 0px 0px 72px;
+              }
+        entities:
+          - switch.adguard_safe_search
+          - <<: *adguard_sensor_card
+            entities:
+              - entity: sensor.searches_safe_search_enforced
+                unit: ' '
+          - switch.adguard_parental_control
+          - <<: *adguard_sensor_card
+            entities:
+              - entity: sensor.adguard_parental_control_blocked
+                unit: ' '
