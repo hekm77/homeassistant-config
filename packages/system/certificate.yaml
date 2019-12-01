@@ -2,39 +2,5 @@
 homeassistant:
   customize:
     sensor.lets_encrypt:
-      friendly_name: Сертификат Lets Encrypt
+      friendly_name: Сертификат Let´s Encrypt
       unit_of_measurement: д.
-
-
-# Команда
-shell_command:
-  # Обновление сертификата SSL
-  renew_ssl: '/home/homeassistant/dehydrated/dehydrated -c'
-  restart_nginx: '/usr/bin/sudo /bin/systemctl restart nginx'
-
-
-# Сенсор
-sensor:
-  # Сертификат Lets Encrypt
-  - platform: cert_expiry
-    host: !secret host
-    name: Lets Encrypt
-
-
-# Автоматизация
-automation:
-  # Автообновление сертификата SSL
-  - alias: auto_renew_ssl_cert
-    initial_state: true
-    trigger:
-      - platform: time
-        at: '01:30:00'
-    condition:
-      - condition: template
-        value_template: "{{ states('sensor.lets_encrypt') | int < 29 }}"
-    action:
-      - service: shell_command.renew_ssl
-      - delay: 00:05:00
-      - service: shell_command.restart_nginx
-      - delay: 00:00:10
-      - service: shell_command.ha_restart
