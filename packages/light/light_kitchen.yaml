@@ -56,6 +56,8 @@ automation:
           entity_id: timer.kitchen
           state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_kitchen
       - service: script.turn_on
         entity_id: script.light_kitchen
       - service: light.turn_on
@@ -99,6 +101,8 @@ automation:
             entity_id: timer.kitchen
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_kitchen
       - service: script.turn_on
         entity_id: script.light_kitchen
       - service: light.turn_off
@@ -132,6 +136,8 @@ automation:
             entity_id: timer.kitchen
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_kitchen
       - service: script.turn_on
         entity_id: script.light_kitchen
       - service: light.turn_off
@@ -256,12 +262,37 @@ automation:
             entity_id: timer.kitchen
             state: 'idle'
     action:
+      - service: script.turn_off
+        entity_id: script.light_kitchen
       - service: script.turn_on
         entity_id: script.light_kitchen
       - service: light.turn_on
         entity_id: light.kitchen
         data_template:
           brightness_pct: 10
+          color_temp: 250
+          transition: 3
+
+
+  # Увеличение яркости в заданное время
+  - alias: kitchen_light_increase
+    initial_state: true
+    trigger:
+      - platform: time
+        at: '07:00:00'
+    condition:
+      - condition: state
+        entity_id: light.kitchen
+        state: 'on'
+    action:
+      - service: script.turn_off
+        entity_id: script.light_kitchen
+      - service: script.turn_on
+        entity_id: script.light_kitchen
+      - service: light.turn_on
+        entity_id: light.kitchen
+        data_template:
+          brightness_pct: 100
           color_temp: 250
           transition: 3
 
