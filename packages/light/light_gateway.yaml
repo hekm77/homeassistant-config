@@ -1,8 +1,8 @@
 # Кастомизация
 homeassistant:
   customize:
-    # Освещение
-    light.gateway_light_f0b429aa26cd:
+    # Подсветка Шлюза
+    light.gateway_light:
       friendly_name: Подсветка Шлюза
 
 
@@ -25,11 +25,11 @@ automation:
               - condition: sun
                 before: sunrise
           - condition: state
-            entity_id: light.gateway_light_f0b429aa26cd
+            entity_id: light.gateway_light
             state: 'off'
     action:
       - service: light.turn_on
-        entity_id: light.gateway_light_f0b429aa26cd
+        entity_id: light.gateway_light
         data_template:
           brightness_pct: 2
           rgb_color: [255, 130, 0]
@@ -54,11 +54,11 @@ automation:
               - condition: sun
                 before: sunrise
           - condition: state
-            entity_id: light.gateway_light_f0b429aa26cd
+            entity_id: light.gateway_light
             state: 'on'
     action:
       - service: light.turn_off
-        entity_id: light.gateway_light_f0b429aa26cd
+        entity_id: light.gateway_light
 
 
   # Включение подсветки шлюза с рандомным цветом в заданное время
@@ -75,18 +75,18 @@ automation:
             conditions:
               - condition: sun
                 after: sunset
-                after_offset: "-01:00:00"
+                after_offset: '-01:00:00'
               - condition: time
                 before: '22:50:00'
           - condition: state
-            entity_id: light.gateway_light_f0b429aa26cd
+            entity_id: light.gateway_light
             state: 'off'
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
             state: 'disarmed'
     action:
       - service: light.turn_on
-        entity_id: light.gateway_light_f0b429aa26cd
+        entity_id: light.gateway_light
         data_template:
           brightness_pct: 15
           rgb_color: ['{{ (range(0, 255)|random) }}','{{ (range(0, 255)|random) }}','{{ (range(0, 255)|random) }}']
@@ -102,8 +102,8 @@ automation:
         event: sunrise
     condition:
       - condition: state
-        entity_id: light.gateway_light_f0b429aa26cd
+        entity_id: light.gateway_light
         state: 'on'
     action:
       - service: light.turn_off
-        entity_id: light.gateway_light_f0b429aa26cd
+        entity_id: light.gateway_light
