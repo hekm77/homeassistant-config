@@ -10,7 +10,7 @@ history:
       - switch
       - binary_sensor
     entities:
-      - light.gateway_light_f0b429aa26cd
+      - light.gateway_light
   include:
     domains:
       - light
