@@ -2,7 +2,7 @@
 # logbook:
 #   include:
 #     entities:
-#       - light.gateway_light_f0b429aa26cd
+#       - light.gateway_light
 #       - light.hall_1
 #       - light.hall_2
 #       - light.livingroom_1
