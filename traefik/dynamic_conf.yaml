@@ -1,0 +1,42 @@
+http:
+  middlewares:
+    redirect:
+      redirectScheme:
+        scheme: https
+
+  routers:
+    hass:
+      entryPoints:
+        - web
+      service: "homeassistant"
+      middlewares:
+        - redirect
+      rule: "Host(`your_domain.duckdns.org`)"
+    hass-secure:
+      entryPoints:
+        - web-secure
+      service: "homeassistant"
+      rule: "Host(`your_domain.duckdns.org`)"
+      tls:
+        options: default
+        certResolver: letsencrypt
+
+  services:
+    homeassistant:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://192.168.1.x:8123
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_AES_128_GCM_SHA256
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256
+      sniStrict: true
