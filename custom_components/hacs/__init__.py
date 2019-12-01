@@ -1,161 +1,178 @@
 """
 Custom element manager for community created elements.
 
-For more details about this component, please refer to the documentation at
-https://custom-components.github.io/hacs/
+For more details about this integration, please refer to the documentation at
+https://hacs.xyz/
 """
-import logging
-import os.path
-import json
-import asyncio
-from datetime import datetime, timedelta
-from pkg_resources import parse_version
-import aiohttp
-
 import voluptuous as vol
-from homeassistant.const import EVENT_HOMEASSISTANT_START, __version__ as HAVERSION
+from aiogithubapi import AIOGitHub
+from homeassistant import config_entries
+from homeassistant.const import EVENT_HOMEASSISTANT_START
+from homeassistant.const import __version__ as HAVERSION
+from homeassistant.components.lovelace import system_health_info
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers import discovery
+from homeassistant.helpers.event import async_call_later
 
-from .hacsbase import HacsBase as hacs
-from .const import (
-    CUSTOM_UPDATER_LOCATIONS,
-    STARTUP,
-    ISSUE_URL,
-    CUSTOM_UPDATER_WARNING,
-    NAME_LONG,
-    NAME_SHORT,
-    DOMAIN_DATA,
-    ELEMENT_TYPES,
-    VERSION,
-    IFRAME,
-    BLACKLIST,
-)
+from .configuration_schema import hacs_base_config_schema, hacs_config_option_schema
+from .const import DOMAIN, ELEMENT_TYPES, STARTUP, VERSION
+from .constrains import check_constans
+from .hacsbase import Hacs
+from .hacsbase.configuration import Configuration
+from .hacsbase.data import HacsData
+from .setup import add_sensor, load_hacs_repository, setup_frontend
 
-from .frontend.views import (
-    HacsStaticView,
-    HacsErrorView,
-    HacsPluginView,
-    HacsOverviewView,
-    HacsStoreView,
-    HacsSettingsView,
-    HacsRepositoryView,
-    HacsAPIView,
-)
+SCHEMA = hacs_base_config_schema()
+SCHEMA[vol.Optional("options")] = hacs_config_option_schema()
+CONFIG_SCHEMA = vol.Schema({DOMAIN: SCHEMA}, extra=vol.ALLOW_EXTRA)
 
-DOMAIN = "{}".format(NAME_SHORT.lower())
 
-# TODO: Remove this when minimum HA version is > 0.93
-REQUIREMENTS = ["aiofiles", "backoff"]
-
-_LOGGER = logging.getLogger("custom_components.hacs")
-
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required("token"): cv.string,
-                vol.Optional("appdaemon", default=False): cv.boolean,
-                vol.Optional("python_script", default=False): cv.boolean,
-                vol.Optional("theme", default=False): cv.boolean,
-            }
+async def async_setup(hass, config):
+    """Set up this integration using yaml."""
+    if DOMAIN not in config:
+        return True
+    hass.data[DOMAIN] = config
+    Hacs.hass = hass
+    Hacs.configuration = Configuration.from_dict(
+        config[DOMAIN], config[DOMAIN].get("options")
+    )
+    Hacs.configuration.config_type = "yaml"
+    await startup_wrapper_for_yaml(Hacs)
+    hass.async_create_task(
+        hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data={}
         )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
+    )
+    return True
 
 
-async def async_setup(hass, config):  # pylint: disable=unused-argument
-    """Set up this component."""
-    _LOGGER.info(STARTUP)
-    config_dir = hass.config.path()
-    github_token = config[DOMAIN]["token"]
+async def async_setup_entry(hass, config_entry):
+    """Set up this integration using UI."""
+    conf = hass.data.get(DOMAIN)
+    if config_entry.source == config_entries.SOURCE_IMPORT:
+        if conf is None:
+            hass.async_create_task(
+                hass.config_entries.async_remove(config_entry.entry_id)
+            )
+        return False
+    Hacs.hass = hass
+    Hacs.configuration = Configuration.from_dict(
+        config_entry.data, config_entry.options
+    )
+    Hacs.configuration.config_type = "flow"
+    Hacs.configuration.config_entry = config_entry
+    config_entry.add_update_listener(reload_hacs)
+    startup_result = await hacs_startup(Hacs)
+    if not startup_result:
+        Hacs.system.disabled = True
+        raise ConfigEntryNotReady
+    Hacs.system.disabled = False
+    return startup_result
 
-    if config[DOMAIN]["appdaemon"]:
-        ELEMENT_TYPES.append("appdaemon")
-    if config[DOMAIN]["python_script"]:
-        ELEMENT_TYPES.append("python_script")
-    if config[DOMAIN]["theme"]:
-        ELEMENT_TYPES.append("theme")
 
-    # Print DEV warning
-    if VERSION == "DEV":
-        _LOGGER.error(
-            "You are running a DEV version of HACS, this is not intended for regular use."
+async def startup_wrapper_for_yaml(hacs):
+    """Startup wrapper for yaml config."""
+    startup_result = await hacs_startup(hacs)
+    if not startup_result:
+        hacs.system.disabled = True
+        hacs.hass.components.frontend.async_remove_panel(
+            hacs.configuration.sidepanel_title.lower()
+            .replace(" ", "_")
+            .replace("-", "_")
         )
+        hacs.logger.info("Could not setup HACS, trying again in 15 min")
+        async_call_later(hacs.hass, 900, startup_wrapper_for_yaml(hacs))
+        return
+    hacs.system.disabled = False
 
-    # Configure HACS
-    await configure_hacs(hass, github_token, config_dir)
 
-    # Check if custom_updater exists
-    for location in CUSTOM_UPDATER_LOCATIONS:
-        if os.path.exists(location.format(config_dir)):
-            msg = CUSTOM_UPDATER_WARNING.format(location.format(config_dir))
-            _LOGGER.critical(msg)
-            return False
+async def hacs_startup(hacs):
+    """HACS startup tasks."""
+    lovelace_info = await system_health_info(hacs.hass)
+    hacs.logger.debug(f"Configuration type: {hacs.configuration.config_type}")
+    hacs.version = VERSION
+    hacs.logger.info(STARTUP)
+    hacs.system.config_path = hacs.hass.config.path()
+    hacs.system.ha_version = HAVERSION
 
-    # Check if HA is the required version.
-    if parse_version(HAVERSION) < parse_version("0.92.0"):
-        _LOGGER.critical("You need HA version 92 or newer to use this integration.")
+    hacs.system.lovelace_mode = lovelace_info.get("mode", "yaml")
+    hacs.system.disabled = False
+    hacs.github = AIOGitHub(
+        hacs.configuration.token, async_create_clientsession(hacs.hass)
+    )
+    hacs.data = HacsData()
+
+    # Check HACS Constrains
+    if not check_constans(hacs):
+        if hacs.configuration.config_type == "flow":
+            if hacs.configuration.config_entry is not None:
+                await async_remove_entry(hacs.hass, hacs.configuration.config_entry)
         return False
 
-    # Add sensor
-    hass.async_create_task(
-        discovery.async_load_platform(hass, "sensor", DOMAIN, {}, config[DOMAIN])
-    )
+    # Set up frontend
+    await setup_frontend(hacs)
+
+    # Set up sensor
+    add_sensor(hacs)
+
+    # Load HACS
+    if not await load_hacs_repository(hacs):
+        if hacs.configuration.config_type == "flow":
+            if hacs.configuration.config_entry is not None:
+                await async_remove_entry(hacs.hass, hacs.configuration.config_entry)
+        return False
+
+    # Restore from storefiles
+    if not await hacs.data.restore():
+        hacs_repo = hacs().get_by_name("hacs/integration")
+        hacs_repo.pending_restart = True
+        if hacs.configuration.config_type == "flow":
+            if hacs.configuration.config_entry is not None:
+                await async_remove_entry(hacs.hass, hacs.configuration.config_entry)
+        return False
+
+    # Add aditional categories
+    if hacs.configuration.appdaemon:
+        ELEMENT_TYPES.append("appdaemon")
+    if hacs.configuration.python_script:
+        ELEMENT_TYPES.append("python_script")
+    if hacs.configuration.theme:
+        ELEMENT_TYPES.append("theme")
+    hacs.common.categories = sorted(ELEMENT_TYPES)
 
     # Setup startup tasks
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_START, hacs().startup_tasks())
-
-    # Register the views
-    hass.http.register_view(HacsStaticView())
-    hass.http.register_view(HacsErrorView())
-    hass.http.register_view(HacsPluginView())
-    hass.http.register_view(HacsStoreView())
-    hass.http.register_view(HacsOverviewView())
-    hass.http.register_view(HacsSettingsView())
-    hass.http.register_view(HacsRepositoryView())
-    hass.http.register_view(HacsAPIView())
-
-    # Add to sidepanel
-    # TODO: Remove this check when minimum HA version is > 0.94
-    if parse_version(HAVERSION) < parse_version("0.93.9"):
-        await hass.components.frontend.async_register_built_in_panel(
-            "iframe",
-            IFRAME["title"],
-            IFRAME["icon"],
-            IFRAME["path"],
-            {"url": hacs.url_path["overview"]},
-            require_admin=IFRAME["require_admin"],
+    if hacs.configuration.config_type == "yaml":
+        hacs.hass.bus.async_listen_once(
+            EVENT_HOMEASSISTANT_START, hacs().startup_tasks()
         )
     else:
-        hass.components.frontend.async_register_built_in_panel(
-            "iframe",
-            IFRAME["title"],
-            IFRAME["icon"],
-            IFRAME["path"],
-            {"url": hacs.url_path["overview"]},
-            require_admin=IFRAME["require_admin"],
-        )
+        async_call_later(hacs.hass, 5, hacs().startup_tasks())
 
     # Mischief managed!
     return True
 
 
-async def configure_hacs(hass, github_token, hass_config_dir):
-    """Configure HACS."""
-    from .aiogithub import AIOGitHub
-    from .hacsmigration import HacsMigration
-    from .hacsstorage import HacsStorage
+async def async_remove_entry(hass, config_entry):
+    """Handle removal of an entry."""
+    Hacs().logger.info("Disabling HACS")
+    Hacs().logger.info("Removing recuring tasks")
+    for task in Hacs().tasks:
+        task()
+    Hacs().logger.info("Removing sensor")
+    try:
+        await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
+    except ValueError:
+        pass
+    Hacs().logger.info("Removing sidepanel")
+    try:
+        hass.components.frontend.async_remove_panel("hacs")
+    except AttributeError:
+        pass
+    Hacs().system.disabled = True
+    Hacs().logger.info("HACS is now disabled")
 
-    hacs.migration = HacsMigration()
-    hacs.storage = HacsStorage()
 
-    hacs.aiogithub = AIOGitHub(
-        github_token, hass.loop, async_create_clientsession(hass)
-    )
-
-    hacs.hass = hass
-    hacs.config_dir = hass_config_dir
-    hacs.blacklist = BLACKLIST
+async def reload_hacs(hass, config_entry):
+    """Reload HACS."""
+    await async_remove_entry(hass, config_entry)
+    await async_setup_entry(hass, config_entry)
