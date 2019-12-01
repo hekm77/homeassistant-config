@@ -24,3 +24,6 @@ logger:
     homeassistant.components.mqtt: error
     homeassistant.components.media_player.songpal: error
     songpal: error
+
+    # homeassistant.components.websocket_api: debug
+    # custom_components.xiaomi_gateway_alarm: debug
