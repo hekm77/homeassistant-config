@@ -1,25 +1,25 @@
 # Home Assistant Configuration
-[Home Assistant](https://home-assistant.io/) is installed on [Raspberry Pi 3B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) from the [Hassbian](https://github.com/home-assistant/pi-gen/releases) image according to this [instruction.](https://www.home-assistant.io/docs/installation/hassbian/installation/)
-## Devices and services I use in Home Assistant
+[Home Assistant](https://home-assistant.io/) is installed in [Docker](https://www.docker.com) on [Raspberry Pi 3B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) (Raspbian Buster)
+## Devices and services
 * Network
   * [AmpliFi HD Mesh Router](https://store.amplifi.com/products/amplifi-mesh-router)
 * Zigbee
-  * [RaspBee](https://www.dresden-elektronik.de/funktechnik/solutions/wireless-light-control/raspbee/?L=1&cHash=c9c902ccdb43164696acccf81b62b2bd) (deCONZ)
-  * [Xiaomi Smart Door Windows Sensor](https://www.gearbest.com/smart-light-bulb/pp_257677.html?wid=1433363)
-  * [Xiaomi Smart Human Body Sensor](https://www.gearbest.com/smart-light-bulb/pp_257678.html?wid=1433363)
-  * [Xiaomi Smart Switch](https://www.gearbest.com/smart-light-bulb/pp_257679.html?wid=1433363)
-  * [Xiaomi Temperature and Humidity Sensor](https://www.gearbest.com/living-appliances/pp_344665.html?wid=1433363)
-  * [Xiaomi Zigbee Smart Plug](https://www.gearbest.com/living-appliances/pp_344666.html?wid=1433363)
-  * [TRÅDFRI wireless dimmer](https://www.ikea.com/se/sv/catalog/products/00347831/)
+  * [RaspBee](https://phoscon.de/en/raspbee) Zigbee Gateway ([deCONZ](https://github.com/dresden-elektronik/deconz-rest-plugin))
+  * Xiaomi Smart Door Windows Sensor (MCCGQ01LM)
+  * Xiaomi Smart Human Body Sensor (RTCGQ01LM)
+  * Xiaomi Smart Switch (WXKG01LM)
+  * Xiaomi Temperature and Humidity Sensor (WSDCGQ01LM)
+  * Xiaomi Zigbee Smart Plug (ZNCZ02LM)
+  * IKEA Trådfri wireless dimmer (ICTC-G-1)
+  * Xiaomi Gateway (DGNWG02LM)
 * Lights
-  * [Xiaomi Gateway](https://www.gearbest.com/living-appliances/pp_344667.html?wid=1433363)
-  * [Yeelight RGB Bulb](https://www.gearbest.com/smart-lighting/pp_361555.html?wid=1433363)  
-  * [Yeelight White Bulb](https://www.gearbest.com/smart-light-bulb/pp_278478.html?wid=1433363)
-  * [TRÅDFRI bulb E27 opal 1000lm](https://www.ikea.com/se/sv/catalog/products/60338452/)
-  * [TRÅDFRI bulb E14 W op/ch 400lm](https://www.ikea.com/se/sv/catalog/products/60365271/)
+  * Yeelight RGB Bulb (YLDP02YL)
+  * Yeelight White Bulb (YLDP01YL)
+  * IKEA Trådfri E27 1000 lumen (LED1623G12)
+  * IKEA Trådfri E14 400 lumen (LED1649C5)
 * Media
-  * Sony TV with custom [component](https://github.com/gerard33/home-assistant/blob/master/braviatv_psk.py)
-  * Sony Soundbar HT-NT5 with component [songpal](https://www.home-assistant.io/components/media_player.songpal/)
+  * [Sony TV](https://github.com/custom-components/media_player.braviatv_psk)
+  * [Sony Soundbar HT-NT5](https://www.home-assistant.io/components/media_player.songpal/)
   * [Dune HD 301](https://www.home-assistant.io/components/media_player.dunehd/)
   * [Spotify](https://www.home-assistant.io/components/media_player.spotify/)
 * Weather
@@ -28,11 +28,20 @@
 * Notifications
   * [Pushover](https://pushover.net)
 * Presence detection
-  * [iPhone Detect](https://github.com/mudape/iphonedetect) custom component for iOS devices
-* Installation, updating  custom cards / components / python-scripts
-  * [HACS](https://custom-components.github.io/hacs/)
+  * [iPhone Detect](https://github.com/mudape/iphonedetect)
+* Manage and discover custom elements for Home Assistant
+  * [HACS](https://github.com/hacs/integration)
+* Docker Images
+  * [Home Assistant](https://hub.docker.com/r/homeassistant/raspberrypi3-homeassistant/tags)
+  * [deCONZ](https://hub.docker.com/r/marthoc/deconz/tags)
+  * [Portainer](https://hub.docker.com/r/portainer/portainer/tags)
+  * [Traefik](https://hub.docker.com/_/traefik?tab=tags)
+  * [AdGuard Home](https://hub.docker.com/r/adguard/adguardhome/tags)
+  * [Mosquitto](https://hub.docker.com/_/eclipse-mosquitto?tab=tags)
+* Remote access
+  * [Traefik reverse proxy](https://traefik.io) + [DuckDNS](https://www.duckdns.org) + [Let's Encrypt](https://letsencrypt.org)
 ## Home Assistant Lovelace UI
-The screenshots show the theme [reeder](https://github.com/hekm77/homeassistant-config/blob/master/themes/reeder.yaml)
+[Reeder Dark Theme](https://github.com/hekm77/homeassistant-config/blob/master/themes/reeder_dark.yaml)
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_1.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_2.png" alt="Home Assistant Lovelace UI" />
 <img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_3.png" alt="Home Assistant Lovelace UI" />
@@ -45,14 +54,11 @@ The screenshots show the theme [reeder](https://github.com/hekm77/homeassistant-
 * [alarm-control-panel-card](https://github.com/ciotlosm/custom-lovelace/tree/master/alarm_control_panel-card)
 * [bar-card](https://github.com/custom-cards/bar-card)
 * [button-card](https://github.com/custom-cards/button-card)
-* [config-template-card](https://github.com/custom-cards/config-template-card)
 * [lovelace-card-mod](https://github.com/thomasloven/lovelace-card-mod)
-* [lovelace-card-modder](https://github.com/thomasloven/lovelace-card-modder)
-* [lovelace-card-templater](https://github.com/gadgetchnnel/lovelace-card-templater)
-* [lovelace-card-tools](https://github.com/thomasloven/lovelace-card-tools)
 * [lovelace-fold-entity-row](https://github.com/thomasloven/lovelace-fold-entity-row)
-* [lovelace-gap-card](https://github.com/thomasloven/lovelace-gap-card)
 * [lovelace-slider-entity-row](https://github.com/thomasloven/lovelace-slider-entity-row)
+* [lovelace-swipe-navigation](https://github.com/maykar/lovelace-swipe-navigation)
 * [mini-graph-gard](https://github.com/kalkih/mini-graph-card)
 * [mini-media-player](https://github.com/kalkih/mini-media-player)
 * [simple-weather-card](https://github.com/kalkih/simple-weather-card)
+* [vertical-stack-in-card](https://github.com/custom-cards/vertical-stack-in-card)
