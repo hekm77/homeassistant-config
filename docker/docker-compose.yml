@@ -1,0 +1,113 @@
+version: '3.7'
+
+services:
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    networks:
+      - traefik_proxy
+    ports:
+      - 8080:8080
+      - 80:80
+      - 443:443
+    volumes:
+      - ${USERDIR}/traefik/traefik.yaml:/traefik.yaml
+      - ${USERDIR}/traefik/dynamic_conf.yaml:/dynamic_conf.yaml
+      - ${USERDIR}/traefik/acme/acme.json:/acme.json
+      - ${USERDIR}/traefik/traefik.log:/traefik.log
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+
+  portainer:
+    image: portainer/portainer:1.22.2
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    networks:
+      - traefik_proxy
+    ports:
+      - 9000:9000
+    volumes:
+      - ${USERDIR}/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.routers.portainer.middlewares=redirect@file"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAINNAME}`)"
+      - "traefik.http.routers.portainer-secure.entrypoints=web-secure"
+      - "traefik.http.routers.portainer-secure.service=portainer"
+      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.${DOMAINNAME}`)"
+      - "traefik.http.routers.portainer-secure.tls=true"
+      - "traefik.http.routers.portainer-secure.tls.options=default"
+      - "traefik.http.routers.portainer-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  homeassistant:
+    image: homeassistant/raspberrypi3-homeassistant:stable
+    container_name: homeassistant
+    restart: always
+    network_mode: host
+    privileged: true
+    devices:
+      - /dev/ttyAMA0
+    volumes:
+      - ${USERDIR}/homeassistant:/config
+      - ${USERDIR}/homeassistant/.ssh:/root/.ssh
+      - /etc/localtime:/etc/localtime:ro
+
+  mqtt:
+    image: eclipse-mosquitto
+    container_name: mqtt
+    restart: always
+    network_mode: host
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ${USERDIR}/mosquitto/config:/mosquitto/config
+      - ${USERDIR}/mosquitto/log:/mosquitto/log
+      - ${USERDIR}/mosquitto/data:/mosquitto/data
+      - /etc/localtime:/etc/localtime:ro
+
+  adguardhome:
+    image: adguard/adguardhome:armhf-latest
+    container_name: adguardhome
+    restart: always
+    network_mode: host
+    volumes:
+      - ${USERDIR}/adguardhome/work:/opt/adguardhome/work
+      - ${USERDIR}/adguardhome/conf:/opt/adguardhome/conf
+      - /etc/localtime:/etc/localtime:ro
+
+  deconz:
+    image: marthoc/deconz:latest
+    container_name: deconz
+    restart: always
+    network_mode: host
+    volumes:
+      - ${USERDIR}/deconz/:/root/.local/share/dresden-elektronik/deCONZ
+      - ${USERDIR}/deconz/otau:/root/otau
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/ttyAMA0
+    environment:
+      - DECONZ_WEB_PORT=8443
+      - DECONZ_WS_PORT=8585
+      - DECONZ_VNC_MODE=1
+      - DECONZ_VNC_PORT=5900
+      - DECONZ_VNC_PASSWORD=${DECONZ_VNC_PASSWORD}
+      - DEBUG_INFO=0
+      - DEBUG_APS=0
+      - DEBUG_ZCL=0
+      - DEBUG_ZDP=0
+      - DEBUG_OTAU=0
+
+
+networks:
+  traefik_proxy:
+    external: true
