@@ -1,0 +1,38 @@
+# Кастомизация
+homeassistant:
+  customize:
+    # Sensor
+    sensor.adguard_average_processing_speed:
+      friendly_name: Время обработки запроса
+    sensor.adguard_dns_queries:
+      friendly_name: DNS-запросы
+    sensor.adguard_dns_queries_blocked:
+      friendly_name: Заблокировано фильтрами
+    sensor.adguard_dns_queries_blocked_ratio:
+      friendly_name: Соотношение заблокированных DNS-запросов
+    sensor.adguard_parental_control_blocked:
+      friendly_name: Заблокировано
+    sensor.adguard_rules_count:
+      friendly_name: Правил блокировки
+    sensor.adguard_safe_browsing_blocked:
+      friendly_name: Вредоносные и фишинговые сайты
+    sensor.searches_safe_search_enforced:
+      friendly_name: Применен
+    # Switch
+    switch.adguard_protection:
+      friendly_name: Защита AdGuard
+    switch.adguard_filtering:
+      friendly_name: Фильтрация
+      icon: mdi:magnify-close
+    switch.adguard_parental_control:
+      friendly_name: Родительский контроль
+      icon: mdi:human-male-girl
+    switch.adguard_safe_browsing:
+      friendly_name: Безопасный просмотр
+      icon: mdi:shield-half-full
+    switch.adguard_safe_search:
+      friendly_name: Безопасный поиск
+      icon: mdi:shield-search
+    switch.adguard_query_log:
+      friendly_name: Журнал
+      icon: mdi:dns
