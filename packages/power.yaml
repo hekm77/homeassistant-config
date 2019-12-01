@@ -114,7 +114,7 @@ sensor:
           {% if is_state('sensor.smart_plug_power_bedroom', 'unknown') %}
             0.0
           {% else %}
-            {{ states('sensor.smart_plug_power_bedroom') }}
+            {{ states('sensor.smart_plug_power_bedroom') | float }}
           {% endif %}
         icon_template: mdi:power-plug
         unit_of_measurement: 'W'
@@ -132,7 +132,7 @@ sensor:
           {% if is_state('sensor.smart_plug_power_camera', 'unknown') %}
             0.0
           {% else %}
-            {{ states('sensor.smart_plug_power_camera') }}
+            {{ states('sensor.smart_plug_power_camera') | float }}
           {% endif %}
         icon_template: mdi:power-plug
         unit_of_measurement: 'W'
@@ -346,9 +346,6 @@ sensor:
                            + states('sensor.power_light_bathroom') | float
                            + states('sensor.power_light_bedroom') | float) | round(2) }}"
         unit_of_measurement: 'W'
-  # Заголовок карты "Энергопотребление за месяц"
-  - platform: template
-    sensors:
   # Общее энергопотребление
   - platform: integration
     source: sensor.power_total
