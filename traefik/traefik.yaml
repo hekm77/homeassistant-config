@@ -1,0 +1,60 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: error
+  filePath: "/traefik.log"
+
+api:
+  insecure: true
+  dashboard: true
+  debug: false
+
+serversTransport:
+  insecureSkipVerify: true
+
+entryPoints:
+  web:
+    address: ":80"
+    forwardedHeaders:
+      trustedIPs:
+        - "127.0.0.1/32"
+        - "192.168.1.0/24"
+    proxyProtocol:
+      trustedIPs:
+        - "127.0.0.1/32"
+        - "192.168.1.0/24"
+
+  web-secure:
+    address: ":443"
+    forwardedHeaders:
+      trustedIPs:
+        - "127.0.0.1/32"
+        - "192.168.1.0/24"
+
+  traefik:
+    address: ":8080"
+    forwardedHeaders:
+      trustedIPs:
+        - "127.0.0.1/32"
+        - "192.168.1.0/24"
+
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik_proxy
+  file:
+    filename: "/dynamic_conf.yaml"
+    watch: true
+
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: your@mail.com
+      storage: acme.json
+      httpChallenge:
+        entryPoint: web
