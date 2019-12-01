@@ -6,13 +6,15 @@ homeassistant:
   unit_system: metric
   time_zone: !secret time_zone
   packages: !include_dir_named packages/
-  whitelist_external_dirs: /home/homeassistant/.homeassistant/
+  whitelist_external_dirs:
+    - /config
   auth_providers:
     - type: homeassistant
     - type: trusted_networks
       trusted_networks:
         - 192.168.1.0/24
-        - 127.0.0.1
+        - 127.0.0.1/32
+        - 172.0.0.0/24
 
 frontend:
   themes: !include_dir_merge_named themes
@@ -20,9 +22,9 @@ frontend:
 lovelace:
   mode: yaml
 
-config:
-
 system_health:
+
+config:
 
 conversation:
 
@@ -34,14 +36,24 @@ http:
 
 mobile_app:
 
+ios:
+
 automation: !include automation.yaml
 script: !include script.yaml
 input_boolean: !include input_boolean.yaml
 
 person:
 
-hacs:
-  token: !secret github_token
+browser_mod:
+  devices:
+    e67b8xxx-bb8eexxx:
+      name: macbook_safari_local
+    f056dxxx-ea8faxxx:
+       name: macbook_chrome_local
+    dfdb2xxx-0a97cxxx:
+      name: iphone_app_local
+    08491xxx-fb54cxxx:
+      name: iphone_app
 
 # zeroconf:
 # ssdp:
