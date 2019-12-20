@@ -4,12 +4,15 @@ reeder_dark:
   accent-color: "#C29356"
   dark-primary-color: "var(--accent-color)"
   light-primary-color: "var(--accent-color)"
+  mdc-theme-primary: "var(--secondary-text-color)"
 
   # Text
   primary-text-color: "#FFFFFF"
   text-primary-color: "#FFFFFF"
   secondary-text-color: "#C1C1C1"
   disabled-text-color: "var(--primary-color)"
+  mdc-theme-on-primary: "var(--paper-listbox-background-color)"
+  mdc-theme-on-secondary: "var(--paper-listbox-background-color)"
 
   # Background / sidebar
   primary-background-color: "#464646"
@@ -115,6 +118,8 @@ reeder_dark:
   hacs-status-installed: "var(--google-green-500)"
   hacs-status-pending-restart: "var(--google-red-500)"
   hacs-status-pending-update: "#FFA73B"
+  hacs-status-not-loaded: "var(--google-red-500)"
+  link-text-color: "var(--accent-color)"
 
   # Mini Graph Card
   mcg-title-letter-spacing: ".05em"
