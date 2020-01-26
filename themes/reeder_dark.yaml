@@ -88,30 +88,6 @@ reeder_dark:
   google-red-500: "#E45E65"
   google-green-500: "#0EE770"
 
-  # History / Logbook
-  lumo-primary-text-color: "var(--primary-text-color)"
-  lumo-secondary-text-color: "#333333"
-  lumo-primary-color: "var(--primary-text-color)"
-  lumo-primary-contrast-color: "var(--lumo-secondary-text-color)"
-  lumo-primary-color-50pct: "rgba(255, 255, 255, .5)"
-  lumo-primary-color-10pct: "rgba(255, 255, 255, .1)"
-  lumo-body-text-color: "var(--primary-text-color)"
-  lumo-base-color: "var(--lumo-secondary-text-color)"
-  lumo-header-text-color: "var(--secondary-text-color)"
-  lumo-tertiary-text-color: "var(--lumo-body-text-color)"
-  lumo-shade: "var(--lumo-secondary-text-color)"
-  lumo-shade-90pct: "rgba(0,0,0, .9)"
-  lumo-shade-80pct: "rgba(0,0,0, .8)"
-  lumo-shade-70pct: "rgba(0,0,0, .7)"
-  lumo-shade-60pct: "rgba(0,0,0, .6)"
-  lumo-shade-50pct: "rgba(0,0,0, .5)"
-  lumo-shade-40pct: "rgba(0,0,0, .4)"
-  lumo-shade-30pct: "rgba(0,0,0, .3)"
-  lumo-shade-20pct: "rgba(0,0,0, .2)"
-  lumo-shade-10pct: "rgba(0,0,0, .1)"
-  lumo-shade-5pct: "rgba(255,255,255, .05)"
-  lumo-tint-5pct: "var(--lumo-secondary-text-color)"
-
   # HACS
   hacs-badge-color: "#09C6D5"
   hacs-badge-text-color: "var(--text-primary-color)"
@@ -124,6 +100,3 @@ reeder_dark:
   # Mini Graph Card
   mcg-title-letter-spacing: ".05em"
   mcg-title-font-weight: "500"
-
-  # Mini Media Player
-  mini-media-player-icon-color: "var(--primary-text-color)"
