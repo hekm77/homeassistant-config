@@ -1,4 +1,7 @@
 # Home Assistant Configuration
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/ChikiPiki)
+
 [Home Assistant](https://home-assistant.io/) is installed in [Docker](https://www.docker.com) on [Raspberry Pi 3B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) (Raspbian Buster)
 ## Devices and services
 * Network
