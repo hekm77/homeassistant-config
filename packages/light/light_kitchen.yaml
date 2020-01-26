@@ -16,7 +16,9 @@ yeelight:
 
 # Таймер
 timer:
-  kitchen:
+  kitchen_auto:
+    duration: '00:00:01'
+  kitchen_manual:
     duration: '01:00:00'
 
 
@@ -26,13 +28,6 @@ input_boolean:
     name: Кухня
     initial: on
     icon: mdi:home-automation
-
-
-# Скрипт
-script:
-  light_kitchen:
-    sequence:
-      - delay: 00:00:1.5
 
 
 # Автоматизации
@@ -53,20 +48,26 @@ automation:
           entity_id: light.kitchen
           state: 'off'
         - condition: state
-          entity_id: timer.kitchen
+          entity_id: timer.kitchen_manual
           state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_kitchen
-      - service: script.turn_on
-        entity_id: script.light_kitchen
+      - service: timer.start
+        entity_id: timer.kitchen_auto
       - service: light.turn_on
         entity_id: light.kitchen
         data_template:
           brightness_pct: >
-            {% if now().hour >= 7 and now().hour < 22 %} 100
-            {% elif now().hour >= 22 and now().hour < 24 %} 10
-            {% elif now().hour >= 0 and now().hour < 7 %} 1
+            {% if now().isoweekday() < 6 %}
+              {% if now().hour >= 7 and now().hour < 22 %} 100
+              {% elif now().hour >= 0 and now().hour < 7 %} 1
+              {% elif now().hour >= 22 and now().hour < 24 %} 10
+              {% endif %}
+            {% else %}
+              {% if now().hour >= 9 and now().hour < 22 %} 100
+              {% elif now().hour >= 7 and now().hour < 9 %} 10
+              {% elif now().hour >= 0 and now().hour < 7 %} 1
+              {% elif now().hour >= 22 and now().hour < 24 %} 10
+              {% endif %}
             {% endif %}
           color_temp: >
             {% if now().hour >= 0 and now().hour < 7 %} 588
@@ -83,11 +84,6 @@ automation:
         to: 'off'
         for:
           minutes: 5
-      - platform: state
-        entity_id: binary_sensor.motion_sensor_kitchen
-        to: 'off'
-        for:
-          minutes: 30
     condition:
       - condition: and
         conditions:
@@ -98,13 +94,11 @@ automation:
             entity_id: light.kitchen
             state: 'on'
           - condition: state
-            entity_id: timer.kitchen
+            entity_id: timer.kitchen_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_kitchen
-      - service: script.turn_on
-        entity_id: script.light_kitchen
+      - service: timer.start
+        entity_id: timer.kitchen_auto
       - service: light.turn_off
         entity_id: light.kitchen
 
@@ -118,11 +112,6 @@ automation:
         to: 'off'
         for:
           minutes: 1
-      - platform: state
-        entity_id: binary_sensor.motion_sensor_kitchen
-        to: 'off'
-        for:
-          minutes: 30
     condition:
       - condition: and
         conditions:
@@ -133,13 +122,34 @@ automation:
             entity_id: light.kitchen
             state: 'on'
           - condition: state
-            entity_id: timer.kitchen
+            entity_id: timer.kitchen_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_kitchen
-      - service: script.turn_on
-        entity_id: script.light_kitchen
+      - service: timer.start
+        entity_id: timer.kitchen_auto
+      - service: light.turn_off
+        entity_id: light.kitchen
+
+
+  # Выключение после остановки таймера
+  - alias: kitchen_light_off_timer
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.kitchen_manual
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: light.kitchen
+            state: 'on'
+          - condition: template
+            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_kitchen.last_changed)) | int > 600 }}"
+    action:
+      - service: timer.start
+        entity_id: timer.kitchen_auto
       - service: light.turn_off
         entity_id: light.kitchen
 
@@ -234,16 +244,16 @@ automation:
       - condition: and
         conditions:
           - condition: state
-            entity_id: script.light_kitchen
-            state: 'off'
+            entity_id: timer.kitchen_auto
+            state: 'idle'
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
             state: 'disarmed'
     action:
       - service: timer.cancel
-        entity_id: timer.kitchen
+        entity_id: timer.kitchen_manual
       - service: timer.start
-        entity_id: timer.kitchen
+        entity_id: timer.kitchen_manual
 
 
   # Уменьшение яркости в заданное время
@@ -259,13 +269,11 @@ automation:
             entity_id: light.kitchen
             state: 'on'
           - condition: state
-            entity_id: timer.kitchen
+            entity_id: timer.kitchen_auto
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_kitchen
-      - service: script.turn_on
-        entity_id: script.light_kitchen
+      - service: timer.start
+        entity_id: timer.kitchen_auto
       - service: light.turn_on
         entity_id: light.kitchen
         data_template:
@@ -284,11 +292,16 @@ automation:
       - condition: state
         entity_id: light.kitchen
         state: 'on'
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
     action:
-      - service: script.turn_off
-        entity_id: script.light_kitchen
-      - service: script.turn_on
-        entity_id: script.light_kitchen
+      - service: timer.start
+        entity_id: timer.kitchen_auto
       - service: light.turn_on
         entity_id: light.kitchen
         data_template:
@@ -305,7 +318,7 @@ automation:
         entity_id: input_boolean.kitchen_automation
     action:
       - service: timer.cancel
-        entity_id: timer.kitchen
+        entity_id: timer.kitchen_manual
       - service_template: >
           {% if is_state('input_boolean.kitchen_automation', 'on') %}
             automation.turn_on
