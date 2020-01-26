@@ -8,6 +8,7 @@ homeassistant:
   packages: !include_dir_named packages/
   whitelist_external_dirs:
     - /config
+    - /config/file
   auth_providers:
     - type: homeassistant
     - type: trusted_networks
@@ -44,23 +45,11 @@ input_boolean: !include input_boolean.yaml
 
 person:
 
-browser_mod:
-  devices:
-    e67b8xxx-bb8eexxx:
-      name: macbook_safari_local
-    f056dxxx-ea8faxxx:
-       name: macbook_chrome_local
-    dfdb2xxx-0a97cxxx:
-      name: iphone_app_local
-    08491xxx-fb54cxxx:
-      name: iphone_app
-
 # zeroconf:
 # ssdp:
 # default_config:
 # customize_glob:
 # discovery:
 # updater:
-# map:
 # cloud:
 # history_graph:
