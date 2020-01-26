@@ -21,7 +21,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   portainer:
-    image: portainer/portainer:1.22.2
+    image: portainer/portainer:latest
     container_name: portainer
     command: -H unix:///var/run/docker.sock
     restart: always
