@@ -4,6 +4,8 @@ homeassistant:
     # Sensor
     sensor.adguard_average_processing_speed:
       friendly_name: Время обработки запроса
+    sensor.adguard_average_processing_speed_custom:
+      friendly_name: Время обработки запроса
     sensor.adguard_dns_queries:
       friendly_name: DNS-запросы
     sensor.adguard_dns_queries_blocked:
@@ -36,3 +38,14 @@ homeassistant:
     switch.adguard_query_log:
       friendly_name: Журнал
       icon: mdi:dns
+
+    script.adguard_update:
+      friendly_name: Обновление
+      icon: mdi:update
+
+sensor:
+  -  platform: template
+     sensors:
+       adguard_average_processing_speed_custom:
+         value_template: "{{ (states('sensor.adguard_average_processing_speed') | float * 10) | round(0) }}"
+         unit_of_measurement: 'ms'
