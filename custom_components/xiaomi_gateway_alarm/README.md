@@ -1,5 +1,7 @@
 # Xiaomi Gateway Alarm
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/ChikiPiki)
+
 This custom component is based on [Xiaomi Raw](https://github.com/syssi/xiaomi_raw)
 
 Credits: Thanks to [Rytilahti](https://github.com/rytilahti/python-miio) and [syssi](https://github.com/syssi/xiaomi_raw)
