@@ -15,6 +15,7 @@ homekit:
       - media_player.dunehd
       - media_player.sony_htnt5
       - media_player.sony_bravia_tv
+      - media_player.apple_tv_livingroom
       - script.dunehd_fastforward
       - script.dunehd_play_pause
       - script.sony_htnt5_volume_mute
@@ -26,9 +27,16 @@ homekit:
       - input_boolean.ott_club
       - input_boolean.kinopub
       - input_boolean.youtube
+      - input_boolean.user_1_home
+      - input_boolean.user_2_home
+      - input_boolean.user_3_home
   entity_config:
     media_player.sony_bravia_tv:
       name: Зал Телевизор
+      feature_list:
+        - feature: on_off
+    media_player.apple_tv_livingroom:
+      name: Зал Apple TV
       feature_list:
         - feature: on_off
     media_player.dunehd:
