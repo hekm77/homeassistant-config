@@ -1,0 +1,91 @@
+# Кастомизация
+homeassistant:
+  customize:
+    sensor.trafikstatus_bus:
+      friendly_name: Buss
+      icon: mdi:bus
+    sensor.trafikstatus_metro:
+      friendly_name: Tunnelbana
+      icon: mdi:subway-variant
+    sensor.trafikstatus_local:
+      friendly_name: Lokalbana
+      icon: mdi:tram
+    sensor.trafikstatus_train:
+      friendly_name: Pendeltåg
+      icon: mdi:train
+    sensor.trafikstatus_tram:
+      friendly_name: Spårvagn
+      icon: mdi:tram
+    sensor.trafikstatus_ferry:
+      friendly_name: Båt
+      icon: mdi:ferry
+
+
+input_boolean:
+  sl_refresh:
+    name: SL Refresh
+
+
+# Сенсоры
+sensor:
+  - platform: hasl
+    ri4key: !secret ri4key
+    si2key: !secret si2key
+    tl2key: !secret tl2key
+    sensors:
+      - friendly_name: HASL
+        sensor_type: departures
+        siteid: !secret siteid
+        direction: 2
+        timewindow: 30
+        lines: !secret sl_lines
+        sensor: binary_sensor.sl_refresh
+      - friendly_name: Trafikstatus
+        sensor_type: status
+        sensor: binary_sensor.sl_refresh
+
+
+  # Trafikstatus sensors
+  - platform: template
+    sensors:
+      trafikstatus_bus:
+        value_template: "{{ state_attr('sensor.trafikstatus', 'bus_status') }}"
+      trafikstatus_metro:
+        value_template: "{{ state_attr('sensor.trafikstatus', 'metro_status') }}"
+      trafikstatus_local:
+        value_template: "{{ state_attr('sensor.trafikstatus', 'local_status') }}"
+      trafikstatus_train:
+        value_template: "{{ state_attr('sensor.trafikstatus', 'train_status') }}"
+      trafikstatus_tram:
+        value_template: "{{ state_attr('sensor.trafikstatus', 'tram_status') }}"
+      trafikstatus_ferry:
+        value_template: "{{ state_attr('sensor.trafikstatus', 'ferry_status') }}"
+
+
+binary_sensor:
+  # Sensor SL Refresh
+  - platform: template
+    sensors:
+      sl_refresh:
+        friendly_name: SL Refresh
+        value_template: "{{ is_state('input_boolean.sl_refresh', 'on') }}"
+
+
+# Автоматизации
+automation:
+  # SL Refresh
+  - alias: sl_refresh
+    initial_state: true
+    trigger:
+      - platform: time
+        at: '00:30:00'
+      - platform: time
+        at: '04:30:00'
+    action:
+      - service_template: >
+          {% if trigger.now.hour == 4 %}
+            input_boolean.turn_on
+          {% else %}
+            input_boolean.turn_off
+          {% endif %}
+        entity_id: input_boolean.sl_refresh
