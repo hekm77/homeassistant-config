@@ -21,6 +21,7 @@
   * [Sony TV](https://github.com/custom-components/media_player.braviatv_psk)
   * [Sony Soundbar HT-NT5](https://www.home-assistant.io/components/media_player.songpal/)
   * [Dune HD 301](https://www.home-assistant.io/components/media_player.dunehd/)
+  * [Apple TV 4K](https://github.com/postlund/hass-atv-beta)
   * [Spotify](https://www.home-assistant.io/components/media_player.spotify/)
 * Weather
   * [SMHI](https://www.home-assistant.io/components/smhi/)
@@ -29,6 +30,7 @@
   * [Pushover](https://pushover.net)
 * Presence detection
   * [iPhone Detect](https://github.com/mudape/iphonedetect)
+  * [Homekit](https://community.home-assistant.io/t/homekit-as-a-presence-sensor/50370)
 * Manage and discover custom elements for Home Assistant
   * [HACS](https://github.com/hacs/integration)
 * Docker Images
@@ -41,14 +43,15 @@
 * Remote access
   * [Traefik reverse proxy](https://traefik.io) + [DuckDNS](https://www.duckdns.org) + [Let's Encrypt](https://letsencrypt.org)
 ## Home Assistant Lovelace UI
-[Reeder Dark Theme](https://github.com/hekm77/homeassistant-config/blob/master/themes/reeder_dark.yaml)
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_1.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_2.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_3.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_4.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_5.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_6.png" alt="Home Assistant Lovelace UI" />
-<img src="https://github.com/hekm77/homeassistant-config/blob/master/screenshots/hass_7.png" alt="Home Assistant Lovelace UI" />
+[Reeder Dark Theme](https://github.com/hekm77/reeder_dark_theme)
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_1.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_2.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_3.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_4.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_5.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_6.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_7.png" alt="Home Assistant Lovelace UI" />
+<img src="https://github.com/hekm77/reeder_dark_theme/blob/master/screenshots/reeder_dark_8.png" alt="Home Assistant Lovelace UI" />
 
 ### Lovelace Custom Cards
 * [alarm-control-panel-card](https://github.com/ciotlosm/custom-lovelace/tree/master/alarm_control_panel-card)
@@ -62,3 +65,5 @@
 * [mini-media-player](https://github.com/kalkih/mini-media-player)
 * [simple-weather-card](https://github.com/kalkih/simple-weather-card)
 * [vertical-stack-in-card](https://github.com/custom-cards/vertical-stack-in-card)
+* [custom-header](https://github.com/maykar/custom-header)
+* [lovelace-multiple-entity-row](https://github.com/benct/lovelace-multiple-entity-row)
