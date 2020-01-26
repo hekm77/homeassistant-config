@@ -20,20 +20,35 @@ resources:
     type: js
   - url: /community_plugin/lovelace-swipe-navigation/swipe-navigation.js
     type: js
+  - url: /community_plugin/custom-header/custom-header.js
+    type: module
+  - url: /community_plugin/lovelace-multiple-entity-row/multiple-entity-row.js
+    type: module
 
   # custom
   - url: /local/lovelace/alarm_control_panel-card.js
     type: js
   - url: /local/lovelace/counter-card.js
     type: js
+  - url: /local/lovelace/hasl-departure-card.js
+    type: js
+  - url: /local/lovelace/hasl-trafikstatus-card.js
+    type: js
   - url: /local/lovelace/chart-colors.js
     type: js
+
+
+custom_header:
+  compact_mode: true
+  chevrons: false
+  header_css: 'padding: 24px;'
 
 
 swipe_nav:
   wrap: false
   prevent_default: true
   swipe_amount: 15
+
 
 anchors:
   # Light Card
@@ -97,7 +112,7 @@ anchors:
     align_state: center
     line_width: 6
     font_size: 120
-    decimals: 0
+    #decimals: 0
 
   # Counter Card
   counter_card: &counter_card
@@ -153,6 +168,70 @@ anchors:
       labels: false
       labels_secondary: false
 
+  # Trafikstatus Card
+  trafikstatus_card: &trafikstatus_card
+    type: custom:button-card
+    layout: name_state
+    styles:
+      card:
+        - height: 100px
+        - font-size: 14px
+        - font-weight: var(--mcg-title-font-weight)
+        - color: var(--secondary-text-color)
+        - letter-spacing: var(--mcg-title-letter-spacing)
+      icon:
+        - height: 40px
+        - width: 40px
+        - position: absolute
+        - left: 10%
+        - top: 10%
+      name:
+        - position: absolute
+        - left: 10%
+        - bottom: 15%
+      custom_fields:
+        status:
+          - display: none
+          - position: absolute
+          - right: 5%
+          - top: 10%
+    custom_fields:
+      status: >
+        [[[
+           if (entity.state == 'Good') return `<ha-icon icon="mdi:check"/>`;
+           if (entity.state == 'Minor') return `<ha-icon icon="mdi:clock-alert-outline"/>`;
+           if (entity.state == 'Closed') return `<ha-icon icon="mdi:close"/>`;
+           else return `<ha-icon icon="mdi:triangle-outline"/>`;
+        ]]]
+    state:
+      - value: 'Good'
+        id: Good
+        styles:
+          custom_fields:
+            status:
+              - display:
+              - color: var(--google-green-500)
+      - value: 'Minor'
+        id: Minor
+        styles:
+          icon:
+            - color: var(--disabled-text-color)
+          custom_fields:
+            status:
+              - display:
+              - color: '#FFA73B'
+              - animation: blink 2s ease infinite
+      - value: 'Closed'
+        id: Closed
+        styles:
+          icon:
+            - color: var(--disabled-text-color)
+          custom_fields:
+            status:
+              - display:
+              - color: var(--google-red-500)
+              - animation: blink 2s ease infinite
+
 
 title: Дом
 views:
@@ -191,7 +270,7 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                background: center / cover url(/local/icons/kitchen_reeder.png) no-repeat;
+                background: center / cover url(/local/icons/kitchen_reeder_2.png) no-repeat;
                 background-color: var(--ha-card-background);
                 background-size: 9em;
               }
@@ -288,12 +367,6 @@ views:
                 entity: light.window_livingroom
                 name: Окно
 
-          # Автоматизация освещения
-          - type: entities
-            entities:
-              - type: custom:fold-entity-row
-                head: group.light_automation
-
       # Спальня
       - type: vertical-stack
         cards:
@@ -325,7 +398,7 @@ views:
               ha-card {
                 background: center / cover url(/local/icons/bathroom_reeder.png) no-repeat;
                 background-color: var(--ha-card-background);
-                background-size: 9em;
+                background-size: 8em;
               }
               .card-header {
                 padding: 24px 16px 16px 24px;
@@ -336,95 +409,6 @@ views:
               - <<: *light_card
                 entity: light.bathroom
                 name: Плафон
-
-
-  # Медиа
-  - title: Медиа
-    icon: mdi:play
-    cards:
-      - type: vertical-stack
-        cards:
-          - type: horizontal-stack
-            cards:
-              # Кинозал
-              - <<: *toggle_button_card
-                entity: input_boolean.dfi
-              # ОТТ Клуб
-              - <<: *toggle_button_card
-                entity: input_boolean.ott_club
-              # Кинопаб
-              - <<: *toggle_button_card
-                entity: input_boolean.kinopub
-              # YouTube
-              - <<: *toggle_button_card
-                entity: input_boolean.youtube
-
-          - type: entities
-            entities:
-              # Sony TV
-              - entity: media_player.sony_bravia_tv
-                type: custom:mini-media-player
-                group: true
-                hide:
-                  controls: true
-                  volume: true
-                  source: true
-                  power_state: false
-              - <<: *divider_10
-
-              # Dune
-              - entity: media_player.dunehd
-                type: custom:mini-media-player
-                group: true
-                info: short
-                hide:
-                  controls: true
-                  volume: true
-                  source: true
-                  power_state: false
-              - <<: *divider_10
-
-              # Sony NT 5
-              - entity: media_player.sony_htnt5
-                type: custom:mini-media-player
-                group: true
-                hide:
-                  controls: true
-                  power_state: false
-              - <<: *divider_10
-
-              # Sony NT 5 Cast
-              - entity: media_player.sony_ht_nt5
-                type: custom:mini-media-player
-                group: true
-                info: scroll
-                hide:
-                  controls: true
-                  volume: true
-                  power_state: false
-
-      - type: vertical-stack
-        cards:
-          - type: entities
-            style: |
-              ha-card {
-                background: center / cover url(/local/icons/spotify_reeder.png) no-repeat;
-                background-color: var(--ha-card-background);
-                background-size: 14em;
-              }
-            entities:
-              # Spotify Player 1
-              - entity: media_player.spotify
-                <<: *spotify_card
-              - <<: *divider_20
-              # Spotify Player 2
-              - entity: media_player.spotify_2
-                <<: *spotify_card
-              - <<: *divider_20
-              # Spotify Player 3
-              - entity: media_player.spotify_3
-                <<: *spotify_card
-              - <<: *divider_20
 
 
   # Охрана
@@ -483,31 +467,32 @@ views:
           - entity: binary_sensor.motion_sensor_bathroom
             secondary_info: last-changed
 
+
       - type: vertical-stack
         cards:
           # Person 1
           - type: entities
             entities:
-              - entity: person.user_1
-                icon: mdi:emoticon-cool
+              - entity: binary_sensor.user_1_presence
+                name: User 1
                 <<: *person_card
           # Person 2
           - type: entities
             entities:
-              - entity: person.user_2
-                icon: mdi:emoticon-kiss
+              - entity: binary_sensor.user_2_presence
+                name: User 2
                 <<: *person_card
           # Person 3
           - type: entities
             entities:
-              - entity: person.user_3
-                icon: mdi:face-profile
+              - entity: binary_sensor.user_3_presence
+                name: User 3
                 <<: *person_card
           # Person 4
           - type: entities
             entities:
-              - entity: person.user_4
-                icon: mdi:face-woman
+              - entity: binary_sensor.user_4_presence
+                name: User 4
                 <<: *person_card
 
 
@@ -559,30 +544,7 @@ views:
               - entity: sensor.online_custom
               - entity: sensor.lets_encrypt
               - entity: script.ha_backup
-              - entity: script.ha_update
               - entity: script.ha_restart
-
-      - type: vertical-stack
-        cards:
-          # Raspberry Pi
-          - type: entities
-            style: |
-              ha-card {
-                background: center / cover url(/local/icons/rpi_reeder.png) no-repeat;
-                background-color: var(--ha-card-background);
-                background-size: 14em;
-              }
-            entities:
-              - entity: sensor.command_sensor
-              - entity: sensor.processor_use
-              - entity: sensor.memory_use_percent
-              - entity: sensor.disk_use_percent_home
-              - entity: sensor.disk_free_home
-              - entity: script.pi_reboot
-              - entity: script.pi_shutdown
-
-      - type: vertical-stack
-        cards:
           # Состояние батареи датчиков
           - type: entities
             entities:
@@ -603,6 +565,24 @@ views:
                   - sensor.tradfri_wireless_dimmer_battery_level
                   - sensor.temperature_livingroom_battery_level
 
+      - type: vertical-stack
+        cards:
+          # Raspberry Pi
+          - type: entities
+            style: |
+              ha-card {
+                background: center / cover url(/local/icons/rpi_reeder.png) no-repeat;
+                background-color: var(--ha-card-background);
+                background-size: 14em;
+              }
+            entities:
+              - entity: sensor.command_sensor
+              - entity: sensor.processor_use
+              - entity: sensor.memory_use_percent
+              - entity: sensor.disk_use_percent_home
+              - entity: sensor.disk_free_home
+              - entity: script.pi_reboot
+              - entity: script.pi_shutdown
           # Epson PX720WD
           - type: entities
             entities:
@@ -641,15 +621,143 @@ views:
                           icon_position: inside
                           width: 100%
 
-          # Освещенность
-          - <<: *graph_card
-            line_color: var(--disabled-text-color)
-            height: 140
-            show:
-              name: true
-              icon: false
+      - type: vertical-stack
+        cards:
+          # Docker
+          - type: entities
+            style: |
+              ha-card {
+                background: center / cover url(/local/icons/docker_reeder.png) no-repeat;
+                background-color: var(--ha-card-background);
+                background-size: 16em;
+              }
             entities:
-              - sensor.gateway_illumination
+              # Home Assistant
+              - entity: script.ha_update
+                type: custom:multiple-entity-row
+                style: |
+                  div:nth-child(3) {
+                    color:
+                      {% if states('sensor.ha_docker_version') > states('sensor.ha_local_version') %}
+                        var(--google-green-500)
+                      {% else %}
+                        var(--primary-text-color)
+                      {% endif %}
+                      ;
+                  }
+                name: Home Assistant
+                toggle: true
+                primary:
+                  entity: sensor.ha_local_version
+                  name: Установлено
+                secondary:
+                  entity: sensor.ha_docker_version
+                  name: Доступно
+              # Portainer
+              - entity: script.portainer_update
+                type: custom:multiple-entity-row
+                style: |
+                  div:nth-child(3) {
+                    color:
+                      {% if states('sensor.portainer_docker_version') > states('sensor.portainer_local_version') %}
+                        var(--google-green-500)
+                      {% else %}
+                        var(--primary-text-color)
+                      {% endif %}
+                      ;
+                  }
+                name: Portainer
+                toggle: true
+                primary:
+                  entity: sensor.portainer_local_version
+                  name: Установлено
+                secondary:
+                  entity: sensor.portainer_docker_version
+                  name: Доступно
+              # Traefik
+              - entity: script.traefik_update
+                type: custom:multiple-entity-row
+                style: |
+                  div:nth-child(3) {
+                    color:
+                      {% if states('sensor.traefik_docker_version') > states('sensor.traefik_local_version') %}
+                        var(--google-green-500)
+                      {% else %}
+                        var(--primary-text-color)
+                      {% endif %}
+                      ;
+                  }
+                name: Traefik
+                toggle: true
+                primary:
+                  entity: sensor.traefik_local_version
+                  name: Установлено
+                secondary:
+                  entity: sensor.traefik_docker_version
+                  name: Доступно
+              # Deconz
+              - entity: script.deconz_update
+                type: custom:multiple-entity-row
+                style: |
+                  div:nth-child(3) {
+                    color:
+                      {% if states('sensor.deconz_docker_version') > states('sensor.deconz_local_version') %}
+                        var(--google-green-500)
+                      {% else %}
+                        var(--primary-text-color)
+                      {% endif %}
+                      ;
+                  }
+                name: Deconz
+                toggle: true
+                primary:
+                  entity: sensor.deconz_local_version
+                  name: Установлено
+                secondary:
+                  entity: sensor.deconz_docker_version
+                  name: Доступно
+              # Adguard
+              - entity: script.adguard_update
+                type: custom:multiple-entity-row
+                style: |
+                  div:nth-child(3) {
+                    color:
+                      {% if states('sensor.adguard_docker_version') > states('sensor.adguard_local_version') %}
+                        var(--google-green-500)
+                      {% else %}
+                        var(--primary-text-color)
+                      {% endif %}
+                      ;
+                  }
+                name: Adguard
+                toggle: true
+                primary:
+                  entity: sensor.adguard_local_version
+                  name: Установлено
+                secondary:
+                  entity: sensor.adguard_docker_version
+                  name: Доступно
+              # Mosquitto
+              - entity: script.mosquitto_update
+                type: custom:multiple-entity-row
+                style: |
+                  div:nth-child(3) {
+                    color:
+                      {% if states('sensor.mosquitto_docker_version') > states('sensor.mosquitto_local_version') %}
+                        var(--google-green-500)
+                      {% else %}
+                        var(--primary-text-color)
+                      {% endif %}
+                      ;
+                  }
+                name: Mosquitto
+                toggle: true
+                primary:
+                  entity: sensor.mosquitto_local_version
+                  name: Установлено
+                secondary:
+                  entity: sensor.mosquitto_docker_version
+                  name: Доступно
 
 
   # Электричество
@@ -667,7 +775,7 @@ views:
                 }
               "#states > div:nth-child(1) > fold-entity-row":
                 $:
-                 "#head > entity-row-maker > hui-section-row":
+                 "#head > hui-section-row":
                    $: |
                      div.divider {
                        height: 0px;
@@ -739,7 +847,7 @@ views:
               .: |
               "#states > div:nth-child(1) > fold-entity-row":
                 $:
-                 "#head > entity-row-maker > hui-section-row":
+                 "#head > hui-section-row":
                    $: |
                      div.divider {
                        height: 0px;
@@ -1047,6 +1155,186 @@ views:
               - entity: sensor.smhi_humidity
 
 
+  # SL
+  - title: SL
+    icon: mdi:bus-clock
+    cards:
+      - type: custom:hasl-departure-card
+        style: |
+          ha-card {
+            background: center / cover url(/local/icons/sl_reeder.png) no-repeat;
+            background-color: var(--ha-card-background);
+            background-size: 12em;
+          }
+        show_cardname: false
+        header: false
+        departures: true
+        timeleft: true
+        adjust_times: true
+        updated: true
+        hide_departed: true
+        language: sv-SE
+        entities:
+          - sensor.hasl
+
+      # Пустая карта
+      - <<: *blank_card
+
+      # Trafikstatus
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              # Buss
+              - <<: *trafikstatus_card
+                entity: sensor.trafikstatus_bus
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    style:
+                      border-radius: 6px
+                    title: Buss
+                    card:
+                      type: custom:hasl-trafikstatus-card
+                      entities:
+                        - sensor.trafikstatus
+                      events: bus_events
+              # Tunnelbana
+              - <<: *trafikstatus_card
+                entity: sensor.trafikstatus_metro
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    style:
+                      border-radius: 6px
+                    title: Tunnelbana
+                    card:
+                      type: custom:hasl-trafikstatus-card
+                      entities:
+                        - sensor.trafikstatus
+                      events: metro_events
+              # Lokalbana
+              - <<: *trafikstatus_card
+                entity: sensor.trafikstatus_local
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    style:
+                      border-radius: 6px
+                    title: Lokalbana
+                    card:
+                      type: custom:hasl-trafikstatus-card
+                      entities:
+                        - sensor.trafikstatus
+                      events: local_events
+
+          - type: horizontal-stack
+            cards:
+              # Pendeltåg
+              - <<: *trafikstatus_card
+                entity: sensor.trafikstatus_train
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    style:
+                      border-radius: 6px
+                    title: Pendeltåg
+                    card:
+                      type: custom:hasl-trafikstatus-card
+                      entities:
+                        - sensor.trafikstatus
+                      events: train_events
+              # Spårvagn
+              - <<: *trafikstatus_card
+                entity: sensor.trafikstatus_tram
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    style:
+                      border-radius: 6px
+                    title: Spårvagn
+                    card:
+                      type: custom:hasl-trafikstatus-card
+                      entities:
+                        - sensor.trafikstatus
+                      events: tram_events
+              # Båt
+              - <<: *trafikstatus_card
+                entity: sensor.trafikstatus_ferry
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    style:
+                      border-radius: 6px
+                    title: Båt
+                    card:
+                      type: custom:hasl-trafikstatus-card
+                      entities:
+                        - sensor.trafikstatus
+                      events: ferry_events
+
+          # Info
+          - type: entities
+            style:
+              .: |
+              "#states > div:nth-child(1) > fold-entity-row":
+                $:
+                 "#head > hui-section-row":
+                   $: |
+                     div.divider {
+                       height: 0px;
+                     }
+                     div.label {
+                       color: var(--secondary-text-color);
+                       font-size: 1.2em;
+                       letter-spacing: var(--mcg-title-letter-spacing, normal);
+                       font-weight: var(--mcg-title-font-weight);
+                     }
+            entities:
+              - type: custom:fold-entity-row
+                head:
+                  type: section
+                  label: Störningsinformation
+                entities:
+                  - type: custom:hasl-departure-card
+                    style:
+                      .: |
+                        ha-card {
+                          border-radius: 0px;
+                          --ha-card-box-shadow: none;
+                          background-color: transparent;
+                        }
+                    show_cardname: false
+                    deviations: true
+                    language: sv-SE
+                    entities:
+                      - sensor.hasl
+
+
   # Adguard
   - title: Adguard
     icon: mdi:shield-check-outline
@@ -1056,7 +1344,7 @@ views:
         entities:
           - entity: sensor.adguard_dns_queries
             unit: ' '
-          - entity: sensor.adguard_average_processing_speed
+          - entity: sensor.adguard_average_processing_speed_custom
             show_state: true
             show_graph: false
             y_axis: secondary
