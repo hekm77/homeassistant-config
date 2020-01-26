@@ -8,7 +8,9 @@ homeassistant:
 
 # Таймер
 timer:
-  bathroom:
+  bathroom_auto:
+    duration: '00:00:01'
+  bathroom_manual:
     duration: '01:30:00'
 
 
@@ -18,13 +20,6 @@ input_boolean:
     name: Ванная
     initial: on
     icon: mdi:home-automation
-
-
-# Скрипт
-script:
-  light_bathroom:
-    sequence:
-      - delay: 00:00:1.5
 
 
 # Автоматизации
@@ -43,13 +38,11 @@ automation:
             entity_id: light.bathroom
             state: 'off'
           - condition: state
-            entity_id: timer.bathroom
+            entity_id: timer.bathroom_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_bathroom
-      - service: script.turn_on
-        entity_id: script.light_bathroom
+      - service: timer.start
+        entity_id: timer.bathroom_auto
       - service: light.turn_on
         entity_id: light.bathroom
         data_template:
@@ -68,11 +61,6 @@ automation:
         to: 'off'
         for:
           minutes: 15
-      - platform: state
-        entity_id: binary_sensor.motion_sensor_bathroom
-        to: 'off'
-        for:
-          minutes: 30
     condition:
       - condition: and
         conditions:
@@ -83,13 +71,11 @@ automation:
             entity_id: light.bathroom
             state: 'on'
           - condition: state
-            entity_id: timer.bathroom
+            entity_id: timer.bathroom_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_bathroom
-      - service: script.turn_on
-        entity_id: script.light_bathroom
+      - service: timer.start
+        entity_id: timer.bathroom_auto
       - service: light.turn_off
         entity_id: light.bathroom
 
@@ -103,11 +89,6 @@ automation:
         to: 'off'
         for:
           minutes: 1
-      - platform: state
-        entity_id: binary_sensor.motion_sensor_bathroom
-        to: 'off'
-        for:
-          minutes: 30
     condition:
       - condition: and
         conditions:
@@ -118,13 +99,34 @@ automation:
             entity_id: light.bathroom
             state: 'on'
           - condition: state
-            entity_id: timer.bathroom
+            entity_id: timer.bathroom_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_bathroom
-      - service: script.turn_on
-        entity_id: script.light_bathroom
+      - service: timer.start
+        entity_id: timer.bathroom_auto
+      - service: light.turn_off
+        entity_id: light.bathroom
+
+
+  # Выключение после остановки таймера
+  - alias: bathroom_light_off_timer
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.bathroom_manual
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: light.bathroom
+            state: 'on'
+          - condition: template
+            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_bathroom.last_changed)) | int > 600 }}"
+    action:
+      - service: timer.start
+        entity_id: timer.bathroom_auto
       - service: light.turn_off
         entity_id: light.bathroom
 
@@ -177,25 +179,22 @@ automation:
           id: smart_switch_bathroom
           event: 1001
     action:
-      - service: script.turn_on
-        entity_id: script.light_bathroom
       - service: light.turn_on
         entity_id: light.bathroom
         data_template:
-          brightness_pct: 50
+          brightness_pct: 30
       - delay: 00:00:0.5
       - service: light.turn_on
         entity_id: light.bathroom
         data_template:
           brightness_pct: 100
-      - service: timer.cancel
-        entity_id: timer.bathroom
+      - delay: 00:00:01
       - service: timer.start
-        entity_id: timer.bathroom
+        entity_id: timer.bathroom_manual
 
 
   # Сброс таймера при включении / выключении вручную
-  - alias: bathroom_timer
+  - alias: bathroom_timer_cancel
     initial_state: true
     trigger:
       - platform: state
@@ -204,8 +203,8 @@ automation:
       - condition: and
         conditions:
           - condition: state
-            entity_id: script.light_bathroom
-            state: 'off'
+            entity_id: timer.bathroom_auto
+            state: 'idle'
           - condition: template
             value_template: "{{ states('sensor.online') | int > 1 }}"
           - condition: state
@@ -213,7 +212,7 @@ automation:
             state: 'disarmed'
     action:
       - service: timer.cancel
-        entity_id: timer.bathroom
+        entity_id: timer.bathroom_manual
 
 
   # Увеличение яркости в заданное время
@@ -227,10 +226,8 @@ automation:
         entity_id: light.bathroom
         state: 'on'
     action:
-      - service: script.turn_off
-        entity_id: script.light_bathroom
-      - service: script.turn_on
-        entity_id: script.light_bathroom
+      - service: timer.start
+        entity_id: timer.bathroom_auto
       - service: light.turn_on
         entity_id: light.bathroom
         data_template:
@@ -245,7 +242,7 @@ automation:
         entity_id: input_boolean.bathroom_automation
     action:
       - service: timer.cancel
-        entity_id: timer.bathroom
+        entity_id: timer.bathroom_manual
       - service_template: >
           {% if is_state('input_boolean.bathroom_automation', 'on') %}
             automation.turn_on
