@@ -1,0 +1,49 @@
+# Трекер устройств
+device_tracker:
+  - platform: iphonedetect
+    consider_home: 90
+    new_device_defaults:
+      track_new_devices: true
+      hide_if_away: false
+    hosts:
+      host_1: 192.168.1.x
+      host_2: 192.168.1.x
+      host_3: 192.168.1.x
+      host_4: 192.168.1.x
+
+
+input_boolean:
+  user_1_home:
+    name: User 1 Home
+    icon: mdi:account
+  user_2_home:
+    name: User 2 Home
+    icon: mdi:account
+  user_3_home:
+   name: User 3 Home
+   icon: mdi:account
+
+
+binary_sensor:
+  - platform: template
+    sensors:
+      chiki_piki_presence:
+        friendly_name: User 1
+        device_class: presence
+        value_template: "{{ is_state('input_boolean.user_1_home', 'on') or is_state('device_tracker.host_1', 'home') }}"
+        icon_template: mdi:emoticon-cool
+      lena_presence:
+        friendly_name: User 2
+        device_class: presence
+        value_template: "{{ is_state('input_boolean.user_2_home', 'on') or is_state('device_tracker.host_2', 'home') }}"
+        icon_template: mdi:emoticon-kiss
+      nikita_presence:
+        friendly_name: User 3
+        device_class: presence
+        value_template: "{{ is_state('input_boolean.user_3_home', 'on') or is_state('device_tracker.host_3', 'home') }}"
+        icon_template: mdi:face-profile
+      lena_2_presence:
+        friendly_name: User 4
+        device_class: presence
+        value_template: "{{ is_state('device_tracker.host_4', 'home') }}"
+        icon_template: mdi:face-woman
