@@ -10,16 +10,13 @@ homeassistant:
     script.ha_restart:
       friendly_name: Перезагрузка
       icon: mdi:restart
-    script.ha_update:
-      friendly_name: Обновление
-      icon: mdi:update
+
 
 # Команды
 shell_command:
   # Перезагрузка Home Assistant
   ha_restart: ssh -p your_port root@192.168.1.x "docker restart homeassistant"
-  # Обновление Home Assistant
-  ha_update: ssh -p your_port root@192.168.1.x  "docker pull homeassistant/raspberrypi3-homeassistant:stable && cd /home/pi && docker-compose up -d"
+
 
 # Сенсоры
 sensor:
@@ -68,13 +65,8 @@ sensor:
 
 # Скрипты
 script:
-  # Перезагрузка Home Assistant в Lovelace
+  # Перезагрузка Home Assistant
   ha_restart:
     sequence:
       - delay: 00:00:0.5
       - service: shell_command.ha_restart
-  # Обновление Home Assistant в Lovelace
-  ha_update:
-    sequence:
-      - delay: 00:00:0.5
-      - service: shell_command.ha_update
