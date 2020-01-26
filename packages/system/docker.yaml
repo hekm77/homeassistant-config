@@ -1,0 +1,219 @@
+# Кастомизация
+homeassistant:
+  customize:
+    script.ha_update:
+      friendly_name: Обновление Home Assistant
+      icon: mdi:update
+    script.portainer_update:
+      friendly_name: Обновление Portainer
+      icon: mdi:update
+    script.traefik_update:
+      friendly_name: Обновление Traefik
+      icon: mdi:update
+    script.deconz_update:
+      friendly_name: Обновление Deconz
+      icon: mdi:update
+    script.adguard_update:
+      friendly_name: Обновление Adguard
+      icon: mdi:update
+    script.mosquitto_update:
+      friendly_name: Обновление Mosquitto
+      icon: mdi:update
+
+
+# Команды
+shell_command:
+  # Обновление Home Assistant
+  ha_update: ssh -p your_port root@192.168.1.x  "docker pull homeassistant/raspberrypi3-homeassistant:stable && cd /home/pi && docker-compose up -d"
+  # Обновление Portainer
+  portainer_update: ssh -p your_port root@192.168.1.x  "docker pull portainer/portainer:latest && cd /home/pi && docker-compose up -d"
+  # Обновление Traefik
+  traefik_update: ssh -p your_port root@192.168.1.x  "docker pull traefik:latest && cd /home/pi && docker-compose up -d"
+  # Обновление Deconz
+  deconz_update: ssh -p your_port root@192.168.1.x  "docker pull marthoc/deconz && cd /home/pi && docker-compose up -d"
+  # Обновление Adguard
+  adguard_update: ssh -p your_port root@192.168.1.x  "docker pull adguard/adguardhome:armhf-latest && cd /home/pi && docker-compose up -d"
+  # Обновление Mosquitto
+  mosquitto_update: ssh -p your_port root@192.168.1.x  "docker pull eclipse-mosquitto && cd /home/pi && docker-compose up -d"
+
+
+# Сенсоры версий docker-контейнеров
+sensor:
+  # Home Assistant Docker Version
+  - platform: version
+    beta: false
+    source: docker
+    name: ha_docker_version
+
+
+  # Home Assistant Local Version
+  - platform: version
+    name: ha_local_version
+    source: local
+    beta: false
+
+
+  # Portainer Docker Version
+  - platform: rest
+    name: portainer_docker_version
+    resource: 'https://registry.hub.docker.com/v2/repositories/portainer/portainer/tags'
+    value_template: >
+      {% set results = value_json.results %}
+      {% set res %}
+      {% set pipe = joiner('|') %}
+        {% for result in results if result.name | regex_search("\d+\.\d+\.\d+$") %}
+          {{ pipe() }}{{ result.name }}
+        {% endfor %}
+      {% endset %}
+      {% set res = res.split('|') | list %}
+        {{ res[0] }}
+    scan_interval: 86400
+
+
+  # Portainer Local Version
+  -  platform: command_line
+     name: portainer_local_version
+     command: ssh -p your_port root@192.168.1.x "docker logs portainer 2>&1 | grep -o 'Starting Portainer[[:space:][0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
+     scan_interval: 3600
+
+
+  # Traefik Docker Version
+  - platform: rest
+    name: traefik_docker_version
+    resource: 'https://registry.hub.docker.com/v2/repositories/library/traefik/tags'
+    value_template: >
+      {% set results = value_json.results %}
+      {% set res %}
+      {% set pipe = joiner('|') %}
+        {% for result in results if result.name | regex_search("\d+\.\d+\.\d+$") %}
+          {{ pipe() }}{{ result.name }}
+        {% endfor %}
+      {% endset %}
+      {% set res = res.split('|') | list %}
+      {% set res = res[0].split('v') %}
+        {{ res[1] }}
+    scan_interval: 86400
+
+
+  # Traefik Local Version
+  -  platform: command_line
+     name: traefik_local_version
+     command: ssh -p your_port root@192.168.1.x "docker inspect traefik:latest"
+     value_template: "{{ value_json[0]['ContainerConfig']['Labels']['org.opencontainers.image.version'].split('v')[1] }}"
+     scan_interval: 86400
+
+
+  # Deconz Docker Version
+  - platform: rest
+    name: deconz_docker_version
+    resource: 'https://registry.hub.docker.com/v2/repositories/marthoc/deconz/tags'
+    value_template: >
+      {% set results = value_json.results %}
+      {% set res %}
+      {% set pipe = joiner('|') %}
+        {% for result in results if result.name | regex_search("armhf-\d+\.\d+\.\d+$") %}
+          {{ pipe() }}{{ result.name }}
+        {% endfor %}
+      {% endset %}
+      {% set res = res.split('|') | list %}
+      {% set res = res[0].split('-') %}
+        {{ res[1] }}
+    scan_interval: 86400
+
+
+  # Deconz Local Version
+  -  platform: command_line
+     name: deconz_local_version
+     command: ssh -p your_port root@192.168.1.x "docker inspect marthoc/deconz:latest"
+     value_template: "{{ value_json[0]['ContainerConfig']['Env'][5].split('DECONZ_VERSION=')[1] }}"
+     scan_interval: 86400
+
+
+  # Adguard Docker Version
+  - platform: rest
+    name: adguard_docker_version
+    resource: 'https://registry.hub.docker.com/v2/repositories/adguard/adguardhome/tags'
+    value_template: >
+      {% set results = value_json.results %}
+      {% set res %}
+      {% set pipe = joiner('|') %}
+        {% for result in results if result.name | regex_search("armhf-v\d+\.\d+\.\d+$") %}
+          {{ pipe() }}{{ result.name }}
+        {% endfor %}
+      {% endset %}
+      {% set res = res.split('|') | list %}
+      {% set res = res[0].split('v') %}
+        {{ res[1] }}
+    scan_interval: 86400
+
+
+  # Adguard Local Version
+  -  platform: command_line
+     name: adguard_local_version
+     command: ssh -p your_port root@192.168.1.x "docker logs adguardhome 2>&1 | grep -o 'AdGuard Home, version[[:space:][a-z]\+[0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
+     scan_interval: 3600
+
+
+  # Mosquitto Docker Version
+  - platform: rest
+    name: mosquitto_docker_version
+    resource: 'https://registry.hub.docker.com/v2/repositories/library/eclipse-mosquitto/tags'
+    value_template: >
+      {% set results = value_json.results %}
+      {% set res %}
+      {% set pipe = joiner('|') %}
+        {% for result in results if result.name | regex_search("\d+\.\d+\.\d+$") %}
+          {{ pipe() }}{{ result.name }}
+        {% endfor %}
+      {% endset %}
+      {% set res = res.split('|') | list %}
+        {{ res[0] }}
+    scan_interval: 86400
+
+
+  # Mosquitto Local Version
+  -  platform: command_line
+     name: mosquitto_local_version
+     command: ssh -p your_port root@192.168.1.x "docker inspect eclipse-mosquitto:latest"
+     value_template: "{{ value_json[0]['ContainerConfig']['Env'][1].split('VERSION=')[1] }}"
+     scan_interval: 86400
+
+
+# Скрипты
+script:
+  # Обновление Home Assistant
+  ha_update:
+    sequence:
+      - service: shell_command.ha_backup
+      - delay: 00:00:30
+      - service: shell_command.ha_update
+  # Обновление Portainer
+  portainer_update:
+    sequence:
+      - service: shell_command.ha_backup
+      - delay: 00:00:30
+      - service: shell_command.portainer_update
+  # Обновление Traefik
+  traefik_update:
+    sequence:
+      - service: shell_command.ha_backup
+      - delay: 00:00:30
+      - service: shell_command.traefik_update
+  # Обновление Deconz
+  deconz_update:
+    sequence:
+      - service: shell_command.ha_backup
+      - delay: 00:00:30
+      - service: shell_command.deconz_update
+  # Обновление Adguard
+  adguard_update:
+    sequence:
+      - service: shell_command.ha_backup
+      - delay: 00:00:30
+      - service: shell_command.adguard_update
+  # Обновление Mosquitto
+  mosquitto_update:
+    sequence:
+      - service: shell_command.ha_backup
+      - delay: 00:00:30
+      - service: shell_command.mosquitto_update
