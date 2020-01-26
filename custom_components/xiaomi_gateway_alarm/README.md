@@ -21,3 +21,5 @@ switch:
     token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx # Gateway token
 ```
 [Retrieving the Access Token](https://www.home-assistant.io/integrations/vacuum.xiaomi_miio/#retrieving-the-access-token)
+
+[Obtain Mi Home device token](https://github.com/Maxmudjon/com.xiaomi-miio/blob/master/docs/obtain_token.md)
