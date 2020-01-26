@@ -31,7 +31,9 @@ light:
 
 # Таймер
 timer:
-  hall:
+  hall_auto:
+    duration: '00:00:01'
+  hall_manual:
     duration: '01:00:00'
 
 
@@ -41,13 +43,6 @@ input_boolean:
     name: Холл
     initial: on
     icon: mdi:home-automation
-
-
-# Скрипт
-script:
-  light_hall:
-    sequence:
-      - delay: 00:00:1.5
 
 
 # Автоматизации
@@ -62,20 +57,32 @@ automation:
     condition:
       - condition: and
         conditions:
-          - condition: time
-            after: '06:00:00'
-            before: '23:00:00'
+          - condition: or
+            conditions:
+              - condition: time
+                after: '06:00:00'
+                before: '23:00:00'
+                weekday:
+                  - mon
+                  - tue
+                  - wed
+                  - thu
+                  - fri
+              - condition: time
+                after: '09:00:00'
+                before: '22:00:00'
+                weekday:
+                  - sat
+                  - sun
           - condition: state
             entity_id: light.hall
             state: 'off'
           - condition: state
-            entity_id: timer.hall
+            entity_id: timer.hall_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_hall
-      - service: script.turn_on
-        entity_id: script.light_hall
+      - service: timer.start
+        entity_id: timer.hall_auto
       - service: light.turn_on
         entity_id: light.hall
         data_template:
@@ -95,11 +102,6 @@ automation:
         to: 'off'
         for:
           minutes: 2
-      - platform: state
-        entity_id: binary_sensor.motion_sensor_hall
-        to: 'off'
-        for:
-          minutes: 60
     condition:
       - condition: and
         conditions:
@@ -107,13 +109,34 @@ automation:
             entity_id: light.hall
             state: 'on'
           - condition: state
-            entity_id: timer.hall
+            entity_id: timer.hall_manual
             state: 'idle'
     action:
-      - service: script.turn_off
-        entity_id: script.light_hall
-      - service: script.turn_on
-        entity_id: script.light_hall
+      - service: timer.start
+        entity_id: timer.hall_auto
+      - service: light.turn_off
+        entity_id: light.hall
+
+
+  # Выключение после остановки таймера
+  - alias: hall_light_off_timer
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.hall_manual
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: light.hall
+            state: 'on'
+          - condition: template
+            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_hall.last_changed)) | int > 600 }}"
+    action:
+      - service: timer.start
+        entity_id: timer.hall_auto
       - service: light.turn_off
         entity_id: light.hall
 
@@ -188,19 +211,19 @@ automation:
       - condition: and
         conditions:
           - condition: state
-            entity_id: script.light_hall
-            state: 'off'
+            entity_id: timer.hall_auto
+            state: 'idle'
           - condition: state
             entity_id: alarm_control_panel.ha_alarm
             state: 'disarmed'
     action:
       - service: timer.cancel
-        entity_id: timer.hall
+        entity_id: timer.hall_manual
       - service: timer.start
-        entity_id: timer.hall
+        entity_id: timer.hall_manual
 
 
-  # Изменение яркости в заданное время
+  # Уменьшение яркости в заданное время
   - alias: hall_light_decrease
     initial_state: true
     trigger:
@@ -211,10 +234,8 @@ automation:
         entity_id: light.hall
         state: 'on'
     action:
-      - service: script.turn_off
-        entity_id: script.light_hall
-      - service: script.turn_on
-        entity_id: script.light_hall
+      - service: timer.start
+        entity_id: timer.hall_auto
       - service: light.turn_on
         entity_id: light.hall
         data_template:
@@ -229,7 +250,7 @@ automation:
         entity_id: input_boolean.hall_automation
     action:
       - service: timer.cancel
-        entity_id: timer.hall
+        entity_id: timer.hall_manual
       - service_template: >
           {% if is_state('input_boolean.hall_automation', 'on') %}
             automation.turn_on
