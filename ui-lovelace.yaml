@@ -90,6 +90,7 @@ anchors:
  # Person Card
   person_card: &person_card
     secondary_info: last-changed
+    state_color: true
     style: |
       :host {
         --paper-item-icon-color:
@@ -389,6 +390,7 @@ views:
                 entity: light.bedroom
                 name: Люстра
               - entity: switch.smart_plug_bedroom
+                state_color: true
 
           # Ванная
           - type: entities
@@ -447,6 +449,7 @@ views:
 
       # Датчики
       - type: entities
+        state_color: true
         style: |
           ha-card {
             background: center / cover url(/local/icons/shield_reeder.png) no-repeat;
@@ -1360,6 +1363,7 @@ views:
             y_axis: secondary
 
       - type: entities
+        state_color: true
         style:
           .: |
             ha-card {
@@ -1372,6 +1376,7 @@ views:
           - switch.adguard_protection
 
       - type: entities
+        state_color: true
         style:
           .: |
             ha-card {
@@ -1398,6 +1403,7 @@ views:
                 unit: ' '
 
       - type: entities
+        state_color: true
         style:
           .: |
             ha-card {
@@ -1410,6 +1416,7 @@ views:
           - switch.adguard_query_log
 
       - type: entities
+        state_color: true
         style:
           .: |
             ha-card {
