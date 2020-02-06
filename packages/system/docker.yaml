@@ -73,7 +73,7 @@ sensor:
   # Portainer Local Version
   -  platform: command_line
      name: portainer_local_version
-     command: ssh -p your_port root@192.168.1.x "docker logs portainer 2>&1 | grep -o 'Starting Portainer[[:space:][0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
+     command: ssh -p your_port root@192.168.1.x "docker logs portainer 2>&1 | grep -m1 -o 'Starting Portainer[[:space:][0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
      scan_interval: 3600
 
 
@@ -150,7 +150,7 @@ sensor:
   # Adguard Local Version
   -  platform: command_line
      name: adguard_local_version
-     command: ssh -p your_port root@192.168.1.x "docker logs adguardhome 2>&1 | grep -o 'AdGuard Home, version[[:space:][a-z]\+[0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
+     command: ssh -p your_port root@192.168.1.x "docker logs adguardhome 2>&1 | grep -m1 -o 'AdGuard Home, version[[:space:][a-z]\+[0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
      scan_interval: 3600
 
 
