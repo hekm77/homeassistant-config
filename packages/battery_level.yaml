@@ -50,7 +50,6 @@ group:
   # Сенсоры уровня заряда батареи датчиков
   battery_levels:
     name: Уровень заряда батареи
-    view: no
     entities:
       - sensor.front_door_sensor_battery_level
       - sensor.motion_sensor_hall_battery_level
