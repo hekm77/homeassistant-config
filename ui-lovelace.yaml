@@ -650,12 +650,11 @@ views:
                   }
                 name: Home Assistant
                 toggle: true
-                primary:
-                  entity: sensor.ha_local_version
-                  name: Установлено
-                secondary:
-                  entity: sensor.ha_docker_version
-                  name: Доступно
+                entities:
+                  - entity: sensor.ha_local_version
+                    name: Установлено
+                  - entity: sensor.ha_docker_version
+                    name: Доступно
               # Portainer
               - entity: script.portainer_update
                 type: custom:multiple-entity-row
@@ -671,12 +670,11 @@ views:
                   }
                 name: Portainer
                 toggle: true
-                primary:
-                  entity: sensor.portainer_local_version
-                  name: Установлено
-                secondary:
-                  entity: sensor.portainer_docker_version
-                  name: Доступно
+                entities:
+                  - entity: sensor.portainer_local_version
+                    name: Установлено
+                  - entity: sensor.portainer_docker_version
+                    name: Доступно
               # Traefik
               - entity: script.traefik_update
                 type: custom:multiple-entity-row
@@ -692,12 +690,11 @@ views:
                   }
                 name: Traefik
                 toggle: true
-                primary:
-                  entity: sensor.traefik_local_version
-                  name: Установлено
-                secondary:
-                  entity: sensor.traefik_docker_version
-                  name: Доступно
+                entities:
+                  - entity: sensor.traefik_local_version
+                    name: Установлено
+                  - entity: sensor.traefik_docker_version
+                    name: Доступно
               # Deconz
               - entity: script.deconz_update
                 type: custom:multiple-entity-row
@@ -713,12 +710,11 @@ views:
                   }
                 name: Deconz
                 toggle: true
-                primary:
-                  entity: sensor.deconz_local_version
-                  name: Установлено
-                secondary:
-                  entity: sensor.deconz_docker_version
-                  name: Доступно
+                entities:
+                  - entity: sensor.deconz_local_version
+                    name: Установлено
+                  - entity: sensor.deconz_docker_version
+                    name: Доступно
               # Adguard
               - entity: script.adguard_update
                 type: custom:multiple-entity-row
@@ -734,12 +730,11 @@ views:
                   }
                 name: Adguard
                 toggle: true
-                primary:
-                  entity: sensor.adguard_local_version
-                  name: Установлено
-                secondary:
-                  entity: sensor.adguard_docker_version
-                  name: Доступно
+                entities:
+                  - entity: sensor.adguard_local_version
+                    name: Установлено
+                  - entity: sensor.adguard_docker_version
+                    name: Доступно
               # Mosquitto
               - entity: script.mosquitto_update
                 type: custom:multiple-entity-row
@@ -755,12 +750,11 @@ views:
                   }
                 name: Mosquitto
                 toggle: true
-                primary:
-                  entity: sensor.mosquitto_local_version
-                  name: Установлено
-                secondary:
-                  entity: sensor.mosquitto_docker_version
-                  name: Доступно
+                entities:
+                  - entity: sensor.mosquitto_local_version
+                    name: Установлено
+                  - entity: sensor.mosquitto_docker_version
+                    name: Доступно
 
 
   # Электричество
