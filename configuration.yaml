@@ -22,6 +22,45 @@ frontend:
 
 lovelace:
   mode: yaml
+  resources:
+    # HACS
+    - url: /hacsfiles/lovelace-card-mod/card-mod.js
+      type: module
+    - url: /hacsfiles/lovelace-fold-entity-row/fold-entity-row.js
+      type: module
+    - url: /hacsfiles/lovelace-slider-entity-row/slider-entity-row.js
+      type: module
+    - url: /hacsfiles/button-card/button-card.js
+      type: module
+    - url: /hacsfiles/bar-card/bar-card.js
+      type: js
+    - url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js
+      type: module
+    - url: /hacsfiles/mini-media-player/mini-media-player-bundle.js
+      type: module
+    - url: /hacsfiles/simple-weather-card/simple-weather-card-bundle.js
+      type: module
+    - url: /hacsfiles/vertical-stack-in-card/vertical-stack-in-card.js
+      type: js
+    - url: /hacsfiles/lovelace-swipe-navigation/swipe-navigation.js
+      type: js
+    - url: /hacsfiles/custom-header/custom-header.js
+      type: module
+    - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
+      type: module
+    - url: /hacsfiles/lovelace-multiple-entity-row/multiple-entity-row.js
+      type: module
+    # Custom
+    - url: /local/lovelace/counter-card.js
+      type: js
+    - url: /local/lovelace/hasl-departure-card.js
+      type: js
+    - url: /local/lovelace/hasl-trafikstatus-card.js
+      type: js
+    - url: /local/lovelace/chart-colors.js
+      type: js
+    - url: /local/lovelace/mm2-clock-card.js
+      type: module
 
 system_health:
 

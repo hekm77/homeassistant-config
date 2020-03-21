@@ -1,49 +1,6 @@
-resources:
-  # community_plugin
-  - url: /community_plugin/lovelace-card-mod/card-mod.js
-    type: module
-  - url: /community_plugin/lovelace-fold-entity-row/fold-entity-row.js
-    type: module
-  - url: /community_plugin/lovelace-slider-entity-row/slider-entity-row.js
-    type: module
-  - url: /community_plugin/button-card/button-card.js
-    type: module
-  - url: /community_plugin/bar-card/bar-card.js
-    type: js
-  - url: /community_plugin/mini-graph-card/mini-graph-card-bundle.js
-    type: module
-  - url: /community_plugin/mini-media-player/mini-media-player-bundle.js
-    type: module
-  - url: /community_plugin/simple-weather-card/simple-weather-card-bundle.js
-    type: module
-  - url: /community_plugin/vertical-stack-in-card/vertical-stack-in-card.js
-    type: js
-  - url: /community_plugin/lovelace-swipe-navigation/swipe-navigation.js
-    type: js
-  - url: /community_plugin/custom-header/custom-header.js
-    type: module
-  - url: /community_plugin/lovelace-multiple-entity-row/multiple-entity-row.js
-    type: module
-
-  # custom
-  - url: /local/lovelace/alarm_control_panel-card.js
-    type: js
-  - url: /local/lovelace/counter-card.js
-    type: js
-  - url: /local/lovelace/hasl-departure-card.js
-    type: js
-  - url: /local/lovelace/hasl-trafikstatus-card.js
-    type: js
-  - url: /local/lovelace/chart-colors.js
-    type: js
-
-
 custom_header:
   compact_mode: true
   chevrons: false
-  header_css: 'padding: 24px;'
-
-
 swipe_nav:
   wrap: false
   prevent_default: true
@@ -57,6 +14,8 @@ anchors:
     hide_when_off: true
     toggle: true
     step: 1
+    min: 1
+    max: 100
 
   # Toggle Button Card
   toggle_button_card: &toggle_button_card
@@ -77,7 +36,6 @@ anchors:
   # Spotify
   spotify_card: &spotify_card
     type: custom:mini-media-player
-    name: ' '
     group: true
     icon: mdi:spotify
     source: full
@@ -87,7 +45,7 @@ anchors:
       power: true
       power_state: false
 
- # Person Card
+  # Person Card
   person_card: &person_card
     secondary_info: last-changed
     state_color: true
@@ -271,7 +229,7 @@ views:
             show_header_toggle: false
             style: |
               ha-card {
-                background: center / cover url(/local/icons/kitchen_reeder_2.png) no-repeat;
+                background: center / cover url(/local/icons/kitchen_reeder.png) no-repeat;
                 background-color: var(--ha-card-background);
                 background-size: 9em;
               }
@@ -342,6 +300,7 @@ views:
                   service_data:
                     entity_id: script.light_livingroom_night
 
+
           # Зал
           - type: entities
             title: Зал
@@ -367,6 +326,11 @@ views:
               - <<: *light_card
                 entity: light.window_livingroom
                 name: Окно
+              - entity: light.led_strip_livingroom
+                name: Подсветка ТВ
+                icon: mdi:led-strip-variant
+                state_color: true
+
 
       # Спальня
       - type: vertical-stack
@@ -420,8 +384,16 @@ views:
       - type: vertical-stack
         cards:
           # Сигнализация
-          - type: custom:alarm_control_panel-card
+          - type: alarm-panel
             style: |
+              ha-card {
+                --alarm-color-disarmed: var(--secondary-text-color) !important;
+                --alarm-color-pending: var(--label-badge-yellow) !important;
+                --alarm-color-triggered: var(--label-badge-red) !important;
+                --alarm-color-armed: var(--label-badge-green) !important;
+                --alarm-color-autoarm: rgba(0, 153, 255, .1) !important;
+                --alarm-state-color: var(--alarm-color-armed) !important;
+              }
               .card-header {
                 padding: 24px 16px 16px 20px;
                 letter-spacing: var(--mcg-title-letter-spacing);
@@ -444,8 +416,6 @@ views:
                 entity: switch.panic_light
                 icon: mdi:alarm-light
 
-      # Пустая карта
-      - <<: *blank_card
 
       # Датчики
       - type: entities
@@ -477,25 +447,21 @@ views:
           - type: entities
             entities:
               - entity: binary_sensor.user_1_presence
-                name: User 1
                 <<: *person_card
           # Person 2
           - type: entities
             entities:
               - entity: binary_sensor.user_2_presence
-                name: User 2
                 <<: *person_card
           # Person 3
           - type: entities
             entities:
               - entity: binary_sensor.user_3_presence
-                name: User 3
                 <<: *person_card
           # Person 4
           - type: entities
             entities:
               - entity: binary_sensor.user_4_presence
-                name: User 4
                 <<: *person_card
 
 
@@ -643,6 +609,8 @@ views:
                     color:
                       {% if states('sensor.ha_docker_version') > states('sensor.ha_local_version') %}
                         var(--google-green-500)
+                      {% elif states('sensor.ha_docker_version') < states('sensor.ha_local_version') %}
+                        var(--google-red-500)
                       {% else %}
                         var(--primary-text-color)
                       {% endif %}
@@ -663,6 +631,8 @@ views:
                     color:
                       {% if states('sensor.portainer_docker_version') > states('sensor.portainer_local_version') %}
                         var(--google-green-500)
+                      {% elif states('sensor.portainer_docker_version') < states('sensor.portainer_local_version') %}
+                        var(--google-red-500)
                       {% else %}
                         var(--primary-text-color)
                       {% endif %}
@@ -683,6 +653,8 @@ views:
                     color:
                       {% if states('sensor.traefik_docker_version') > states('sensor.traefik_local_version') %}
                         var(--google-green-500)
+                      {% elif states('sensor.traefik_docker_version') < states('sensor.traefik_local_version') %}
+                        var(--google-red-500)
                       {% else %}
                         var(--primary-text-color)
                       {% endif %}
@@ -703,6 +675,8 @@ views:
                     color:
                       {% if states('sensor.deconz_docker_version') > states('sensor.deconz_local_version') %}
                         var(--google-green-500)
+                      {% elif states('sensor.deconz_docker_version') < states('sensor.deconz_local_version') %}
+                        var(--google-red-500)
                       {% else %}
                         var(--primary-text-color)
                       {% endif %}
@@ -723,6 +697,8 @@ views:
                     color:
                       {% if states('sensor.adguard_docker_version') > states('sensor.adguard_local_version') %}
                         var(--google-green-500)
+                      {% elif states('sensor.adguard_docker_version') < states('sensor.adguard_local_version') %}
+                        var(--google-red-500)
                       {% else %}
                         var(--primary-text-color)
                       {% endif %}
@@ -743,6 +719,8 @@ views:
                     color:
                       {% if states('sensor.mosquitto_docker_version') > states('sensor.mosquitto_local_version') %}
                         var(--google-green-500)
+                      {% elif states('sensor.mosquitto_docker_version') < states('sensor.mosquitto_local_version') %}
+                         var(--google-red-500)
                       {% else %}
                         var(--primary-text-color)
                       {% endif %}
@@ -1370,6 +1348,7 @@ views:
           - switch.adguard_protection
 
       - type: entities
+        show_header_toggle: false
         state_color: true
         style:
           .: |
@@ -1410,6 +1389,7 @@ views:
           - switch.adguard_query_log
 
       - type: entities
+        show_header_toggle: false
         state_color: true
         style:
           .: |

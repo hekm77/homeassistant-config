@@ -57,16 +57,19 @@ sensor:
   - platform: rest
     name: portainer_docker_version
     resource: 'https://registry.hub.docker.com/v2/repositories/portainer/portainer/tags'
-    value_template: >
+    value_template: >-
       {% set results = value_json.results %}
-      {% set res %}
-      {% set pipe = joiner('|') %}
-        {% for result in results if result.name | regex_search("\d+\.\d+\.\d+$") %}
+      {%- set res -%}
+      {%- set pipe = joiner('|') -%}
+        {% for result in results if result.name | regex_search("^\d+\.\d+\.\d+$") -%}
           {{ pipe() }}{{ result.name }}
-        {% endfor %}
-      {% endset %}
+        {% else %}
+          {{ states('sensor.portainer_local_version') }}
+        {% endfor -%}
+      {% endset -%}
       {% set res = res.split('|') | list %}
-        {{ res[0] }}
+      {% set ver = res[0] %}
+        {{ ver }}
     scan_interval: 86400
 
 
@@ -81,17 +84,20 @@ sensor:
   - platform: rest
     name: traefik_docker_version
     resource: 'https://registry.hub.docker.com/v2/repositories/library/traefik/tags'
-    value_template: >
+    value_template: >-
       {% set results = value_json.results %}
-      {% set res %}
-      {% set pipe = joiner('|') %}
-        {% for result in results if result.name | regex_search("\d+\.\d+\.\d+$") %}
+      {%- set res -%}
+      {%- set pipe = joiner('|') -%}
+        {% for result in results if result.name | regex_search("^v\d+\.\d+\.\d+$") -%}
           {{ pipe() }}{{ result.name }}
-        {% endfor %}
-      {% endset %}
+        {% else %}
+          v{{ states('sensor.traefik_local_version') }}
+        {% endfor -%}
+      {% endset -%}
       {% set res = res.split('|') | list %}
       {% set res = res[0].split('v') %}
-        {{ res[1] }}
+      {% set ver = res[1] %}
+        {{ ver }}
     scan_interval: 86400
 
 
@@ -107,17 +113,20 @@ sensor:
   - platform: rest
     name: deconz_docker_version
     resource: 'https://registry.hub.docker.com/v2/repositories/marthoc/deconz/tags'
-    value_template: >
+    value_template: >-
       {% set results = value_json.results %}
-      {% set res %}
-      {% set pipe = joiner('|') %}
-        {% for result in results if result.name | regex_search("armhf-\d+\.\d+\.\d+$") %}
+      {%- set res -%}
+      {%- set pipe = joiner('|') -%}
+        {% for result in results if result.name | regex_search("^armhf-\d+\.\d+\.\d+$") -%}
           {{ pipe() }}{{ result.name }}
-        {% endfor %}
-      {% endset %}
+        {% else %}
+          armhf-{{ states('sensor.deconz_local_version') }}
+        {% endfor -%}
+      {% endset -%}
       {% set res = res.split('|') | list %}
       {% set res = res[0].split('-') %}
-        {{ res[1] }}
+      {% set ver = res[1] %}
+        {{ ver }}
     scan_interval: 86400
 
 
@@ -133,17 +142,20 @@ sensor:
   - platform: rest
     name: adguard_docker_version
     resource: 'https://registry.hub.docker.com/v2/repositories/adguard/adguardhome/tags'
-    value_template: >
+    value_template: >-
       {% set results = value_json.results %}
-      {% set res %}
-      {% set pipe = joiner('|') %}
-        {% for result in results if result.name | regex_search("armhf-v\d+\.\d+\.\d+$") %}
+      {%- set res -%}
+      {%- set pipe = joiner('|') -%}
+        {% for result in results if result.name | regex_search("^armhf-v\d+\.\d+\.\d+$") -%}
           {{ pipe() }}{{ result.name }}
-        {% endfor %}
-      {% endset %}
+        {% else %}
+          armhf-v{{ states('sensor.adguard_local_version') }}
+        {% endfor -%}
+      {% endset -%}
       {% set res = res.split('|') | list %}
       {% set res = res[0].split('v') %}
-        {{ res[1] }}
+      {% set ver = res[1] %}
+        {{ ver }}
     scan_interval: 86400
 
 
@@ -160,14 +172,17 @@ sensor:
     resource: 'https://registry.hub.docker.com/v2/repositories/library/eclipse-mosquitto/tags'
     value_template: >
       {% set results = value_json.results %}
-      {% set res %}
-      {% set pipe = joiner('|') %}
-        {% for result in results if result.name | regex_search("\d+\.\d+\.\d+$") %}
+      {%- set res -%}
+      {%- set pipe = joiner('|') -%}
+        {% for result in results if result.name | regex_search("^\d+\.\d+\.\d+$") -%}
           {{ pipe() }}{{ result.name }}
-        {% endfor %}
-      {% endset %}
+        {% else %}
+          {{ states('sensor.mosquitto_local_version') }}
+        {% endfor -%}
+      {% endset -%}
       {% set res = res.split('|') | list %}
-        {{ res[0] }}
+      {% set ver = res[0] %}
+        {{ ver }}
     scan_interval: 86400
 
 
@@ -177,6 +192,25 @@ sensor:
      command: ssh -p your_port root@192.168.1.x "docker inspect eclipse-mosquitto:latest"
      value_template: "{{ value_json[0]['ContainerConfig']['Env'][1].split('VERSION=')[1] }}"
      scan_interval: 86400
+
+
+# Автоматизация
+automation:
+  # Обновление сенсоров
+  - alias: sensors_docker_version_update
+    initial_state: true
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - delay: 00:00:03
+      - service: homeassistant.update_entity
+        entity_id:
+          - sensor.portainer_docker_version
+          - sensor.traefik_docker_version
+          - sensor.deconz_docker_version
+          - sensor.adguard_docker_version
+          - sensor.mosquitto_docker_version
 
 
 # Скрипты
