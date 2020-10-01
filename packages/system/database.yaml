@@ -13,7 +13,7 @@ sensor:
     db_url: !secret mysql_db_url
     queries:
       - name: MySQL DB size
-        query: 'SELECT table_schema "database", Round(Sum((data_length + index_length) / 1024) / 1024, 1) "value" FROM information_schema.tables WHERE table_schema="homeassistant" GROUP BY table_schema;'
+        query: 'SELECT table_schema "database", Round(Sum((data_length + index_length) / 1024) / 1024, 1) "value" FROM information_schema.tables WHERE table_schema="hass" GROUP BY table_schema;'
         column: 'value'
         unit_of_measurement: MB
 
@@ -24,7 +24,7 @@ automation:
   - alias: database_purge
     trigger:
       platform: time
-      at: '12:00:00'
+      at: '12:00:05'
     action:
       - service: recorder.purge
         data:

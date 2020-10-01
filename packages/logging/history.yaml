@@ -15,9 +15,10 @@ history:
     domains:
       - light
     entities:
-      - light.hall_1
-      - light.hall_2
-      - light.livingroom_1
-      - light.livingroom_2
+      - light.hall
+      - light.livingroom_ceiling
+      - light.livingroom_floor
+      - light.livingroom_window
       - light.kitchen
       - light.bedroom
+      - light.bathroom

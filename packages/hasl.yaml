@@ -78,14 +78,12 @@ automation:
     initial_state: true
     trigger:
       - platform: time
-        at: '00:30:00'
+        at: '00:30:05'
       - platform: time
-        at: '04:30:00'
+        at: '04:30:05'
     action:
-      - service_template: >
-          {% if trigger.now.hour == 4 %}
-            input_boolean.turn_on
-          {% else %}
-            input_boolean.turn_off
+      - service: >
+          {% if trigger.now.hour == 4 %} input_boolean.turn_on
+          {% else %} input_boolean.turn_off
           {% endif %}
         entity_id: input_boolean.sl_refresh

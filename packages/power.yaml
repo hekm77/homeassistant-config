@@ -10,11 +10,11 @@ homeassistant:
       friendly_name: Холл-1
     sensor.energy_monthly_light_hall_2:
       friendly_name: Холл-2
-    sensor.energy_monthly_light_livingroom_1:
+    sensor.energy_monthly_light_livingroom_ceiling:
       friendly_name: Зал Люстра
-    sensor.energy_monthly_light_livingroom_2:
+    sensor.energy_monthly_light_livingroom_floor:
       friendly_name: Зал Ночник
-    sensor.energy_monthly_light_window_livingroom:
+    sensor.energy_monthly_light_livingroom_window:
       friendly_name: Зал Окно
     sensor.energy_monthly_light_kitchen:
       friendly_name: Кухня Люстра
@@ -44,13 +44,13 @@ homeassistant:
     sensor.power_light_hall_2:
       icon: mdi:lightbulb
       friendly_name: Холл-2
-    sensor.power_light_livingroom_1:
+    sensor.power_light_livingroom_ceiling:
       icon: mdi:ceiling-light
       friendly_name: Зал Люстра
-    sensor.power_light_livingroom_2:
+    sensor.power_light_livingroom_floor:
       icon: mdi:lightbulb
       friendly_name: Зал Ночник
-    sensor.power_light_window_livingroom:
+    sensor.power_light_livingroom_window:
       icon: mdi:lamp
       friendly_name: Зал Окно
     sensor.power_light_kitchen:
@@ -109,10 +109,8 @@ sensor:
   - platform: template
     sensors:
       power_smart_plug_bedroom:
-        entity_id: sensor.smart_plug_power_bedroom
         value_template: >
-          {% if is_state('sensor.smart_plug_power_bedroom', 'unknown') %}
-            0.0
+          {% if is_state('sensor.smart_plug_power_bedroom', 'unknown') %} 0.0
           {% else %}
             {{ states('sensor.smart_plug_power_bedroom') | float }}
           {% endif %}
@@ -127,10 +125,8 @@ sensor:
   - platform: template
     sensors:
       power_smart_plug_camera:
-        entity_id: sensor.smart_plug_power_camera
         value_template: >
-          {% if is_state('sensor.smart_plug_power_camera', 'unknown') %}
-            0.0
+          {% if is_state('sensor.smart_plug_power_camera', 'unknown') %} 0.0
           {% else %}
             {{ states('sensor.smart_plug_power_camera') | float }}
           {% endif %}
@@ -145,15 +141,12 @@ sensor:
   - platform: template
     sensors:
       power_light_hall_1:
-        entity_id: light.hall_1
         value_template: >
           {% if is_state('light.hall_1', 'on') %}
             {% set bri = (state_attr('light.hall_1', 'brightness') | int / 2.55) | round(0) %}
               {{ (8.1 - ((100 - bri) * (8.1 - 0.9) / 99)) | round(1) }}
-          {% elif is_state('light.hall_1', 'off') %}
-            0.9
-          {% else %}
-            0.0
+          {% elif is_state('light.hall_1', 'off') %} 0.9
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:lightbulb
         unit_of_measurement: 'W'
@@ -166,15 +159,12 @@ sensor:
   - platform: template
     sensors:
       power_light_hall_2:
-        entity_id: light.hall_2
         value_template: >
           {% if is_state('light.hall_2', 'on') %}
             {% set bri = (state_attr('light.hall_2', 'brightness') | int / 2.55) | round(0) %}
               {{ (8.1 - ((100 - bri) * (8.1 - 0.9) / 99)) | round(1) }}
-          {% elif is_state('light.hall_2', 'off') %}
-            0.9
-          {% else %}
-            0.0
+          {% elif is_state('light.hall_2', 'off') %} 0.9
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:lightbulb
         unit_of_measurement: 'W'
@@ -186,53 +176,46 @@ sensor:
   # Зал Люстра / Yeelight RGB bulb 4000K / потребляемая мощность
   - platform: template
     sensors:
-      power_light_livingroom_1:
-        entity_id: light.livingroom_1
+      power_light_livingroom_ceiling:
         value_template: >
-          {% if is_state('light.livingroom_1', 'on') %}
-            {% set bri = (state_attr('light.livingroom_1', 'brightness') | int / 2.55) | round(0) %}
+          {% if is_state('light.livingroom_ceiling', 'on') %}
+            {% set bri = (state_attr('light.livingroom_ceiling', 'brightness') | int / 2.55) | round(0) %}
               {{ (9.4 - ((100 - bri) * (9.4 - 1.9) / 99)) | round(1) }}
-          {% elif is_state('light.livingroom_1', 'off') %}
-            1.3
-          {% else %}
-            0.0
+          {% elif is_state('light.livingroom_ceiling', 'off') %} 1.3
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:ceiling-light
         unit_of_measurement: 'W'
   # Зал Люстра / Yeelight RGB bulb 4000K / энергопотребление
   - platform: integration
-    source: sensor.power_light_livingroom_1
-    name: "consumption_light_livingroom_1"
+    source: sensor.power_light_livingroom_ceiling
+    name: "consumption_light_livingroom_ceiling"
     unit_prefix: k
   # Зал Ночник / Yeelight RGB bulb 4000K / потребляемая мощность
   - platform: template
     sensors:
-      power_light_livingroom_2:
-        entity_id: light.livingroom_2
+      power_light_livingroom_floor:
         value_template: >
-          {% if is_state('light.livingroom_2', 'on') %}
-            {% set bri = (state_attr('light.livingroom_2', 'brightness') | int / 2.55) | round(0) %}
+          {% if is_state('light.livingroom_floor', 'on') %}
+            {% set bri = (state_attr('light.livingroom_floor', 'brightness') | int / 2.55) | round(0) %}
               {{ (9.4 - ((100 - bri) * (9.4 - 1.9) / 99)) | round(1) }}
-          {% elif is_state('light.livingroom_2', 'off') %}
-            1.3
-          {% else %}
-            0.0
+          {% elif is_state('light.livingroom_floor', 'off') %} 1.3
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:lightbulb
         unit_of_measurement: 'W'
   # Зал Ночник / Yeelight RGB bulb 4000K / энергопотребление
   - platform: integration
-    source: sensor.power_light_livingroom_2
-    name: "consumption_light_livingroom_2"
+    source: sensor.power_light_livingroom_floor
+    name: "consumption_light_livingroom_floor"
     unit_prefix: k
   # Зал Окно / TRÅDFRI bulb E14 W op/ch 400lm / потребляемая мощность
   - platform: template
     sensors:
-      power_light_window_livingroom:
-        entity_id: light.window_livingroom
+      power_light_livingroom_window:
         value_template: >
-          {% if is_state('light.window_livingroom', 'on') %}
-            {% set bri = (state_attr('light.window_livingroom', 'brightness') | int / 2.55) | round(0) %}
+          {% if is_state('light.livingroom_window', 'on') %}
+            {% set bri = (state_attr('light.livingroom_window', 'brightness') | int / 2.55) | round(0) %}
               {% if bri >= 1 and bri <= 30 %}
                 {{ (1.1 - ((30 - bri) * (1.1 - 0.7) / 29)) | round(1) }}
               {% elif bri > 30 and bri <= 60 %}
@@ -242,31 +225,26 @@ sensor:
               {% elif bri > 80 and bri <= 100 %}
                 {{ (5.4 - ((100 - bri) * (5.4 - 3.3) / 20)) | round(1) }}
               {% endif %}
-          {% elif is_state('light.window_livingroom', 'off') %}
-            0.4
-          {% else %}
-            0.0
+          {% elif is_state('light.livingroom_window', 'off') %} 0.4
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:lamp
         unit_of_measurement: 'W'
   # Зал Окно / TRÅDFRI bulb E14 W op/ch 400lm / энергопотребление
   - platform: integration
-    source: sensor.power_light_window_livingroom
-    name: "consumption_light_window_livingroom"
+    source: sensor.power_light_livingroom_window
+    name: "consumption_light_livingroom_window"
     unit_prefix: k
   # Кухня Люстра / Yeelight RGB bulb 4000K / потребляемая мощность
   - platform: template
     sensors:
       power_light_kitchen:
-        entity_id: light.kitchen
         value_template: >
           {% if is_state('light.kitchen', 'on') %}
             {% set bri = (state_attr('light.kitchen', 'brightness') | int / 2.55) | round(0) %}
               {{ (9.4 - ((100 - bri) * (9.4 - 1.9) / 99)) | round(1) }}
-          {% elif is_state('light.kitchen', 'off') %}
-            1.3
-          {% else %}
-            0.0
+          {% elif is_state('light.kitchen', 'off') %} 1.3
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:ceiling-light
         unit_of_measurement: 'W'
@@ -279,15 +257,12 @@ sensor:
   - platform: template
     sensors:
       power_light_bedroom:
-        entity_id: light.bedroom
         value_template: >
           {% if is_state('light.bedroom', 'on') %}
             {% set bri = (state_attr('light.bedroom', 'brightness') | int / 2.55) | round(0) %}
               {{ (9.4 - ((100 - bri) * (9.4 - 1.9) / 99)) | round(1) }}
-          {% elif is_state('light.bedroom', 'off') %}
-            1.3
-          {% else %}
-            0.0
+          {% elif is_state('light.bedroom', 'off') %} 1.3
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:ceiling-light
         unit_of_measurement: 'W'
@@ -300,7 +275,6 @@ sensor:
   - platform: template
     sensors:
       power_light_bathroom:
-        entity_id: light.bathroom
         value_template: >
           {% if is_state('light.bathroom', 'on') %}
             {% set bri = (state_attr('light.bathroom', 'brightness') | int / 2.55) | round(0) %}
@@ -319,10 +293,8 @@ sensor:
               {% elif bri > 95 %}
                 12.8
               {% endif %}
-          {% elif is_state('light.bathroom', 'off') %}
-            0.4
-          {% else %}
-            0.0
+          {% elif is_state('light.bathroom', 'off') %} 0.4
+          {% else %} 0.0
           {% endif %}
         icon_template: mdi:lightbulb
         unit_of_measurement: 'W'
@@ -339,9 +311,9 @@ sensor:
                            + states('sensor.power_smart_plug_camera') | float
                            + states('sensor.power_light_hall_1') | float
                            + states('sensor.power_light_hall_2') | float
-                           + states('sensor.power_light_livingroom_1') | float
-                           + states('sensor.power_light_livingroom_2') | float
-                           + states('sensor.power_light_window_livingroom') | float
+                           + states('sensor.power_light_livingroom_ceiling') | float
+                           + states('sensor.power_light_livingroom_floor') | float
+                           + states('sensor.power_light_livingroom_window') | float
                            + states('sensor.power_light_kitchen') | float
                            + states('sensor.power_light_bathroom') | float
                            + states('sensor.power_light_bedroom') | float) | round(2) }}"
@@ -434,16 +406,16 @@ utility_meter:
     source: sensor.consumption_light_hall_2
     cycle: monthly
   # Зал Люстра
-  energy_monthly_light_livingroom_1:
-    source: sensor.consumption_light_livingroom_1
+  energy_monthly_light_livingroom_ceiling:
+    source: sensor.consumption_light_livingroom_ceiling
     cycle: monthly
   # Зал Ночник
-  energy_monthly_light_livingroom_2:
-    source: sensor.consumption_light_livingroom_2
+  energy_monthly_light_livingroom_floor:
+    source: sensor.consumption_light_livingroom_floor
     cycle: monthly
   # Зал Окно
-  energy_monthly_light_window_livingroom:
-    source: sensor.consumption_light_window_livingroom
+  energy_monthly_light_livingroom_window:
+    source: sensor.consumption_light_livingroom_window
     cycle: monthly
   # Кухня Люстра
   energy_monthly_light_kitchen:
@@ -477,7 +449,7 @@ automation:
         entity_id: sensor.energy_monthly_total
     action:
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/{{ now().month }}"
           payload: "{{ (states('sensor.energy_monthly_total') | float) | round(3) }}"
           retain: true
@@ -490,11 +462,10 @@ automation:
       - platform: time
         at: '23:59:50'
     condition:
-      - condition: template
-        value_template: "{{ now().month == 12 and now().day == 31 }}"
+      - "{{ now().month == 12 and now().day == 31 }}"
     action:
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/year_total/{{ now().year }}"
           payload: "{{ (states('sensor.energy_yearly_total') | float) | round(3) }}"
           retain: true
@@ -507,66 +478,65 @@ automation:
       - platform: time
         at: '00:00:05'
     condition:
-      - condition: template
-        value_template: "{{ now().month == 1 and now().day == 1 }}"
+      - "{{ now().month == 1 and now().day == 1 }}"
     action:
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/1"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/2"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/3"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/4"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/5"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/6"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/7"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/8"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/9"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/10"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/11"
           payload: '{{ 0.0 }}'
           retain: true
       - service: mqtt.publish
-        data_template:
+        data:
           topic: "power/month_total/12"
           payload: '{{ 0.0 }}'
           retain: true
@@ -585,9 +555,9 @@ automation:
           - sensor.energy_monthly_smart_plug_camera
           - sensor.energy_monthly_light_hall_1
           - sensor.energy_monthly_light_hall_2
-          - sensor.energy_monthly_light_livingroom_1
-          - sensor.energy_monthly_light_livingroom_2
-          - sensor.energy_monthly_light_window_livingroom
+          - sensor.energy_monthly_light_livingroom_ceiling
+          - sensor.energy_monthly_light_livingroom_floor
+          - sensor.energy_monthly_light_livingroom_window
           - sensor.energy_monthly_light_kitchen
           - sensor.energy_monthly_light_bedroom
           - sensor.energy_monthly_light_bathroom

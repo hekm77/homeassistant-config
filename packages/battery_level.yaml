@@ -22,7 +22,7 @@ homeassistant:
     sensor.motion_sensor_bedroom_battery_level:
       friendly_name: Спальня ДД
       icon: mdi:run-fast
-    sensor.temperature_livingroom_battery_level:
+    sensor.climate_sensor_livingroom_battery_level:
       friendly_name: Зал Климат
       icon: mdi:thermometer
     sensor.tradfri_wireless_dimmer_battery_level:
@@ -63,7 +63,7 @@ group:
       - sensor.smart_switch_kitchen_battery_level
       - sensor.smart_switch_bedroom_battery_level
       - sensor.tradfri_wireless_dimmer_battery_level
-      - sensor.temperature_livingroom_battery_level
+      - sensor.climate_sensor_livingroom_battery_level
 
 
 # Заголовок карты
@@ -71,7 +71,6 @@ sensor:
   - platform: template
     sensors:
       battery_level_card_header:
-        entity_id: sensor.date
         value_template: ' '
 
 
@@ -82,9 +81,9 @@ automation:
     initial_state: true
     trigger:
       - platform: time
-        at: '10:00:00'
+        at: '10:00:05'
       - platform: time
-        at: '18:00:00'
+        at: '18:00:05'
     condition:
         - condition: template
           value_template: >-

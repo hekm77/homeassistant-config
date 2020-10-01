@@ -35,7 +35,6 @@ sensor:
     sensors:
       online_custom:
         icon_template: mdi:clock
-        entity_id: sensor.time
         unit_of_measurement: ' '
         value_template: >
           {% set uptime = states('sensor.online') | int %}
@@ -68,5 +67,5 @@ script:
   # Перезагрузка Home Assistant
   ha_restart:
     sequence:
-      - delay: 00:00:0.5
+      - delay: 00:00:01
       - service: shell_command.ha_restart

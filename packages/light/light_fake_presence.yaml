@@ -1,76 +1,55 @@
 # Автоматизация
 automation:
   # Имитация присутствия
-  - alias: fake_presence
+  - alias: light_fake_presence
     initial_state: true
     trigger:
       - platform: time_pattern
         minutes: '/5'
-        seconds: 00
-    condition:
-      - condition: and
-        conditions:
-          - condition: template
-            value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'armed_away'
-          - condition: state
-            entity_id: script.fake_presence
-            state: 'off'
-    action:
-      - service: script.turn_on
-        entity_id: script.fake_presence_on
-
-
-  - alias: fake_presence_off
-    initial_state: true
-    trigger:
       - platform: state
-        entity_id: script.fake_presence
+        entity_id: script.light_fake_presence
         to: 'off'
-        for:
-          minutes: 10
+        for: '00:10:00'
     condition:
-      - condition: and
-        conditions:
-          - condition: template
-            value_template: "{{ states('sensor.outdoor_illuminance') | int > 2000 }}"
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'armed_away'
+      - "{{ is_state('alarm_control_panel.ha_alarm', 'armed_away') }}"
     action:
-      - service: light.turn_off
-        entity_id:
-          - light.kitchen
-          - light.livingroom_1
-          - light.bedroom
-          - light.bathroom
+      - choose:
+          - conditions:
+              - "{{ trigger.platform == 'time_pattern' }}"
+              - "{{ is_state('script.light_fake_presence', 'off') }}"
+              - "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
+            sequence:
+              - service: script.turn_on
+                entity_id: script.light_fake_presence
+          - conditions:
+              - "{{ trigger.platform == 'state' }}"
+            sequence:
+              - service: light.turn_off
+                entity_id:
+                  - light.kitchen
+                  - light.livingroom_ceiling
+                  - light.bedroom
+                  - light.bathroom
 
 
-# Скрипты
+# Скрипт
 script:
   # Имитация присутствия
-  fake_presence:
+  light_fake_presence:
     sequence:
-      - service: light.turn_on
-        data_template:
-          entity_id: >
-            {{ ['light.kitchen','light.livingroom_1','light.bedroom','light.bathroom'] | random }}
-          brightness_pct: 100
-      - delay: '00:{{ (range(2, 15) | random) }}:00'
-      - service: light.turn_off
-        data_template:
-          entity_id: >
-            {{ ['light.kitchen','light.livingroom_1','light.bedroom','light.bathroom'] | random }}
-      - delay: '00:{{ (range(1, 10) | random) }}:00'
-      - service: script.turn_on
-        entity_id: script.fake_presence_on
-
-
-  fake_presence_on:
-    sequence:
-      - condition: template
-        value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
-      - service: script.turn_on
-        entity_id: script.fake_presence
+      - repeat:
+          while:
+            - condition: template
+              value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
+          sequence:
+            - service: light.turn_on
+              data:
+                entity_id: >
+                  {{ ['light.kitchen','light.livingroom_ceiling','light.bedroom','light.bathroom'] | random }}
+                brightness_pct: 100
+            - delay: '00:{{ (range(2, 15) | random) }}:00'
+            - service: light.turn_off
+              data:
+                entity_id: >
+                  {{ ['light.kitchen','light.livingroom_ceiling','light.bedroom','light.bathroom'] | random }}
+            - delay: '00:{{ (range(1, 10) | random) }}:00'

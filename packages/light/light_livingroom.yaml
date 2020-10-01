@@ -2,23 +2,23 @@
 homeassistant:
   customize:
     # Освещение
-    light.livingroom_1:
+    light.livingroom_ceiling:
       friendly_name: Зал Люстра
       icon: mdi:ceiling-light
-    light.livingroom_2:
+    light.livingroom_floor:
       friendly_name: Зал Ночник
-    light.window_livingroom:
+    light.livingroom_window:
       friendly_name: Зал Окно
       icon: mdi:lamp
     # Сцены освещения
     script.light_livingroom_bright:
-      friendly_name: Ярко
+      friendly_name: Сцена Ярко
       icon: mdi:brightness-7
     script.light_livingroom_movie:
-      friendly_name: Кино
+      friendly_name: Сцена Кино
       icon: mdi:movie-roll
     script.light_livingroom_night:
-      friendly_name: Ночь
+      friendly_name: Сцена Ночь
       icon: mdi:weather-night
 
 
@@ -26,26 +26,43 @@ homeassistant:
 yeelight:
   devices:
     192.168.1.x:
-      name: livingroom_1
+      name: livingroom_ceiling
     192.168.1.x:
-      name: livingroom_2
+      name: livingroom_floor
+
+
+# Состояние подсветки ТВ (Osram Smart+ Led Strip BLE HomeKit). Группа в HomeKit
+light:
+  - platform: mqtt
+    name: "Livingroom Led Strip"
+    state_topic: "light/livingroom/led_strip/switch"
+    command_topic: "light/livingroom/led_strip/switch"
+    rgb_state_topic: "light/livingroom/led_strip/rgb"
+    rgb_command_topic: "light/livingroom/led_strip/rgb"
+    brightness_state_topic: "light/livingroom/led_strip/brightness"
+    brightness_command_topic: "light/livingroom/led_strip/brightness"
+    retain: true
 
 
 # Таймеры
 timer:
-  livingroom_auto:
-    duration: '00:00:01'
-  livingroom_1_manual:
+  light_livingroom_ceiling_auto:
+    duration: '00:00:02'
+  light_livingroom_floor_auto:
+    duration: '00:00:02'
+  light_livingroom_window_auto:
+    duration: '00:00:02'
+  light_livingroom_ceiling_manual:
     duration: '03:00:00'
-  livingroom_2_manual:
+  light_livingroom_floor_manual:
     duration: '03:00:00'
-  livingroom_3_manual:
+  light_livingroom_window_manual:
     duration: '03:00:00'
 
 
 input_boolean:
-  # Вкл / выкл автоматизации освещения в Lovelace
-  livingroom_automation:
+  # Включение / выключение автоматизации освещения
+  light_livingroom_automation:
     name: Зал
     initial: on
     icon: mdi:home-automation
@@ -58,464 +75,253 @@ script:
     sequence:
       - service: light.turn_on
         entity_id:
-          - light.livingroom_1
-          - light.livingroom_2
-        data:
-          brightness_pct: 100
-          color_temp: 250
-          transition: 3
+          - light.livingroom_ceiling
+          - light.livingroom_floor
+        data: {brightness_pct: 100, color_temp: 250}
+      - service: timer.cancel
+        entity_id:
+          - timer.light_livingroom_ceiling_manual
+          - timer.light_livingroom_floor_manual
+      - service: timer.start
+        entity_id:
+          - timer.light_livingroom_ceiling_manual
+          - timer.light_livingroom_floor_manual
 
 
   # Кино
   light_livingroom_movie:
     sequence:
       - service: light.turn_on
-        entity_id: light.livingroom_2
-        data:
-          brightness_pct: 15
-          rgb_color: [102, 102, 255]
-          transition: 3
+        entity_id:
+          - light.livingroom_floor
+          - light.livingroom_led_strip
+        data: {brightness_pct: 15, transition: 3, rgb_color: [102, 102, 255]}
       - condition: state
-        entity_id: light.livingroom_1
+        entity_id: light.livingroom_ceiling
         state: 'on'
       - service: light.turn_off
-        entity_id: light.livingroom_1
-        data:
-          transition: 3
+        entity_id: light.livingroom_ceiling
+        data: {transition: 3}
 
 
   # Ночь
   light_livingroom_night:
     sequence:
       - service: light.turn_on
-        entity_id: light.livingroom_2
-        data:
-          brightness_pct: 1
-          color_temp: 588
-          transition: 3
+        entity_id: light.livingroom_floor
+        data: {brightness_pct: 1, color_temp: 588, transition: 3}
       - condition: state
-        entity_id: light.livingroom_1
+        entity_id: light.livingroom_ceiling
         state: 'on'
       - service: light.turn_off
-        entity_id: light.livingroom_1
-        data:
-          transition: 3
+        entity_id: light.livingroom_ceiling
+        data: {transition: 3}
 
 
 # Автоматизации
 automation:
-  # Включение люстры по одинарному клику
-  - alias: livingroom_1_light_on_switch_click
+  # Кнопка
+  - alias: light_livingroom_smart_switch
     initial_state: true
     trigger:
       - platform: event
         event_type: deconz_event
         event_data:
           id: smart_switch_livingroom
-          event: 1002
     condition:
-      - condition: state
-        entity_id: light.livingroom_1
-        state: 'off'
+      - "{{ trigger.event.data.event in [1002, 1004, 1005, 1006, 1001] }}"
     action:
-      - service: light.turn_on
-        entity_id: light.livingroom_1
-        data_template:
-          brightness_pct: >
-            {% if now().hour >= 0 and now().hour < 8 %} 10
-            {% elif now().hour >= 8 and now().hour < 21 %} 100
-            {% elif now().hour >= 21 and now().hour < 22 %} 50
-            {% elif now().hour >= 22 and now().hour < 24 %} 1
-            {% endif %}
-          color_temp: 250
+      - choose:
+          # Включение люстры по одинарному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1002 }}"
+              - "{{ is_state('light.livingroom_ceiling', 'off') }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.livingroom_ceiling
+                data:
+                  brightness_pct: >
+                    {% if 0 <= now().hour < 8 %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% elif 21 <= now().hour < 24 %} 50
+                    {% endif %}
+                  color_temp: 250
+          # Выключение люстры по одинарному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1002 }}"
+              - "{{ is_state('light.livingroom_ceiling', 'on') }}"
+            sequence:
+              - service: light.turn_off
+                entity_id: light.livingroom_ceiling
+          # Включение ночника по двойному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1004 }}"
+              - "{{ is_state('light.livingroom_floor', 'off') }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.livingroom_floor
+                data:
+                  brightness_pct: >
+                    {% if (0 <= now().hour < 8) or (21 <= now().hour < 24) %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% endif %}
+                  color_temp: 250
+          # Выключение ночника по двойному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1004 }}"
+              - "{{ is_state('light.livingroom_floor', 'on') }}"
+            sequence:
+              - service: light.turn_off
+                entity_id: light.livingroom_floor
+          # Вкл / Выкл подсветки ТВ по тройному клику
+          - conditions: "{{ trigger.event.data.event == 1005 }}"
+            sequence:
+              - entity_id: light.livingroom_led_strip
+                service: >
+                  {% if is_state('light.livingroom_led_strip', 'off') %} light.turn_on
+                  {% else %} light.turn_off
+                  {% endif %}
+          # Вкл / Выкл ночника на окне по четверному клику
+          - conditions: "{{ trigger.event.data.event == 1006 }}"
+            sequence:
+              - entity_id: light.livingroom_window
+                service: >
+                  {% if is_state('light.livingroom_window', 'off') %} light.turn_on
+                  {% else %} light.turn_off
+                  {% endif %}
+          # Включение группы по длинному нажатию
+          - conditions:
+              - "{{ trigger.event.data.event == 1001 }}"
+              - condition: or
+                conditions:
+                  - "{{ is_state('light.livingroom_ceiling', 'off') }}"
+                  - "{{ is_state('light.livingroom_floor', 'off') }}"
+                  - "{{ is_state('light.livingroom_ceiling', 'off') and
+                        is_state('light.livingroom_floor', 'off') }}"
+            sequence:
+              - service: script.turn_on
+                entity_id: script.light_livingroom_bright
+          # Выключение группы по длинному нажатию
+          - conditions:
+              - "{{ trigger.event.data.event == 1001 }}"
+              - "{{ is_state('light.livingroom_ceiling', 'on') }}"
+              - "{{ is_state('light.livingroom_floor', 'on') }}"
+            sequence:
+              - service: light.turn_off
+                entity_id:
+                  - light.livingroom_ceiling
+                  - light.livingroom_floor
+                  - light.livingroom_led_strip
 
 
-  # Выключение люстры по одинарному клику
-  - alias: livingroom_1_light_off_switch_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_livingroom
-          event: 1002
-    condition:
-      - condition: state
-        entity_id: light.livingroom_1
-        state: 'on'
-    action:
-      - service: light.turn_off
-        entity_id: light.livingroom_1
-
-
-  # Запуск таймера при включении / выключении люстры вручную
-  - alias: livingroom_1_timer
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: light.livingroom_1
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.livingroom_auto
-            state: 'idle'
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.cancel
-        entity_id: timer.livingroom_1_manual
-      - service: timer.start
-        entity_id: timer.livingroom_1_manual
-
-
-  # Включение ночника по двойному клику
-  - alias: livingroom_2_light_on_switch_double_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_livingroom
-          event: 1004
-    condition:
-      - condition: state
-        entity_id: light.livingroom_2
-        state: 'off'
-    action:
-      - service: light.turn_on
-        entity_id: light.livingroom_2
-        data_template:
-          brightness_pct: >
-            {% if now().hour >= 0 and now().hour < 8 %} 10
-            {% elif now().hour >= 8 and now().hour < 21 %} 100
-            {% elif now().hour >= 21 and now().hour < 24 %} 10
-            {% endif %}
-          color_temp: 250
-
-
-  # Выключение ночника по двойному клику
-  - alias: livingroom_2_light_off_switch_double_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_livingroom
-          event: 1004
-    condition:
-      - condition: state
-        entity_id: light.livingroom_2
-        state: 'on'
-    action:
-      - service: light.turn_off
-        entity_id: light.livingroom_2
-
-
-  # Запуск таймера при включении / выключении ночника вручную
-  - alias: livingroom_2_timer
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: light.livingroom_2
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.livingroom_auto
-            state: 'idle'
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.cancel
-        entity_id: timer.livingroom_2_manual
-      - service: timer.start
-        entity_id: timer.livingroom_2_manual
-
-
-  # Включение группы по длинному нажатию
-  - alias: livingroom_group_light_on_switch_long_press
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_livingroom
-          event: 1001
-    condition:
-      - condition: or
-        conditions:
-          - condition: and
-            conditions:
-              - condition: state
-                entity_id: light.livingroom_1
-                state: 'off'
-              - condition: state
-                entity_id: light.livingroom_2
-                state: 'off'
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: light.livingroom_1
-                state: 'off'
-              - condition: state
-                entity_id: light.livingroom_2
-                state: 'off'
-    action:
-      - service: light.turn_on
-        entity_id:
-          - light.livingroom_1
-          - light.livingroom_2
-        data_template:
-          brightness_pct: 100
-          color_temp: 250
-
-
-  # Выключение группы по длинному нажатию
-  - alias: livingroom_group_light_off_switch_long_press
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_livingroom
-          event: 1001
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.livingroom_1
-            state: 'on'
-          - condition: state
-            entity_id: light.livingroom_2
-            state: 'on'
-    action:
-      - service: light.turn_off
-        entity_id:
-          - light.livingroom_1
-          - light.livingroom_2
-
-
-  # Выключение группы после остановки таймера
-  - alias: livingroom_light_off_timer
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: timer.finished
-    condition:
-      - condition: and
-        conditions:
-          - condition: template
-            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_livingroom.last_changed)) | int > 600 }}"
-          - condition: template
-            value_template: "{{ trigger.event.data.entity_id in ['timer.livingroom_1_manual','timer.livingroom_2_manual'] }}"
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: light.livingroom_1
-                state: 'on'
-              - condition: state
-                entity_id: light.livingroom_2
-                state: 'on'
-    action:
-      - service: timer.start
-        entity_id: timer.livingroom_auto
-      - service: light.turn_off
-        data_template:
-          entity_id: >
-            {% if trigger.event.data.entity_id == 'timer.livingroom_1_manual' %}
-              light.livingroom_1
-            {% elif trigger.event.data.entity_id == 'timer.livingroom_2_manual' %}
-              light.livingroom_2
-            {% endif %}
-
-
-  # Включение ночника в заданное время при низкой освещенности
-  - alias: livingroom_2_light_on
+  # Время
+  - alias: light_livingroom_time
     initial_state: true
     trigger:
       - platform: time_pattern
         minutes: '/5'
-        seconds: 00
-    condition:
-      - condition: and
-        conditions:
-          - condition: and
-            conditions:
+      - platform: time
+        at:
+          - '21:30:05'
+          - '23:00:05'
+    action:
+      - choose:
+          # Включение в заданное время при низкой освещенности
+          - conditions:
+              - "{{ trigger.platform == 'time_pattern' }}"
+              - "{{ is_state('alarm_control_panel.ha_alarm', 'disarmed') }}"
+              - "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
               - condition: sun
                 after: sunset
                 after_offset: '-00:30:00'
               - condition: time
                 before: '22:50:00'
-          - condition: template
-            value_template: "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
-          - condition: state
-            entity_id: light.livingroom_2
-            state: 'off'
-          - condition: state
-            entity_id: timer.livingroom_2_manual
-            state: 'idle'
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.start
-        entity_id: timer.livingroom_auto
-      - service: light.turn_on
-        entity_id: light.livingroom_2
-        data_template:
-          brightness_pct: 5
-          color_temp: 250
-          transition: 3
-
-
-  # Включение ночника на окне в заданное время при низкой освещенности
-  - alias: livingroom_window_light_on
-    initial_state: true
-    trigger:
-      - platform: time_pattern
-        minutes: '/5'
-        seconds: 00
-    condition:
-      - condition: and
-        conditions:
-          - condition: and
-            conditions:
-              - condition: sun
-                after: sunset
-                after_offset: '-00:30:00'
-              - condition: time
-                before: '22:50:00'
-          - condition: template
-            value_template: "{{ states('sensor.outdoor_illuminance') | int < 1000 }}"
-          - condition: state
-            entity_id: light.window_livingroom
-            state: 'off'
-    action:
-      - delay: 00:00:05
-      - service: timer.start
-        entity_id: timer.livingroom_auto
-      - service: light.turn_on
-        entity_id: light.window_livingroom
-        data_template:
-          brightness_pct: 50
-
-
-  # Запуск таймера при включении / выключении ночника на окне вручную
-  - alias: livingroom_3_timer
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: light.window_livingroom
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.livingroom_auto
-            state: 'idle'
-          - condition: template
-            value_template: "{{ states('sensor.online') | int > 1 }}"
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.cancel
-        entity_id: timer.livingroom_3_manual
-      - service: timer.start
-        entity_id: timer.livingroom_3_manual
-
-
-  # Выключение в заданное время
-  - alias: livingroom_light_off
-    initial_state: true
-    trigger:
-      - platform: time
-        at: '23:00'
-      - platform: time
-        at: '23:01'
-    condition:
-      - condition: or
-        conditions:
-          - condition: template
-            value_template: "{{ trigger.now.minute == 0 and is_state('light.window_livingroom', 'on') }}"
-          - condition: and
-            conditions:
-              - condition: state
-                entity_id: timer.livingroom_2_manual
-                state: 'idle'
-              - condition: template
-                value_template: "{{ trigger.now.minute == 1 and is_state('light.livingroom_2', 'on') }}"
-    action:
-      - service: timer.start
-        entity_id: timer.livingroom_auto
-      - service: light.turn_off
-        data_template:
-          entity_id: >
-            {% if trigger.now.minute == 0 %}
-              light.window_livingroom
-            {% else %}
-              light.livingroom_2
-            {% endif %}
-
-
-  # Уменьшение яркости в заданное время
-  - alias: livingroom_light_decrease
-    initial_state: true
-    trigger:
-      - platform: time
-        at: '21:30:00'
-      - platform: time
-        at: '23:00:05'
-    condition:
-      - condition: or
-        conditions:
-          - condition: template
-            value_template: "{{ trigger.now.hour == 21 and (state_attr('light.window_livingroom', 'brightness') | int / 2.55) | int > 25 }}"
-          - condition: and
-            conditions:
-              - condition: state
-                entity_id: timer.livingroom_1_manual
-                state: 'idle'
-              - condition: template
-                value_template: "{{ trigger.now.hour == 23 and (state_attr('light.livingroom_1', 'brightness') | int / 2.55) | int > 25 }}"
-    action:
-      - service: timer.start
-        entity_id: timer.livingroom_auto
-      - service: light.turn_on
-        data_template:
-          entity_id: >
-            {% if trigger.now.hour == 21 %}
-              light.window_livingroom
-            {% else %}
-              light.livingroom_1
-            {% endif %}
-          brightness_pct: 25
-
-
-  # Включение / выключение автоматизации переключателем в Lovelace
-  - alias: livingroom_automation_on_off
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: input_boolean.livingroom_automation
-    action:
-      - service: timer.cancel
-        entity_id:
-          - timer.livingroom_1_manual
-          - timer.livingroom_2_manual
-          - timer.livingroom_3_manual
-      - service_template: >
-          {% if is_state('input_boolean.livingroom_automation', 'on') %}
-            automation.turn_on
-          {% else %}
-            automation.turn_off
-          {% endif %}
-        entity_id:
-          - automation.livingroom_timer
-          - automation.livingroom_light_off_timer
-          - automation.livingroom_2_light_on
-          - automation.livingroom_light_off
-          - automation.window_livingroom_light_on
-          - automation.livingroom_light_decrease
+              - condition: or
+                conditions:
+                  - "{{ is_state('light.livingroom_floor', 'off') and
+                        is_state('timer.light_livingroom_floor_manual', 'idle') }}"
+                  - "{{ is_state('light.livingroom_window', 'off') and
+                        is_state('timer.light_livingroom_window_manual', 'idle') }}"
+            sequence:
+              - service: timer.start
+                entity_id:
+                  - timer.light_livingroom_floor_auto
+                  - timer.light_livingroom_window_auto
+              # Ночник
+              - service: light.turn_on
+                data:
+                  entity_id: >
+                    {% if is_state('light.livingroom_floor', 'on') %} light.none
+                    {% else %} light.livingroom_floor
+                    {% endif %}
+                  brightness_pct: 1
+                  color_temp: 250
+                  transition: 3
+              # Ночник на окне
+              - service: light.turn_on
+                data:
+                  entity_id: >
+                    {% if is_state('light.livingroom_window', 'on') %} light.none
+                    {% else %} light.livingroom_window
+                    {% endif %}
+                  brightness_pct: 50
+          # Выключение в заданное время
+          - conditions:
+              - "{{ trigger.platform == 'time' and trigger.now.minute == 0 }}"
+              - condition: or
+                conditions:
+                  - "{{ is_state('light.livingroom_window', 'on') and
+                        is_state('timer.light_livingroom_window_manual', 'idle') }}"
+                  - "{{ is_state('light.livingroom_floor', 'on') and
+                        is_state('timer.light_livingroom_floor_manual', 'idle') }}"
+            sequence:
+              - service: timer.start
+                entity_id:
+                  - timer.light_livingroom_floor_auto
+                  - timer.light_livingroom_window_auto
+              # Ночник
+              - service: light.turn_off
+                data:
+                  entity_id: >
+                    {% if is_state('light.livingroom_floor', 'on') %} light.livingroom_floor
+                    {% else %} light.none
+                    {% endif %}
+              # Ночник на окне
+              - service: light.turn_off
+                data:
+                  entity_id: >
+                    {% if is_state('light.livingroom_window', 'on') %} light.livingroom_window
+                    {% else %} light.none
+                    {% endif %}
+          # Уменьшение яркости в заданное время
+          - conditions:
+              - "{{ trigger.platform == 'time' and trigger.now.minute == 30 }}"
+              - condition: or
+                conditions:
+                  - "{{ is_state('light.livingroom_ceiling', 'on') and
+                        is_state('timer.light_livingroom_ceiling_manual', 'idle') and
+                        (state_attr('light.livingroom_ceiling', 'brightness') | int > 64) }}"
+                  - "{{ is_state('light.livingroom_window', 'on') and
+                        is_state('timer.light_livingroom_window_manual', 'idle') and
+                        (state_attr('light.livingroom_window', 'brightness') | int > 64) }}"
+            sequence:
+              - service: timer.start
+                entity_id:
+                  - timer.light_livingroom_ceiling_auto
+                  - timer.light_livingroom_window_auto
+              # Люстра
+              - service: light.turn_on
+                data:
+                  entity_id: >
+                    {% if is_state('light.livingroom_ceiling', 'on') %} light.livingroom_ceiling
+                    {% else %} light.none
+                    {% endif %}
+                  brightness_pct: 25
+              # Ночник на окне
+              - service: light.turn_on
+                data:
+                  entity_id: >
+                    {% if is_state('light.livingroom_window', 'on') %} light.livingroom_window
+                    {% else %} light.none
+                    {% endif %}
+                  brightness_pct: 25

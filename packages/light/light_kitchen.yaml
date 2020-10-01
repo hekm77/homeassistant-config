@@ -16,15 +16,15 @@ yeelight:
 
 # Таймер
 timer:
-  kitchen_auto:
-    duration: '00:00:01'
-  kitchen_manual:
-    duration: '01:00:00'
+  light_kitchen_auto:
+    duration: '00:00:02'
+  light_kitchen_manual:
+    duration: '01:30:00'
 
 
 input_boolean:
-  # Вкл / выкл автоматизации освещения в Lovelace
-  kitchen_automation:
+  # Вкл / выкл автоматизации освещения
+  light_kitchen_automation:
     name: Кухня
     initial: on
     icon: mdi:home-automation
@@ -32,301 +32,142 @@ input_boolean:
 
 # Автоматизации
 automation:
-  # Включение при обнаружении движения
-  - alias: kitchen_light_on_motion
+  # Датчик движения
+  - alias: light_kitchen_motion
     initial_state: true
     trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_kitchen
         to: 'on'
-    condition:
-      condition: and
-      conditions:
-        - condition: template
-          value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
-        - condition: state
-          entity_id: light.kitchen
-          state: 'off'
-        - condition: state
-          entity_id: timer.kitchen_manual
-          state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.kitchen_auto
-      - service: light.turn_on
-        entity_id: light.kitchen
-        data_template:
-          brightness_pct: >
-            {% if now().isoweekday() < 6 %}
-              {% if now().hour >= 7 and now().hour < 22 %} 100
-              {% elif now().hour >= 0 and now().hour < 7 %} 1
-              {% elif now().hour >= 22 and now().hour < 24 %} 10
-              {% endif %}
-            {% else %}
-              {% if now().hour >= 9 and now().hour < 22 %} 100
-              {% elif now().hour >= 7 and now().hour < 9 %} 10
-              {% elif now().hour >= 0 and now().hour < 7 %} 1
-              {% elif now().hour >= 22 and now().hour < 24 %} 10
-              {% endif %}
-            {% endif %}
-          color_temp: >
-            {% if now().hour >= 0 and now().hour < 7 %} 588
-            {% else %} 250
-            {% endif %}
-
-
-  # Выключение без движения днем
-  - alias: kitchen_light_off_day_motion
-    initial_state: true
-    trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_kitchen
         to: 'off'
-        for:
-          minutes: 5
-    condition:
-      - condition: and
-        conditions:
-          - condition: time
-            after: '06:00:00'
-            before: '23:00:00'
-          - condition: state
-            entity_id: light.kitchen
-            state: 'on'
-          - condition: state
-            entity_id: timer.kitchen_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.kitchen_auto
-      - service: light.turn_off
-        entity_id: light.kitchen
-
-
-  # Выключение без движения ночью
-  - alias: kitchen_light_off_night_motion
-    initial_state: true
-    trigger:
+        for: '00:01:00'
       - platform: state
         entity_id: binary_sensor.motion_sensor_kitchen
         to: 'off'
-        for:
-          minutes: 1
+        for: '00:05:00'
     condition:
-      - condition: and
-        conditions:
-          - condition: time
-            after: '23:00:00'
-            before: '06:00:00'
-          - condition: state
+      - "{{ is_state('timer.light_kitchen_manual', 'idle') }}"
+    action:
+      - choose:
+          # Включение при обнаружении движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'on' }}"
+              - "{{ is_state('light.kitchen', 'off') }}"
+              - "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_kitchen_auto
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data:
+                  brightness_pct: >
+                    {% if 0 <= now().hour < 7 %} 1
+                    {% elif (22 <= now().hour < 24) or
+                            ((7 <= now().hour < 9) and now().isoweekday() > 5) %} 10
+                    {% elif ((7 <= now().hour < 22) and now().isoweekday() < 6) or
+                            ((9 <= now().hour < 22) and now().isoweekday() > 5) %} 100
+                    {% endif %}
+                  color_temp: >
+                    {% if 0 <= now().hour < 7 %} 588
+                    {% else %} 250
+                    {% endif %}
+          # Выключение без движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'off' }}"
+              - "{{ is_state('light.kitchen', 'on') }}"
+              - condition: or
+                conditions:
+                  - "{{ (0 <= now().hour < 6) and
+                        (now() - states.binary_sensor.motion_sensor_kitchen.last_updated).seconds | int >= 60 }}"
+                  - "{{ (6 <= now().hour < 24) and
+                        (now() - states.binary_sensor.motion_sensor_kitchen.last_updated).seconds | int >= 300 }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_kitchen_auto
+              - service: light.turn_off
+                entity_id: light.kitchen
+
+
+  # Кнопка
+  - alias: light_kitchen_smart_switch
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_kitchen
+    condition:
+      - "{{ trigger.event.data.event in [1002, 1004, 1001] }}"
+    action:
+      - choose:
+          # Включение по одинарному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1002 }}"
+              - "{{ is_state('light.kitchen', 'off') }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data:
+                  brightness_pct: >
+                    {% if 7 <= now().hour < 22 %} 100
+                    {% elif 22 <= now().hour < 24 %} 10
+                    {% elif 0 <= now().hour < 7 %} 1
+                    {% endif %}
+                  color_temp: >
+                    {% if 0 <= now().hour < 7 %} 588
+                    {% else %} 250
+                    {% endif %}
+          # Включение 25% яркости по двойному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1004 }}"
+              - "{{ state_attr('light.kitchen', 'brightness') | int != 64 }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data: {brightness_pct: 25, color_temp: 250}
+          # Включение 100% яркости по длинному нажатию
+          - conditions:
+              - "{{ trigger.event.data.event == 1001 }}"
+              - "{{ state_attr('light.kitchen', 'brightness') | int != 255 }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data: {brightness_pct: 100, color_temp: 250}
+        # Выключение освещения при любом нажатии
+        default:
+          - service: light.turn_off
             entity_id: light.kitchen
-            state: 'on'
-          - condition: state
-            entity_id: timer.kitchen_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.kitchen_auto
-      - service: light.turn_off
-        entity_id: light.kitchen
 
 
-  # Выключение после остановки таймера
-  - alias: kitchen_light_off_timer
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: timer.finished
-        event_data:
-          entity_id: timer.kitchen_manual
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.kitchen
-            state: 'on'
-          - condition: template
-            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_kitchen.last_changed)) | int > 600 }}"
-    action:
-      - service: timer.start
-        entity_id: timer.kitchen_auto
-      - service: light.turn_off
-        entity_id: light.kitchen
-
-
-  # Включение по одинарному клику
-  - alias: kitchen_light_on_switch_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_kitchen
-          event: 1002
-    condition:
-      - condition: state
-        entity_id: light.kitchen
-        state: 'off'
-    action:
-      - service: light.turn_on
-        entity_id: light.kitchen
-        data_template:
-          brightness_pct: >
-            {% if now().hour >= 7 and now().hour < 22 %} 100
-            {% elif now().hour >= 22 and now().hour < 24 %} 10
-            {% elif now().hour >= 0 and now().hour < 7 %} 1
-            {% endif %}
-          color_temp: >
-            {% if now().hour >= 0 and now().hour < 7 %} 588
-            {% else %} 250
-            {% endif %}
-
-
-  # Выключение по одинарному клику
-  - alias: kitchen_light_off_switch_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_kitchen
-          event: 1002
-    condition:
-      - condition: state
-        entity_id: light.kitchen
-        state: 'on'
-    action:
-      - service: light.turn_off
-        entity_id: light.kitchen
-
-
-  # Включение 25% яркости / 4000K по двойному клику
-  - alias: kitchen_light_25_switch_double_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_kitchen
-          event: 1004
-    action:
-      - service: light.turn_on
-        entity_id: light.kitchen
-        data_template:
-          brightness_pct: 25
-          color_temp: 250
-
-
-  # Включение 100% яркости / 4000K по длинному нажатию
-  - alias: kitchen_light_100_switch_long_press
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_kitchen
-          event: 1001
-    action:
-      - service: light.turn_on
-        entity_id: light.kitchen
-        data_template:
-          brightness_pct: 100
-          color_temp: 250
-
-
-  # Запуск таймера при включении / выключении вручную
-  - alias: kitchen_timer
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: light.kitchen
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.kitchen_auto
-            state: 'idle'
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.cancel
-        entity_id: timer.kitchen_manual
-      - service: timer.start
-        entity_id: timer.kitchen_manual
-
-
-  # Уменьшение яркости в заданное время
-  - alias: kitchen_light_decrease
+  # Время
+  - alias: light_kitchen_time
     initial_state: true
     trigger:
       - platform: time
-        at: '22:00:00'
+        at:
+          - '22:00:05'
+          - '07:00:05'
     condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.kitchen
-            state: 'on'
-          - condition: state
-            entity_id: timer.kitchen_auto
-            state: 'idle'
+      - "{{ is_state('light.kitchen', 'on') }}"
     action:
       - service: timer.start
-        entity_id: timer.kitchen_auto
-      - service: light.turn_on
-        entity_id: light.kitchen
-        data_template:
-          brightness_pct: 10
-          color_temp: 250
-          transition: 3
-
-
-  # Увеличение яркости в заданное время
-  - alias: kitchen_light_increase
-    initial_state: true
-    trigger:
-      - platform: time
-        at: '07:00:00'
-    condition:
-      - condition: state
-        entity_id: light.kitchen
-        state: 'on'
-      - condition: time
-        weekday:
-          - mon
-          - tue
-          - wed
-          - thu
-          - fri
-    action:
-      - service: timer.start
-        entity_id: timer.kitchen_auto
-      - service: light.turn_on
-        entity_id: light.kitchen
-        data_template:
-          brightness_pct: 100
-          color_temp: 250
-          transition: 3
-
-
-  # Включение / выключение автоматизации переключателем в Lovelace
-  - alias: kitchen_automation_on_off
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: input_boolean.kitchen_automation
-    action:
-      - service: timer.cancel
-        entity_id: timer.kitchen_manual
-      - service_template: >
-          {% if is_state('input_boolean.kitchen_automation', 'on') %}
-            automation.turn_on
-          {% else %}
-            automation.turn_off
-          {% endif %}
-        entity_id:
-          - automation.kitchen_light_on_motion
-          - automation.kitchen_light_off_day_motion
-          - automation.kitchen_light_off_night_motion
-          - automation.kitchen_light_decrease
+        entity_id: timer.light_kitchen_auto
+      - choose:
+          # Уменьшение яркости в заданное время
+          - conditions:
+              - "{{ trigger.now.hour == 22 }}"
+              - "{{ is_state('timer.light_kitchen_manual', 'idle') }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data: {brightness_pct: 10, color_temp: 250, transition: 3}
+          # Увеличение яркости в заданное время
+          - conditions:
+              - "{{ trigger.now.hour == 7 }}"
+              - "{{ now().isoweekday() < 6}}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data: {brightness_pct: 100, color_temp: 250, transition: 3}

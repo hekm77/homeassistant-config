@@ -16,15 +16,15 @@ yeelight:
 
 # Таймеры
 timer:
-  bedroom_auto:
-    duration: '00:00:01'
-  bedroom_manual:
+  light_bedroom_auto:
+    duration: '00:00:02'
+  light_bedroom_manual:
     duration: '01:30:00'
 
 
 input_boolean:
-  # Вкл / выкл автоматизации освещения в Lovelace
-  bedroom_automation:
+  # Вкл / Выкл автоматизации освещения
+  light_bedroom_automation:
     name: Спальня
     initial: on
     icon: mdi:home-automation
@@ -32,260 +32,120 @@ input_boolean:
 
 # Автоматизации
 automation:
-  # Включение при обнаружении движения
-  - alias: bedroom_light_on_motion
+  # Датчик движения
+  - alias: light_bedroom_motion
     initial_state: true
     trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_bedroom
         to: 'on'
-    condition:
-      - condition: and
-        conditions:
-          - condition: or
-            conditions:
-              - condition: time
-                after: '08:00:00'
-                before: '22:00:00'
-                weekday:
-                  - mon
-                  - tue
-                  - wed
-                  - thu
-                  - fri
-              - condition: time
-                after: '10:00:00'
-                before: '22:00:00'
-                weekday:
-                  - sat
-                  - sun
-          - condition: template
-            value_template: "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
-          - condition: state
-            entity_id: light.bedroom
-            state: 'off'
-          - condition: state
-            entity_id: timer.bedroom_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.bedroom_auto
-      - service: light.turn_on
-        entity_id: light.bedroom
-        data_template:
-          brightness_pct: >
-            {% if now().hour >= 8 and now().hour < 21 %} 100
-            {% elif now().hour >= 21 and now().hour < 22 %} 10
-            {% endif %}
-          color_temp: 250
-
-
-  # Выключение без движения
-  - alias: bedroom_light_off_motion
-    initial_state: true
-    trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_bedroom
         to: 'off'
-        for:
-          minutes: 2
+        for: '00:02:00'
     condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.bedroom
-            state: 'on'
-          - condition: state
-            entity_id: timer.bedroom_manual
-            state: 'idle'
+      - "{{ is_state('timer.light_bedroom_manual', 'idle') }}"
     action:
-      - service: timer.start
-        entity_id: timer.bedroom_auto
-      - service: light.turn_off
-        entity_id: light.bedroom
+      - choose:
+          # Включение при обнаружении движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'on' }}"
+              - "{{ is_state('light.bedroom', 'off') }}"
+              - "{{ states('sensor.outdoor_illuminance') | int < 2000 }}"
+              - condition: or
+                conditions:
+                  - "{{ (8 <= now().hour < 22) and now().isoweekday() < 6 }}"
+                  - "{{ (10 <= now().hour < 22) and now().isoweekday() > 5 }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_bedroom_auto
+              - service: light.turn_on
+                entity_id: light.bedroom
+                data:
+                  brightness_pct: >
+                    {% if 8 <= now().hour < 21 %} 100
+                    {% elif 21 <= now().hour < 22 %} 10
+                    {% endif %}
+                  color_temp: 250
+          # Выключение без движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'off' }}"
+              - "{{ is_state('light.bedroom', 'on') }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_bedroom_auto
+              - service: light.turn_off
+                entity_id: light.bedroom
 
 
-  # Выключение после остановки таймера
-  - alias: bedroom_light_off_timer
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: timer.finished
-        event_data:
-          entity_id: timer.bedroom_manual
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.bedroom
-            state: 'on'
-          - condition: template
-            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_bedroom.last_changed)) | int > 600 }}"
-    action:
-      - service: timer.start
-        entity_id: timer.bedroom_auto
-      - service: light.turn_off
-        entity_id: light.bedroom
-
-
-  # Включение по одинарному клику
-  - alias: bedroom_light_on_switch_click
+  # Кнопка
+  - alias: light_bedroom_smart_switch
     initial_state: true
     trigger:
       - platform: event
         event_type: deconz_event
         event_data:
           id: smart_switch_bedroom
-          event: 1002
     condition:
-      - condition: state
-        entity_id: light.bedroom
-        state: 'off'
+      - "{{ trigger.event.data.event in [1002, 1004, 1001] }}"
     action:
+      - choose:
+          # Включение по одинарному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1002 }}"
+              - "{{ is_state('light.bedroom', 'off') }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.bedroom
+                data:
+                  brightness_pct: >
+                    {% if 0 <= now().hour < 6 %} 1
+                    {% elif (6 <= now().hour < 8) or (21 <= now().hour < 24) %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% endif %}
+                  color_temp: 250
+          # Включение 25% яркости по двойному клику
+          - conditions:
+              - "{{ trigger.event.data.event == 1004 }}"
+              - "{{ state_attr('light.bedroom', 'brightness') | int != 64 }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.bedroom
+                data: {brightness_pct: 25, color_temp: 250}
+          # Включение 100% яркости по длинному нажатию
+          - conditions:
+              - "{{ trigger.event.data.event == 1001 }}"
+              - "{{ state_attr('light.bedroom', 'brightness') | int != 255 }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.bedroom
+                data: {brightness_pct: 100, color_temp: 250}
+        # Выключение освещения при любом нажатии
+        default:
+          - service: light.turn_off
+            entity_id: light.bedroom
+
+
+  # Время
+  - alias: light_bedroom_time
+    initial_state: true
+    trigger:
+      - platform: time
+        at:
+          - '21:00:05'
+          - '10:00:05'
+    condition:
+      - "{{ is_state('light.bedroom', 'on') }}"
+    action:
+      # Уменьшение / Увеличение яркости в заданное время
+      - service: timer.start
+        entity_id: timer.light_bedroom_auto
       - service: light.turn_on
         entity_id: light.bedroom
-        data_template:
+        data:
+          color_temp: 250
+          transition: 3
           brightness_pct: >
-            {% if now().hour >= 0 and now().hour < 6 %} 1
-            {% elif now().hour >= 6 and now().hour < 8 %} 10
-            {% elif now().hour >= 8 and now().hour < 21 %} 100
-            {% elif now().hour >= 21 and now().hour < 24 %} 10
+            {% if trigger.now.hour == 21 %} 10
+            {% elif trigger.now.hour == 10 %} 100
             {% endif %}
-          color_temp: 250
-
-
-  # Выключение по одинарному клику
-  - alias: bedroom_light_off_switch_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_bedroom
-          event: 1002
-    condition:
-      - condition: state
-        entity_id: light.bedroom
-        state: 'on'
-    action:
-      - service: light.turn_off
-        entity_id: light.bedroom
-
-
-  # Включение 25% яркости / 4000K по двойному клику
-  - alias: bedroom_light_25_switch_double_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_bedroom
-          event: 1004
-    action:
-      - service: light.turn_on
-        entity_id: light.bedroom
-        data_template:
-          brightness_pct: 25
-          color_temp: 250
-
-
-  # Включение 100% яркости / 4000K по длинному нажатию
-  - alias: bedroom_light_100_switch_long_press
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_bedroom
-          event: 1001
-    action:
-      - service: light.turn_on
-        entity_id: light.bedroom
-        data_template:
-          brightness_pct: 100
-          color_temp: 250
-
-
-  # Запуск таймера при включении / выключении вручную
-  - alias: bedroom_timer
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: light.bedroom
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.bedroom_auto
-            state: 'idle'
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.cancel
-        entity_id: timer.bedroom_manual
-      - service: timer.start
-        entity_id: timer.bedroom_manual
-
-
-  # Уменьшение яркости в заданное время
-  - alias: bedroom_light_decrease
-    initial_state: true
-    trigger:
-      - platform: time
-        at: '21:00:00'
-    condition:
-      - condition: state
-        entity_id: light.bedroom
-        state: 'on'
-    action:
-      - service: timer.start
-        entity_id: timer.bedroom_auto
-      - service: light.turn_on
-        entity_id: light.bedroom
-        data_template:
-          brightness_pct: 10
-          color_temp: 250
-          transition: 3
-
-
-  # Увеличение яркости в заданное время
-  - alias: bedroom_light_increase
-    initial_state: true
-    trigger:
-      - platform: time
-        at: '10:00:00'
-    condition:
-      - condition: state
-        entity_id: light.bedroom
-        state: 'on'
-    action:
-      - service: timer.start
-        entity_id: timer.bedroom_auto
-      - service: light.turn_on
-        entity_id: light.bedroom
-        data_template:
-          brightness_pct: 100
-          color_temp: 250
-          transition: 3
-
-
-  # Включение / выключение автоматизации переключателем в Lovelace
-  - alias: bedroom_automation_on_off
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: input_boolean.bedroom_automation
-    action:
-      - service: timer.cancel
-        entity_id: timer.bedroom_manual
-      - service_template: >
-          {% if is_state('input_boolean.bedroom_automation', 'on') %}
-            automation.turn_on
-          {% else %}
-            automation.turn_off
-          {% endif %}
-        entity_id:
-          - automation.bedroom_light_on_motion
-          - automation.bedroom_light_off_motion
-          - automation.bedroom_light_decrease

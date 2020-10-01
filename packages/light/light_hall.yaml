@@ -31,15 +31,15 @@ light:
 
 # Таймер
 timer:
-  hall_auto:
-    duration: '00:00:01'
-  hall_manual:
+  light_hall_auto:
+    duration: '00:00:02'
+  light_hall_manual:
     duration: '01:00:00'
 
 
 input_boolean:
-  # Вкл / выкл автоматизации освещения в Lovelace
-  hall_automation:
+  # Вкл / выкл автоматизации освещения
+  light_hall_automation:
     name: Холл
     initial: on
     icon: mdi:home-automation
@@ -47,217 +47,117 @@ input_boolean:
 
 # Автоматизации
 automation:
-  # Включение при обнаружении движения
-  - alias: hall_light_on_motion
+  # Датчик движения
+  - alias: light_hall_motion
     initial_state: true
     trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_hall
         to: 'on'
-    condition:
-      - condition: and
-        conditions:
-          - condition: or
-            conditions:
-              - condition: time
-                after: '06:00:00'
-                before: '23:00:00'
-                weekday:
-                  - mon
-                  - tue
-                  - wed
-                  - thu
-                  - fri
-              - condition: time
-                after: '09:00:00'
-                before: '22:00:00'
-                weekday:
-                  - sat
-                  - sun
-          - condition: state
-            entity_id: light.hall
-            state: 'off'
-          - condition: state
-            entity_id: timer.hall_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.hall_auto
-      - service: light.turn_on
-        entity_id: light.hall
-        data_template:
-          brightness_pct: >
-            {% if now().hour >= 6 and now().hour < 8 %} 10
-            {% elif now().hour >= 8 and now().hour < 21 %} 100
-            {% elif now().hour >= 21 and now().hour < 23 %} 1
-            {% endif %}
-
-
-  # Выключение без движения
-  - alias: hall_light_off_motion
-    initial_state: true
-    trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_hall
         to: 'off'
-        for:
-          minutes: 2
+        for: '00:01:00'
     condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.hall
-            state: 'on'
-          - condition: state
-            entity_id: timer.hall_manual
-            state: 'idle'
+      - "{{ is_state('timer.light_hall_manual', 'idle') }}"
     action:
-      - service: timer.start
-        entity_id: timer.hall_auto
-      - service: light.turn_off
-        entity_id: light.hall
+      - choose:
+          # Включение при обнаружении движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'on' }}"
+              - "{{ is_state('light.hall', 'off') }}"
+              - condition: or
+                conditions:
+                  - "{{ (6 <= now().hour < 23) and now().isoweekday() < 6 }}"
+                  - "{{ (9 <= now().hour < 22) and now().isoweekday() > 5 }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_hall_auto
+              - service: light.turn_on
+                entity_id: light.hall
+                data:
+                  brightness_pct: >
+                    {% if 6 <= now().hour < 8 %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% elif 21 <= now().hour < 23 %} 1
+                    {% endif %}
+          # Выключение без движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'off' }}"
+              - "{{ is_state('light.hall', 'on') }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_hall_auto
+              - service: light.turn_off
+                entity_id: light.hall
 
 
-  # Выключение после остановки таймера
-  - alias: hall_light_off_timer
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: timer.finished
-        event_data:
-          entity_id: timer.hall_manual
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.hall
-            state: 'on'
-          - condition: template
-            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_hall.last_changed)) | int > 600 }}"
-    action:
-      - service: timer.start
-        entity_id: timer.hall_auto
-      - service: light.turn_off
-        entity_id: light.hall
-
-
-  # Включение диммером днем
-  - alias: hall_light_on_day_dimmer
+  # Диммер
+  - alias: light_hall_dimmer
     initial_state: true
     trigger:
       - platform: event
         event_type: deconz_event
         event_data:
           id: tradfri_wireless_dimmer
-          event: 1002
     condition:
-      - condition: time
-        after: '06:00:00'
-        before: '23:00:00'
+      - "{{ trigger.event.data.event in [1002, 4002] }}"
     action:
-      - service: light.turn_on
-        entity_id: light.hall
-        data_template:
-          brightness_pct: 100
+      - choose:
+          # Включение диммером днем
+          - conditions:
+              - "{{ trigger.event.data.event == 1002 }}"
+              - "{{ is_state('light.hall', 'off') }}"
+              - "{{ 6 <= now().hour < 23 }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.hall
+                data: {brightness_pct: 100}
+          # Включение диммером ночью
+          - conditions:
+              - "{{ trigger.event.data.event == 1002 }}"
+              - condition: or
+                conditions:
+                  - "{{ now().hour == 23 }}"
+                  - "{{ 0 <= now().hour < 6 }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.hall
+                data:
+                  brightness: >
+                    {% if is_state('light.hall', 'off') %} 3
+                    {% else %}
+                      {% set bri = state_attr('light.hall', 'brightness') | int %}
+                        {{ [bri+123, 249] | min }}
+                    {% endif %}
+          # Выключение диммером
+          - conditions:
+              - "{{ trigger.event.data.event == 4002 }}"
+              - "{{ is_state('light.hall', 'on') }}"
+            sequence:
+              - service: light.turn_off
+                entity_id: light.hall
 
 
-  # Включение диммером ночью
-  - alias: hall_light_on_night_dimmer
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: tradfri_wireless_dimmer
-          event: 1002
-    condition:
-      - condition: time
-        after: '23:00:00'
-        before: '06:00:00'
-    action:
-      - service: light.turn_on
-        entity_id: light.hall
-        data_template:
-          brightness: >
-            {% if is_state('light.hall', 'off') %}
-              3
-            {% else %}
-              {% set bri = state_attr('light.hall', 'brightness') | int %}
-                {{ [bri+123, 249] | min }}
-            {% endif %}
-
-
-  # Выключение диммером
-  - alias: hall_light_off_dimmer
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: tradfri_wireless_dimmer
-          event: 4002
-    action:
-      - service: light.turn_off
-        entity_id: light.hall
-
-
-  # Запуск таймера при включении / выключении вручную
-  - alias: hall_timer
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: light.hall
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.hall_auto
-            state: 'idle'
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
-    action:
-      - service: timer.cancel
-        entity_id: timer.hall_manual
-      - service: timer.start
-        entity_id: timer.hall_manual
-
-
-  # Уменьшение яркости в заданное время
-  - alias: hall_light_decrease
+  # Время
+  - alias: light_hall_time
     initial_state: true
     trigger:
       - platform: time
-        at: '21:00:00'
+        at:
+          - '21:00:05'
+          - '08:00:05'
     condition:
-      - condition: state
-        entity_id: light.hall
-        state: 'on'
+      - "{{ is_state('light.hall', 'on') }}"
     action:
+      # Уменьшение / Увеличение яркости в заданное время
       - service: timer.start
-        entity_id: timer.hall_auto
+        entity_id: timer.light_hall_auto
       - service: light.turn_on
         entity_id: light.hall
-        data_template:
-          brightness_pct: 1
-
-
-  # Включение / выключение автоматизации переключателем в Lovelace
-  - alias: hall_automation_on_off
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: input_boolean.hall_automation
-    action:
-      - service: timer.cancel
-        entity_id: timer.hall_manual
-      - service_template: >
-          {% if is_state('input_boolean.hall_automation', 'on') %}
-            automation.turn_on
-          {% else %}
-            automation.turn_off
-          {% endif %}
-        entity_id:
-          - automation.hall_light_on_motion
-          - automation.hall_light_off_motion
-          - automation.hall_light_decrease
+        data:
+          transition: 3
+          brightness_pct: >
+            {% if trigger.now.hour == 21 %} 1
+            {% elif trigger.now.hour == 8 %} 100
+            {% endif %}

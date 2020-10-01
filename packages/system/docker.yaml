@@ -40,10 +40,23 @@ shell_command:
 # Сенсоры версий docker-контейнеров
 sensor:
   # Home Assistant Docker Version
-  - platform: version
-    beta: false
-    source: docker
+  - platform: rest
     name: ha_docker_version
+    resource: 'https://registry.hub.docker.com/v2/repositories/homeassistant/raspberrypi3-homeassistant/tags'
+    value_template: >
+      {% set results = value_json.results %}
+      {%- set res -%}
+      {%- set pipe = joiner('|') -%}
+        {% for result in results if result.name | regex_search("^\d+\.\d+\.\d+$") -%}
+          {{ pipe() }}{{ result.name }}
+        {% else %}
+          {{ states('sensor.ha_local_version') }}
+        {% endfor -%}
+      {% endset -%}
+      {% set res = res.split('|') | list %}
+      {% set ver = res[0] %}
+        {{ ver }}
+    scan_interval: 86400
 
 
   # Home Assistant Local Version
@@ -56,7 +69,7 @@ sensor:
   # Portainer Docker Version
   - platform: rest
     name: portainer_docker_version
-    resource: 'https://registry.hub.docker.com/v2/repositories/portainer/portainer/tags'
+    resource: 'https://registry.hub.docker.com/v2/repositories/portainer/portainer-ce/tags'
     value_template: >-
       {% set results = value_json.results %}
       {%- set res -%}
@@ -77,7 +90,7 @@ sensor:
   -  platform: command_line
      name: portainer_local_version
      command: ssh -p your_port root@192.168.1.x "docker logs portainer 2>&1 | grep -m1 -o 'Starting Portainer[[:space:][0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
-     scan_interval: 3600
+     scan_interval: 86400
 
 
   # Traefik Docker Version
@@ -146,10 +159,10 @@ sensor:
       {% set results = value_json.results %}
       {%- set res -%}
       {%- set pipe = joiner('|') -%}
-        {% for result in results if result.name | regex_search("^armhf-v\d+\.\d+\.\d+$") -%}
+        {% for result in results if result.name | regex_search("^v\d+\.\d+\.\d+$") -%}
           {{ pipe() }}{{ result.name }}
         {% else %}
-          armhf-v{{ states('sensor.adguard_local_version') }}
+          v{{ states('sensor.adguard_local_version') }}
         {% endfor -%}
       {% endset -%}
       {% set res = res.split('|') | list %}
@@ -163,7 +176,7 @@ sensor:
   -  platform: command_line
      name: adguard_local_version
      command: ssh -p your_port root@192.168.1.x "docker logs adguardhome 2>&1 | grep -m1 -o 'AdGuard Home, version[[:space:][a-z]\+[0-9]\+.[0-9]\+.[0-9]\+' | grep -o '[0-9]\+.[0-9]\+.[0-9]\+'"
-     scan_interval: 3600
+     scan_interval: 86400
 
 
   # Mosquitto Docker Version
@@ -203,9 +216,10 @@ automation:
       - platform: homeassistant
         event: start
     action:
-      - delay: 00:00:03
+      - delay: '00:00:10'
       - service: homeassistant.update_entity
         entity_id:
+          - sensor.ha_docker_version
           - sensor.portainer_docker_version
           - sensor.traefik_docker_version
           - sensor.deconz_docker_version
@@ -219,50 +233,50 @@ script:
   ha_update:
     sequence:
       - service: shell_command.ha_backup
-      - delay: 00:00:30
+      - delay: '00:01:00'
       - service: shell_command.ha_update
   # Обновление Portainer
   portainer_update:
     sequence:
       - service: shell_command.ha_backup
-      - delay: 00:00:30
+      - delay: '00:01:00'
       - service: shell_command.portainer_update
-      - delay: 00:05:00
+      - delay: '00:05:00'
       - service: homeassistant.update_entity
         entity_id: sensor.portainer_local_version
   # Обновление Traefik
   traefik_update:
     sequence:
       - service: shell_command.ha_backup
-      - delay: 00:00:30
+      - delay: '00:00:30'
       - service: shell_command.traefik_update
-      - delay: 00:05:00
+      - delay: '00:05:00'
       - service: homeassistant.update_entity
         entity_id: sensor.traefik_local_version
   # Обновление Deconz
   deconz_update:
     sequence:
       - service: shell_command.ha_backup
-      - delay: 00:00:30
+      - delay: '00:01:00'
       - service: shell_command.deconz_update
-      - delay: 00:05:00
+      - delay: '00:05:00'
       - service: homeassistant.update_entity
         entity_id: sensor.deconz_local_version
   # Обновление Adguard
   adguard_update:
     sequence:
       - service: shell_command.ha_backup
-      - delay: 00:00:30
+      - delay: '00:01:00'
       - service: shell_command.adguard_update
-      - delay: 00:05:00
+      - delay: '00:05:00'
       - service: homeassistant.update_entity
         entity_id: sensor.adguard_local_version
   # Обновление Mosquitto
   mosquitto_update:
     sequence:
       - service: shell_command.ha_backup
-      - delay: 00:00:30
+      - delay: '00:01:00'
       - service: shell_command.mosquitto_update
-      - delay: 00:05:00
+      - delay: '00:05:00'
       - service: homeassistant.update_entity
         entity_id: sensor.mosquitto_local_version

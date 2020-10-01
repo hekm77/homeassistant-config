@@ -29,17 +29,20 @@ binary_sensor:
       chiki_piki_presence:
         friendly_name: User 1
         device_class: presence
-        value_template: "{{ is_state('input_boolean.user_1_home', 'on') or is_state('device_tracker.host_1', 'home') }}"
+        value_template: "{{ is_state('input_boolean.user_1_home', 'on') or
+                            is_state('device_tracker.host_1', 'home') }}"
         icon_template: mdi:emoticon-cool
       lena_presence:
         friendly_name: User 2
         device_class: presence
-        value_template: "{{ is_state('input_boolean.user_2_home', 'on') or is_state('device_tracker.host_2', 'home') }}"
+        value_template: "{{ is_state('input_boolean.user_2_home', 'on') or
+                            is_state('device_tracker.host_2', 'home') }}"
         icon_template: mdi:emoticon-kiss
       nikita_presence:
         friendly_name: User 3
         device_class: presence
-        value_template: "{{ is_state('input_boolean.user_3_home', 'on') or is_state('device_tracker.host_3', 'home') }}"
+        value_template: "{{ is_state('input_boolean.user_3_home', 'on') or
+                            is_state('device_tracker.host_3', 'home') }}"
         icon_template: mdi:face-profile
       lena_2_presence:
         friendly_name: User 4

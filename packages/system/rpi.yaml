@@ -51,10 +51,10 @@ script:
   # Перезагрузка Raspberry Pi в Lovelace
   pi_reboot:
     sequence:
-      - delay: 00:00:0.5
+      - delay: 00:00:01
       - service: shell_command.pi_reboot
   # Выключение Raspberry Pi в Lovelace
   pi_shutdown:
     sequence:
-      - delay: 00:00:0.5
+      - delay: 00:00:01
       - service: shell_command.pi_shutdown

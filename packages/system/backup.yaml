@@ -9,15 +9,14 @@ homeassistant:
 # Команды запуска shell-скриптов резервного копирования
 shell_command:
   # Home Assistant
-  ha_backup: ssh -p your_port root@192.168.1.x "bash /user_dir/homeassistant/shell_scripts/ha_backup.sh"
+  ha_backup: ssh -p your_port root@192.168.1.x "bash /user_dir/homeassistant/shell_scripts/ha_backup.sh 2>&1 &"
 
 # Скрипты
 script:
-  # Резервное копирование в Lovelace
-  # Home Assistant
+  # Резервное копирование Home Assistant
   ha_backup:
     sequence:
-      - delay: 00:00:0.5
+      - delay: 00:00:01
       - service: shell_command.ha_backup
 
 
@@ -28,7 +27,7 @@ automation:
     initial_state: true
     trigger:
       - platform: time
-        at: '01:00:00'
+        at: '01:00:05'
     condition:
       - condition: time
         weekday:

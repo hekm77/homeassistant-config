@@ -22,3 +22,14 @@ recorder:
       - group.all_lights
       - group.all_scripts
       - group.all_switches
+  include:
+    entities:
+      - switch.xiaomi_gateway_alarm
+
+      - light.hall
+      - light.livingroom_ceiling
+      - light.livingroom_floor
+      - light.livingroom_window
+      - light.kitchen
+      - light.bedroom
+      - light.bathroom

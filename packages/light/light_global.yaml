@@ -1,0 +1,202 @@
+group:
+ # Вкл / выкл автоматизаций освещения
+ light_automation:
+   name: Автоматизация освещения
+   entities:
+     - input_boolean.light_hall_automation
+     - input_boolean.light_livingroom_automation
+     - input_boolean.light_kitchen_automation
+     - input_boolean.light_bedroom_automation
+     - input_boolean.light_bathroom_automation
+
+
+# Автоматизации
+automation:
+  # Включение освещения с заданной параметрами при включении из GUI / HomeKit
+  - alias: light_context_global
+    initial_state: true
+    mode: parallel
+    trigger:
+      - platform: state
+        entity_id:
+          - light.hall
+          - light.kitchen
+          - light.bedroom
+          - light.livingroom_ceiling
+          - light.livingroom_floor
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: or
+        conditions:
+          # GUI
+          - "{{ trigger.to_state.context.user_id != None and
+                trigger.to_state.context.parent_id == None and
+                trigger.to_state.context.id != None }}"
+          # HomeKit
+          - "{{ trigger.to_state.context.user_id == None and
+                trigger.to_state.context.parent_id == None and
+                trigger.to_state.context.id != None }}"
+    action:
+      - choose:
+          # Холл Люстра
+          - conditions:
+              - "{{ trigger.entity_id == 'light.hall' }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.hall
+                data:
+                  brightness_pct: >
+                    {% if 6 <= now().hour < 23 %} 100
+                    {% elif 23 <= now().hour < 24 %} 10
+                    {% elif 0 <= now().hour < 6 %} 1
+                    {% endif %}
+                  transition: 1
+          # Кухня Люстра
+          - conditions:
+              - "{{ trigger.entity_id == 'light.kitchen' }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.kitchen
+                data:
+                  brightness_pct: >
+                    {% if 7 <= now().hour < 22 %} 100
+                    {% elif 22 <= now().hour < 24 %} 10
+                    {% elif 0 <= now().hour < 7 %} 1
+                    {% endif %}
+                  color_temp: >
+                    {% if 0 <= now().hour < 7 %} 588
+                    {% else %} 250
+                    {% endif %}
+                  transition: 1
+          # Спальня Люстра
+          - conditions:
+              - "{{ trigger.entity_id == 'light.bedroom' }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.bedroom
+                data:
+                  brightness_pct: >
+                    {% if 0 <= now().hour < 6 %} 1
+                    {% elif (6 <= now().hour < 8) or (21 <= now().hour < 24) %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% endif %}
+                  color_temp: 250
+                  transition: 1
+          # Зал Люстра
+          - conditions:
+              - "{{ trigger.entity_id == 'light.livingroom_ceiling' }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.livingroom_ceiling
+                data:
+                  brightness_pct: >
+                    {% if 0 <= now().hour < 8 %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% elif 21 <= now().hour < 24 %} 50
+                    {% endif %}
+                  color_temp: 250
+                  transition: 1
+          # Зал Ночник
+          - conditions:
+              - "{{ trigger.entity_id == 'light.livingroom_floor' }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.livingroom_floor
+                data:
+                  brightness_pct: >
+                    {% if (0 <= now().hour < 8) or (21 <= now().hour < 24) %} 10
+                    {% elif 8 <= now().hour < 21 %} 100
+                    {% endif %}
+                  color_temp: 250
+                  transition: 1
+
+
+  # Таймер
+  - alias: light_timer_global
+    initial_state: true
+    mode: parallel
+    trigger:
+      - platform: state
+        entity_id:
+          - light.hall
+          - light.kitchen
+          - light.bedroom
+          - light.livingroom_ceiling
+          - light.livingroom_floor
+          - light.livingroom_window
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_hall_manual}
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_kitchen_manual}
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_bedroom_manual}
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_bathroom_manual}
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_livingroom_ceiling_manual}
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_livingroom_floor_manual}
+      - platform: event
+        event_type: timer.finished
+        event_data: {entity_id: timer.light_livingroom_window_manual}
+    condition:
+      - "{{ is_state('alarm_control_panel.ha_alarm', 'disarmed') }}"
+    action:
+      - choose:
+          # Запуск таймера при включении / выключении освещения вручную
+          - conditions:
+              - "{{ trigger.platform == 'state' }}"
+              - "{{ trigger.from_state.state != 'unavailable' }}"
+              - "{{ trigger.to_state.state != 'unavailable' }}"
+              - "{{ is_state('timer.' ~ trigger.entity_id.replace('.', '_') ~ '_auto', 'idle') }}"
+            sequence:
+              - service: timer.cancel
+                data:
+                  entity_id: "timer.{{ trigger.entity_id.replace('.', '_') }}_manual"
+              - service: timer.start
+                data:
+                  entity_id: "timer.{{ trigger.entity_id.replace('.', '_') }}_manual"
+          # Выключение освещения после остановки таймера
+          - conditions:
+              - "{{ trigger.platform == 'event' }}"
+              - "{{ is_state('light.' ~ trigger.event.data.entity_id.split('timer.light_')[1].split('_manual')[0], 'on') }}"
+              - "{{ is_state('binary_sensor.motion_sensor_' ~ trigger.event.data.entity_id.split('_')[1], 'off' ) }}"
+            sequence:
+              - service: timer.start
+                data:
+                  entity_id: "{{ trigger.event.data.entity_id.replace('manual', 'auto') }}"
+              - service: light.turn_off
+                data:
+                  entity_id: "light.{{ trigger.event.data.entity_id.split('timer.light_')[1].split('_manual')[0] }}"
+
+
+  # Включение / выключение автоматизациЙ освещения
+  - alias: light_automation_toggle_global
+    initial_state: true
+    mode: parallel
+    trigger:
+      - platform: state
+        entity_id:
+          - input_boolean.light_hall_automation
+          - input_boolean.light_kitchen_automation
+          - input_boolean.light_bedroom_automation
+          - input_boolean.light_bathroom_automation
+          - input_boolean.light_livingroom_automation
+    action:
+      - service: timer.cancel
+        data:
+          entity_id: "{{ trigger.entity_id.replace('input_boolean', 'timer').replace('automation', 'manual') }}"
+      - service: >
+          {% if trigger.to_state.state == 'on' %} automation.turn_on
+          {% else %} automation.turn_off
+          {% endif %}
+        data:
+          entity_id: "{{ ('automation' ~ trigger.entity_id.split('input_boolean')[1].replace('automation', 'motion')) }},
+                      {{ ('automation' ~ trigger.entity_id.split('input_boolean')[1].replace('automation', 'time')) }}"

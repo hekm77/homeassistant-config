@@ -8,15 +8,15 @@ homeassistant:
 
 # Таймер
 timer:
-  bathroom_auto:
-    duration: '00:00:01'
-  bathroom_manual:
+  light_bathroom_auto:
+    duration: '00:00:03'
+  light_bathroom_manual:
     duration: '01:30:00'
 
 
 input_boolean:
-  # Вкл / выкл автоматизации освещения в Lovelace
-  bathroom_automation:
+  # Вкл / выкл автоматизации освещения
+  light_bathroom_automation:
     name: Ванная
     initial: on
     icon: mdi:home-automation
@@ -24,232 +24,123 @@ input_boolean:
 
 # Автоматизации
 automation:
-  # Включение при обнаружении движения
-  - alias: bathroom_light_on_motion
+  # Датчик движения
+  - alias: light_bathroom_motion
     initial_state: true
     trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_bathroom
         to: 'on'
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.bathroom
-            state: 'off'
-          - condition: state
-            entity_id: timer.bathroom_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.bathroom_auto
-      - service: light.turn_on
-        entity_id: light.bathroom
-        data_template:
-          brightness_pct: >
-            {% if now().hour >= 0 and now().hour < 5 %} 5
-            {% else %} 100
-            {% endif %}
-
-
-  # Выключение без движения днем
-  - alias: bathroom_light_off_day_motion
-    initial_state: true
-    trigger:
       - platform: state
         entity_id: binary_sensor.motion_sensor_bathroom
         to: 'off'
-        for:
-          minutes: 15
-    condition:
-      - condition: and
-        conditions:
-          - condition: time
-            after: '05:00:00'
-            before: '23:30:00'
-          - condition: state
-            entity_id: light.bathroom
-            state: 'on'
-          - condition: state
-            entity_id: timer.bathroom_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.bathroom_auto
-      - service: light.turn_off
-        entity_id: light.bathroom
-
-
-  # Выключение без движения ночью
-  - alias: bathroom_light_off_night_motion
-    initial_state: true
-    trigger:
+        for: '00:01:00'
       - platform: state
         entity_id: binary_sensor.motion_sensor_bathroom
         to: 'off'
-        for:
-          minutes: 1
+        for: '00:10:00'
     condition:
-      - condition: and
-        conditions:
-          - condition: time
-            after: '23:30:00'
-            before: '05:00:00'
-          - condition: state
+      - "{{ is_state('timer.light_bathroom_manual', 'idle') }}"
+    action:
+      - choose:
+          # Включение при обнаружении движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'on' }}"
+              - "{{ is_state('light.bathroom', 'off') }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_bathroom_auto
+              - service: light.turn_on
+                entity_id: light.bathroom
+                data:
+                  brightness_pct: >
+                    {% if 0 <= now().hour < 5 %} 5
+                    {% else %} 100
+                    {% endif %}
+          # Выключение без движения
+          - conditions:
+              - "{{ trigger.to_state.state == 'off' }}"
+              - "{{ is_state('light.bathroom', 'on') }}"
+              - condition: or
+                conditions:
+                  - "{{ (0 <= now().hour < 5) and
+                        (now() - states.binary_sensor.motion_sensor_bathroom.last_updated).seconds | int >= 60 }}"
+                  - "{{ (5 <= now().hour < 24) and
+                        (now() - states.binary_sensor.motion_sensor_bathroom.last_updated).seconds | int >= 600 }}"
+            sequence:
+              - service: timer.start
+                entity_id: timer.light_bathroom_auto
+              - service: light.turn_off
+                entity_id: light.bathroom
+
+
+  # Кнопка
+  - alias: light_bathroom_smart_switch
+    initial_state: true
+    trigger:
+      - platform: event
+        event_type: deconz_event
+        event_data:
+          id: smart_switch_bathroom
+    condition:
+      - "{{ trigger.event.data.event in [1002, 1004, 1001] }}"
+    action:
+      - choose:
+          # Включение освещения при любом нажатии
+          - conditions:
+              - "{{ is_state('light.bathroom', 'off') }}"
+            sequence:
+              - service: light.turn_on
+                entity_id: light.bathroom
+                data: {brightness_pct: 100}
+        # Выключение освещения при любом нажатии
+        default:
+          - service: light.turn_off
             entity_id: light.bathroom
-            state: 'on'
-          - condition: state
-            entity_id: timer.bathroom_manual
-            state: 'idle'
-    action:
-      - service: timer.start
-        entity_id: timer.bathroom_auto
-      - service: light.turn_off
-        entity_id: light.bathroom
 
 
-  # Выключение после остановки таймера
-  - alias: bathroom_light_off_timer
+  # Таймер
+  - alias: light_timer_bathroom
     initial_state: true
     trigger:
-      - platform: event
-        event_type: timer.finished
-        event_data:
-          entity_id: timer.bathroom_manual
-    condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: light.bathroom
-            state: 'on'
-          - condition: template
-            value_template: "{{ (as_timestamp(now()) - as_timestamp(states.binary_sensor.motion_sensor_bathroom.last_changed)) | int > 600 }}"
-    action:
-      - service: timer.start
-        entity_id: timer.bathroom_auto
-      - service: light.turn_off
-        entity_id: light.bathroom
 
-
-  # Включение по одинарному клику
-  - alias: bathroom_light_on_switch_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_bathroom
-          event: 1002
-    condition:
-      - condition: state
-        entity_id: light.bathroom
-        state: 'off'
-    action:
-      - service: light.turn_on
-        entity_id: light.bathroom
-        data_template:
-          brightness_pct: 100
-
-
-  # Выключение по одинарному клику
-  - alias: bathroom_light_off_switch_click
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_bathroom
-          event: 1002
-    condition:
-      - condition: state
-        entity_id: light.bathroom
-        state: 'on'
-    action:
-      - service: light.turn_off
-        entity_id: light.bathroom
-
-
-  # Включение 100% яркости по длинному нажатию / запуск таймера
-  - alias: bathroom_light_100_switch_long_press
-    initial_state: true
-    trigger:
-      - platform: event
-        event_type: deconz_event
-        event_data:
-          id: smart_switch_bathroom
-          event: 1001
-    action:
-      - service: light.turn_on
-        entity_id: light.bathroom
-        data_template:
-          brightness_pct: 30
-      - delay: 00:00:0.5
-      - service: light.turn_on
-        entity_id: light.bathroom
-        data_template:
-          brightness_pct: 100
-      - delay: 00:00:01
-      - service: timer.start
-        entity_id: timer.bathroom_manual
-
-
-  # Сброс таймера при включении / выключении вручную
-  - alias: bathroom_timer_cancel
-    initial_state: true
-    trigger:
       - platform: state
         entity_id: light.bathroom
     condition:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: timer.bathroom_auto
-            state: 'idle'
-          - condition: template
-            value_template: "{{ states('sensor.online') | int > 1 }}"
-          - condition: state
-            entity_id: alarm_control_panel.ha_alarm
-            state: 'disarmed'
+      - "{{ is_state('alarm_control_panel.ha_alarm', 'disarmed') }}"
+      - "{{ trigger.from_state.state != 'unavailable' }}"
     action:
-      - service: timer.cancel
-        entity_id: timer.bathroom_manual
+      - choose:
+          # Сброс / запуск таймера при включении вручную
+          - conditions:
+              - "{{ trigger.to_state.state == 'on' }}"
+              - "{{ is_state('timer.light_bathroom_auto', 'idle') }}"
+            sequence:
+              - service: timer.cancel
+                entity_id: timer.light_bathroom_manual
+              - service: timer.start
+                entity_id: timer.light_bathroom_manual
+          # Сброс таймера при выключении вручную
+          - conditions:
+              - "{{ trigger.to_state.state == 'off' }}"
+              - "{{ is_state('timer.light_bathroom_auto', 'idle') }}"
+            sequence:
+              - service: timer.cancel
+                entity_id: timer.light_bathroom_manual
 
 
-  # Увеличение яркости в заданное время
-  - alias: bathroom_light_increase
+  # Время
+  - alias: light_bathroom_time
     initial_state: true
     trigger:
       - platform: time
-        at: '05:00:00'
+        at: '05:00:05'
     condition:
-      - condition: state
-        entity_id: light.bathroom
-        state: 'on'
+      - "{{ is_state('light.bathroom', 'on') }}"
     action:
+      # Увеличение яркости в заданное время
       - service: timer.start
-        entity_id: timer.bathroom_auto
+        entity_id: timer.light_bathroom_auto
       - service: light.turn_on
         entity_id: light.bathroom
-        data_template:
-          brightness_pct: 100
-
-
-  # Включение / выключение автоматизации переключателем в Lovelace
-  - alias: bathroom_automation_on_off
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: input_boolean.bathroom_automation
-    action:
-      - service: timer.cancel
-        entity_id: timer.bathroom_manual
-      - service_template: >
-          {% if is_state('input_boolean.bathroom_automation', 'on') %}
-            automation.turn_on
-          {% else %}
-            automation.turn_off
-          {% endif %}
-        entity_id:
-          - automation.bathroom_light_on_motion
-          - automation.bathroom_light_off_day_motion
-          - automation.bathroom_light_off_night_motion
+        data: {brightness_pct: 100}

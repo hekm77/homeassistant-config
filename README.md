@@ -20,10 +20,10 @@
   * Yeelight White Bulb (YLDP01YL)
   * IKEA Trådfri E27 1000 lumen (LED1623G12)
   * IKEA Trådfri E14 400 lumen (LED1649C5)
+  * Osram Smart+ Led Strip BLE (HomeKit)
 * Media
   * [Sony TV](https://github.com/custom-components/media_player.braviatv_psk)
   * [Sony Soundbar HT-NT5](https://www.home-assistant.io/components/media_player.songpal/)
-  * [Dune HD 301](https://www.home-assistant.io/components/media_player.dunehd/)
   * [Apple TV 4K](https://github.com/postlund/hass-atv-beta)
   * [Spotify](https://www.home-assistant.io/components/media_player.spotify/)
 * Weather
