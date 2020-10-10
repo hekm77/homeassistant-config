@@ -21,7 +21,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   portainer:
-    image: portainer/portainer:latest
+    image: portainer/portainer-ce:latest
     container_name: portainer
     command: -H unix:///var/run/docker.sock
     restart: always
@@ -89,6 +89,7 @@ services:
     container_name: deconz
     restart: always
     network_mode: host
+    privileged: true
     volumes:
       - ${USERDIR}/deconz/:/root/.local/share/dresden-elektronik/deCONZ
       - ${USERDIR}/deconz/otau:/root/otau
@@ -106,6 +107,7 @@ services:
       - DEBUG_ZCL=0
       - DEBUG_ZDP=0
       - DEBUG_OTAU=0
+      - UDEV=1
 
 
 networks:

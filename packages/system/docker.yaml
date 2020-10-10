@@ -26,7 +26,7 @@ shell_command:
   # Обновление Home Assistant
   ha_update: ssh -p your_port root@192.168.1.x  "docker pull homeassistant/raspberrypi3-homeassistant:stable && cd /home/pi && docker-compose up -d"
   # Обновление Portainer
-  portainer_update: ssh -p your_port root@192.168.1.x  "docker pull portainer/portainer:latest && cd /home/pi && docker-compose up -d"
+  portainer_update: ssh -p your_port root@192.168.1.x  "docker pull portainer/portainer-ce:latest && cd /home/pi && docker-compose up -d"
   # Обновление Traefik
   traefik_update: ssh -p your_port root@192.168.1.x  "docker pull traefik:latest && cd /home/pi && docker-compose up -d"
   # Обновление Deconz
@@ -147,7 +147,7 @@ sensor:
   -  platform: command_line
      name: deconz_local_version
      command: ssh -p your_port root@192.168.1.x "docker inspect marthoc/deconz:latest"
-     value_template: "{{ value_json[0]['ContainerConfig']['Env'][5].split('DECONZ_VERSION=')[1] }}"
+     value_template: "{{ value_json[0]['ContainerConfig']['Env'][4].split('DECONZ_VERSION=')[1] }}"
      scan_interval: 86400
 
 
